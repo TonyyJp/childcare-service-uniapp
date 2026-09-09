@@ -1,0 +1,23 @@
+/* Institution role theme on top of shared chrome */
+@import './mp-common.scss';
+
+.page {
+  background: #faf5ff;
+}
+
+.overlay-page {
+  background: #faf5ff;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #ab47bc 0%, #ce93d8 100%);
+}
+
+.form-input {
+  background: #faf5ff;
+  border: 1rpx solid #ce93d8;
+}
+
+.bottom-nav {
+  border-top: 1rpx solid #f3e5f5;
+}

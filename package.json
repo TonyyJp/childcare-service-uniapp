@@ -1,0 +1,24 @@
+{
+  "name": "miaomiao-daycare",
+  "version": "1.0.0",
+  "description": "苗苗托育机构管理平台 - UniApp版",
+  "scripts": {
+    "dev:mp-weixin": "uni -p mp-weixin",
+    "dev:app": "uni -p app-plus",
+    "dev:h5": "uni -p h5",
+    "build:mp-weixin": "uni build -p mp-weixin",
+    "build:app": "uni build -p app-plus",
+    "build:h5": "uni build -p h5"
+  },
+  "dependencies": {
+    "@dcloudio/uni-app": "*",
+    "@dcloudio/uni-mp-weixin": "*",
+    "vue": "^3.2.45"
+  },
+  "devDependencies": {
+    "@dcloudio/types": "*",
+    "@dcloudio/uni-cli-shared": "*",
+    "@vue/compiler-core": "^3.2.45",
+    "typescript": "^4.9.4"
+  }
+}

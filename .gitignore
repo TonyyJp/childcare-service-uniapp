@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Build / HBuilderX / WeChat output
+unpackage/
+dist/
+
+# Local / OS
+.DS_Store
+*.log
+.idea/
+.vscode/
+*.local
+
+# Optional local overrides (keep config.js for now; secrets should not live there)
+.env
+.env.*
+!.env.example
