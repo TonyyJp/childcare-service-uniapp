@@ -78,7 +78,7 @@ const profileMenuGroups = computed(() => [
     title: '支持',
     items: [
       { icon: '💬', label: '帮助与反馈', sub: '常见问题、意见反馈', page: 'help', color: '#FFA726' },
-      { icon: 'ℹ️', label: '关于苗苗', sub: '版本 1.0.0', page: 'about', color: '#8D6E63' },
+      { icon: 'ℹ️', label: '关于智优', sub: '版本 1.0.0', page: 'about', color: '#8D6E63' },
     ],
   },
 ])

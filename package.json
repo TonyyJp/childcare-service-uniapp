@@ -1,7 +1,7 @@
 {
   "name": "miaomiao-daycare",
   "version": "1.0.0",
-  "description": "苗苗托育机构管理平台 - UniApp版",
+  "description": "智优托教机构管理平台 - UniApp版",
   "scripts": {
     "dev:mp-weixin": "uni -p mp-weixin",
     "dev:app": "uni -p app-plus",

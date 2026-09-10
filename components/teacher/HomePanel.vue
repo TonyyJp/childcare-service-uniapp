@@ -73,7 +73,7 @@ const checkinClassId = inject('teacherCheckinClassId', null)
 
 const homeLoading = ref(false)
 const teacherName = ref('老师')
-const tenantName = ref('苗苗托育')
+const tenantName = ref('智优托教')
 const teacherAvatar = computed(() => (teacherName.value || '师').slice(0, 1))
 const todayLabel = ref('')
 const primaryClassName = ref('—')
@@ -121,7 +121,7 @@ async function loadTeacherHome() {
   try {
     const [profile, dash] = await Promise.all([fetchProfile(), fetchDashboard()])
     teacherName.value = profile?.name || '老师'
-    tenantName.value = profile?.tenant_name || '苗苗托育'
+    tenantName.value = profile?.tenant_name || '智优托教'
     todayLabel.value = formatToday(dash?.date)
     const cards = (dash?.classes || []).map((c, i) => {
       const expected = (c.periods || []).reduce((s, p) => s + (p.expected || 0), 0)

@@ -121,7 +121,7 @@
         <view style="margin-bottom:24rpx;">
           <view style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16rpx;">
             <text style="font-size:26rpx;font-weight:800;color:#2D1F18;">🏫 机构课程</text>
-            <text style="font-size:22rpx;" :style="{ color: accentColor }">苗苗托育 · {{ courses.length }}门在招</text>
+            <text style="font-size:22rpx;" :style="{ color: accentColor }">智优托教 · {{ courses.length }}门在招</text>
           </view>
           <scroll-view scroll-x style="margin:0 -40rpx;padding:0 40rpx;">
             <view style="display:flex;gap:24rpx;">
