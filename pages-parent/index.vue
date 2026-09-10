@@ -26,9 +26,11 @@
         :course="selectedCourse"
         @close="selectedCourse = null"
       />
+
+      <MenuOverlay v-if="menuVisible" @close="menuVisible = false" />
     </view>
 
-    <view v-if="!selectedCourse && !showProfile && activeTab !== 'homework'" class="bottom-nav">
+    <view v-if="!selectedCourse && !menuVisible && !showProfile && activeTab !== 'homework'" class="bottom-nav">
       <view v-for="tab in navTabs" :key="tab.id" class="nav-item" @click="activeTab = tab.id">
         <view style="position:relative;display:inline-flex;">
           <text class="nav-icon" :style="{ color: activeTab === tab.id ? accentColor : '#8D6E63' }">{{ tab.emoji }}</text>
@@ -53,6 +55,7 @@ import SchedulePanel from '../components/parent/SchedulePanel.vue'
 import GrowthPanel from '../components/parent/GrowthPanel.vue'
 import MessagesPanel from '../components/parent/MessagesPanel.vue'
 import CourseDetailOverlay from '../components/parent/CourseDetailOverlay.vue'
+import MenuOverlay from '../components/parent/MenuOverlay.vue'
 import ProfileHub from '../components/parent/ProfileHub.vue'
 import ProfileChild from '../components/parent/ProfileChild.vue'
 import ProfileHealth from '../components/parent/ProfileHealth.vue'
@@ -75,6 +78,7 @@ const {
   showProfile,
   profilePage,
   selectedCourse,
+  menuVisible,
   unreadCount,
 } = ctx
 

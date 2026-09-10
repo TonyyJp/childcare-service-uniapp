@@ -54,6 +54,7 @@ export function createParentContext() {
   const showProfile = ref(false)
   const profilePage = ref('main')
   const selectedCourse = ref(null)
+  const menuVisible = ref(false)
   const unreadCount = ref(0)
 
   const homeLoading = ref(false)
@@ -416,6 +417,7 @@ export function createParentContext() {
     showProfile,
     profilePage,
     selectedCourse,
+    menuVisible,
     unreadCount,
     homeLoading,
     parentName,

@@ -96,10 +96,11 @@
                 </scroll-view>
               </view>
 
-              <view v-else-if="item.type === 'notice'" class="card" style="padding:20rpx 24rpx;border-left:6rpx solid #3B9EEB;">
+              <view v-else-if="item.type === 'notice'" class="card" style="padding:20rpx 24rpx;border-left:6rpx solid #3B9EEB;" @click="item.id === 'menu' && openMenu()">
                 <view class="pill" style="background:#E3F2FD;color:#3B9EEB;margin-bottom:12rpx;"><text style="font-size:20rpx;">{{ item.noticeSender }}</text></view>
                 <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;margin-bottom:8rpx;">{{ item.noticeTitle }}</text>
                 <text style="font-size:24rpx;color:#8D6E63;line-height:1.6;">{{ item.noticeBody }}</text>
+                <text v-if="item.id === 'menu'" style="font-size:22rpx;color:#3B9EEB;display:block;margin-top:8rpx;">点击查看完整食谱 ›</text>
               </view>
 
               <view v-else-if="item.type === 'daily'" class="card" style="padding:20rpx 24rpx;">
@@ -180,7 +181,12 @@ const yesterdayItems = ctx.yesterdayItems
 const homeworkEntryHint = ctx.homeworkEntryHint
 const courses = ctx.courses
 const selectedCourse = ctx.selectedCourse
+const menuVisible = ctx.menuVisible
 const openProfile = ctx.openProfile
+
+function openMenu() {
+  menuVisible.value = true
+}
 const selectChild = ctx.selectChild
 const loadParentHome = ctx.loadParentHome
 
