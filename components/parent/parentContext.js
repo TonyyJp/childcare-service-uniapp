@@ -8,7 +8,8 @@ import {
   fetchStudents,
   reportSubscribe,
 } from '../../api/parent.js'
-import { mediaUrl, WX_SUBSCRIBE_TEMPLATES } from '../../config.js'
+import { mediaUrl } from '../../config.js'
+import { ensureWechatRuntime, getSubscribeTemplates } from '../../utils/wechatRuntime.js'
 
 export const PARENT_CTX_KEY = 'parentCtx'
 export const ACCENT = '#3B9EEB'
@@ -382,16 +383,18 @@ export function createParentContext() {
     row.on = !row.on
     persistNotifyPrefs()
     if (row.on) {
-      const tplId = WX_SUBSCRIBE_TEMPLATES[key]
-      const report = () => reportSubscribe(`parent_${key}`, 1).catch(() => {})
-      if (tplId && typeof uni.requestSubscribeMessage === 'function') {
-        uni.requestSubscribeMessage({
-          tmplIds: [tplId],
-          complete: () => report(),
-        })
-      } else {
-        report()
-      }
+      ensureWechatRuntime().then(() => {
+        const tplId = getSubscribeTemplates()[key]
+        const report = () => reportSubscribe(`parent_${key}`, 1).catch(() => {})
+        if (tplId && typeof uni.requestSubscribeMessage === 'function') {
+          uni.requestSubscribeMessage({
+            tmplIds: [tplId],
+            complete: () => report(),
+          })
+        } else {
+          report()
+        }
+      })
     }
   }
   function clearLocalCache() {

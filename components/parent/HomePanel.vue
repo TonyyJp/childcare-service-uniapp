@@ -2,7 +2,7 @@
   <view class="tab-page">
     <view class="gradient-header" :style="{ background: `linear-gradient(150deg, ${accentColor} 0%, ${accentColor}99 100%)` }">
       <view class="header-row">
-        <view class="back-btn" @click="goBack"><text class="back-icon">‹</text></view>
+        <view class="header-side" />
         <text class="header-title">{{ homeDateLabel }}</text>
         <view class="header-side" />
       </view>
@@ -200,7 +200,6 @@ const typeConfig = {
 const currentItems = computed(() => dayTab.value === 'today' ? todayItems.value : yesterdayItems.value)
 const visibleItems = computed(() => timelineExpanded.value ? currentItems.value : currentItems.value.slice(0, 2))
 
-function goBack() { uni.navigateBack() }
 function switchDayTab(val) {
   dayTab.value = val
   timelineExpanded.value = false

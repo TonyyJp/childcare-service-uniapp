@@ -3,7 +3,6 @@
     <view class="content">
       <HomePanel
         v-if="activeTab === 'home'"
-        @back="goBack"
         @navigate="navigate"
         @go-checkin="onGoCheckin"
       />
@@ -67,10 +66,6 @@ const navTabs = [
   { id: 'daily', label: '日常', emoji: '📷' },
   { id: 'stats', label: '学情', emoji: '📊' },
 ]
-
-function goBack() {
-  uni.navigateBack()
-}
 
 function navigate(nav) {
   if (!nav) return

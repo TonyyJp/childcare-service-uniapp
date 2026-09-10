@@ -2,7 +2,7 @@
   <view class="tab-page">
     <view class="gradient-header" style="background:linear-gradient(135deg,#FF7043 0%,#FF8A65 100%);">
       <view class="header-row">
-        <view class="back-btn" @click="$emit('back')"><text class="back-icon">‹</text></view>
+        <view class="header-side" />
         <text class="header-title">{{ tenantName }}</text>
         <view class="header-side" />
       </view>
@@ -66,7 +66,7 @@
 import { ref, computed, inject, onMounted } from 'vue'
 import { fetchDashboard, fetchProfile } from '../../api/teacher.js'
 
-const emit = defineEmits(['back', 'navigate', 'go-checkin'])
+const emit = defineEmits(['navigate', 'go-checkin'])
 
 const AVATAR_COLORS = ['#FF7043', '#AB47BC', '#3B9EEB', '#66BB6A', '#FFA726', '#EC407A']
 const checkinClassId = inject('teacherCheckinClassId', null)

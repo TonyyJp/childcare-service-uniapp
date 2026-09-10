@@ -1,6 +1,10 @@
 <script>
+import { ensureWechatRuntime } from './utils/wechatRuntime.js'
+
 export default {
-  onLaunch() {},
+  onLaunch() {
+    ensureWechatRuntime().catch(() => {})
+  },
   onShow() {},
   onHide() {}
 }
