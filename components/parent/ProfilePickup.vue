@@ -1,58 +1,74 @@
 <template>
-      <view style="flex:1;display:flex;flex-direction:column;height:100%;background:#F0F7FF;">
-        <view class="safe-nav-header" style="background:white;padding-bottom:24rpx;border-bottom:1rpx solid #E3F2FD;flex-shrink:0;">
-          <view style="display:flex;align-items:center;padding:0 40rpx;">
-            <view style="width:64rpx;height:64rpx;border-radius:24rpx;background:#F0F7FF;display:flex;align-items:center;justify-content:center;margin-right:20rpx;" @click="goProfilePage('main')">
-              <text style="font-size:40rpx;color:#2D1F18;line-height:1;">‹</text>
+  <view class="subpage">
+    <view class="safe-nav-header subpage-nav">
+      <text class="subpage-nav__title">接送人</text>
+      <view class="subpage-nav__row">
+        <view class="subpage-nav__back" @click="goProfilePage('main')">
+          <text class="subpage-nav__back-icon">‹</text>
+        </view>
+        <view class="subpage-nav__side" />
+      </view>
+    </view>
+    <view class="subpage-body">
+      <scroll-view scroll-y class="subpage-scroll">
+        <view class="subpage-pad">
+          <text class="subpage-hint">{{ activeChild.name || '请先绑定宝贝' }} · 授权接送人员</text>
+
+          <view v-if="!activeChildId" class="empty-block empty-block--card">
+            <text class="empty-block__title">请先绑定宝贝</text>
+            <text class="empty-block__hint">绑定后可为孩子添加接送人</text>
+          </view>
+          <view v-else-if="pickupLoading" class="empty-block">
+            <text class="empty-block__text">加载中…</text>
+          </view>
+          <view v-else-if="!pickupPersons.length" class="empty-block empty-block--card">
+            <text class="empty-block__title">暂无接送人</text>
+            <text class="empty-block__hint">添加后可用于接送核对</text>
+          </view>
+
+          <view v-for="p in pickupPersons" :key="p.id" class="list-card">
+            <view class="list-card__row">
+              <view class="list-card__body">
+                <text class="list-card__title">{{ p.name }} · {{ p.relation }}</text>
+                <text class="list-card__sub">{{ p.phone }}</text>
+              </view>
+              <view class="list-card__action list-card__action--danger" @click="removePickupPerson(p)">
+                <text class="list-card__action-text">删除</text>
+              </view>
             </view>
-            <view style="flex:1;">
-              <text style="font-size:32rpx;font-weight:800;color:#2D1F18;display:block;">接送人</text>
-              <text style="font-size:22rpx;color:#8D6E63;">{{ activeChild.name || '请先绑定宝贝' }}</text>
-            </view>
-            <view v-if="activeChildId" style="background:#E3F2FD;border-radius:16rpx;padding:12rpx 20rpx;" @click="showPickupCompose = true">
-              <text style="font-size:22rpx;font-weight:700;color:#3B9EEB;">+ 添加</text>
-            </view>
+          </view>
+
+          <view v-if="activeChildId" class="add-dashed" @click="showPickupCompose = true">
+            <text class="add-dashed__text">+ 添加接送人</text>
           </view>
         </view>
-        <scroll-view scroll-y style="flex:1;height:0;">
-          <view style="padding:24rpx 40rpx;">
-            <view v-if="!activeChildId" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">请先绑定宝贝</text></view>
-            <view v-else-if="pickupLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">加载中…</text></view>
-            <view v-else-if="!pickupPersons.length" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">暂无接送人</text></view>
-            <view v-for="p in pickupPersons" :key="p.id" class="card" style="padding:24rpx;margin-bottom:16rpx;display:flex;align-items:center;">
-              <view style="flex:1;min-width:0;">
-                <text style="font-size:28rpx;font-weight:800;color:#2D1F18;display:block;">{{ p.name }} · {{ p.relation }}</text>
-                <text style="font-size:22rpx;color:#8D6E63;display:block;margin-top:6rpx;">{{ p.phone }}</text>
-              </view>
-              <view style="padding:12rpx 20rpx;border-radius:16rpx;background:#FFEBEE;" @click="removePickupPerson(p)">
-                <text style="font-size:22rpx;font-weight:700;color:#E53935;">删除</text>
-              </view>
-            </view>
+      </scroll-view>
+    </view>
+
+    <view v-if="showPickupCompose" class="overlay" style="z-index:80;" @click="showPickupCompose = false">
+      <view class="sheet" @click.stop>
+        <view class="sheet-handle" />
+        <text class="sheet-title">添加接送人</text>
+        <view class="form-section">
+          <view class="form-field">
+            <text class="form-label">姓名</text>
+            <input class="form-input" v-model="pickupForm.name" placeholder="接送人姓名" maxlength="20" />
           </view>
-        </scroll-view>
-        <view v-if="showPickupCompose" class="overlay" style="z-index:80;" @click="showPickupCompose = false">
-          <view class="sheet" @click.stop>
-            <view class="sheet-handle" />
-            <text class="sheet-title">添加接送人</text>
-            <view style="margin-bottom:16rpx;">
-              <text style="font-size:24rpx;font-weight:700;color:#8D6E63;display:block;margin-bottom:8rpx;">姓名</text>
-              <input class="form-input" v-model="pickupForm.name" placeholder="接送人姓名" maxlength="20" />
-            </view>
-            <view style="margin-bottom:16rpx;">
-              <text style="font-size:24rpx;font-weight:700;color:#8D6E63;display:block;margin-bottom:8rpx;">关系</text>
-              <input class="form-input" v-model="pickupForm.relation" placeholder="如：爷爷 / 阿姨" maxlength="20" />
-            </view>
-            <view style="margin-bottom:24rpx;">
-              <text style="font-size:24rpx;font-weight:700;color:#8D6E63;display:block;margin-bottom:8rpx;">手机</text>
-              <input class="form-input" v-model="pickupForm.phone" type="number" placeholder="手机号" maxlength="20" />
-            </view>
-            <view class="primary-btn" @click="submitPickupPerson">
-              <text style="color:white;font-size:30rpx;font-weight:800;">保存</text>
-            </view>
+          <view class="form-field">
+            <text class="form-label">关系</text>
+            <input class="form-input" v-model="pickupForm.relation" placeholder="如：爷爷 / 阿姨" maxlength="20" />
           </view>
+          <view class="form-field">
+            <text class="form-label">手机</text>
+            <input class="form-input" v-model="pickupForm.phone" type="number" placeholder="手机号" maxlength="20" />
+          </view>
+        </view>
+        <view class="primary-btn" @click="submitPickupPerson">
+          <text style="color:white;font-size:30rpx;font-weight:800;">保存</text>
         </view>
       </view>
-
+    </view>
+  </view>
 </template>
 
 <script setup>
@@ -136,4 +152,5 @@ onShow(() => { if (props.active) loadPickupPersons() })
 
 <style lang="scss">
 @import '../../styles/mp-common.scss';
+@import '../../styles/profile-subpage.scss';
 </style>

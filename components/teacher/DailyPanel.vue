@@ -1,76 +1,110 @@
 <template>
   <view class="tab-page">
     <view class="gradient-header" style="background:linear-gradient(135deg,#FF7043 0%,#FF8A65 100%);">
-      <view class="safe-nav-bar" style="display:flex;align-items:center;justify-content:space-between;padding-bottom:32rpx;">
-        <view>
-          <text style="font-size:44rpx;font-weight:800;color:white;display:block;">日常动态</text>
-          <text style="font-size:24rpx;color:rgba(255,255,255,0.8);">今日已发布 {{ publishedCount }} 条</text>
-        </view>
-        <view style="background:rgba(255,255,255,0.25);border-radius:20rpx;padding:16rpx 28rpx;" @click="openCompose">
-          <text style="color:white;font-size:26rpx;font-weight:700;">+ 发动态</text>
-        </view>
+      <view class="safe-nav-bar" style="padding-bottom:32rpx;">
+        <text style="font-size:44rpx;font-weight:800;color:white;display:block;">日常动态</text>
+        <text style="font-size:24rpx;color:rgba(255,255,255,0.8);display:block;margin-top:8rpx;">今日已发布 {{ publishedCount }} 条</text>
       </view>
     </view>
 
-    <scroll-view scroll-y style="flex:1;height:0;">
-      <view style="padding:24rpx 40rpx;">
+    <view style="flex:1;overflow:hidden;">
+      <scroll-view scroll-y style="height:100%;">
+        <view style="padding:24rpx 40rpx;">
+        <view class="primary-btn" style="margin-bottom:24rpx;" @click="openCompose">
+          <text style="color:white;font-size:30rpx;font-weight:800;">发动态</text>
+        </view>
         <view v-if="dailyLoading" style="padding:48rpx 0;text-align:center;">
           <text style="font-size:26rpx;color:#8D6E63;">加载中…</text>
         </view>
         <view v-else-if="!dailyRecords.length" style="padding:48rpx 0;text-align:center;">
-          <text style="font-size:26rpx;color:#8D6E63;">暂无动态，点右上角发布</text>
+          <text style="font-size:26rpx;color:#8D6E63;">暂无动态，点击上方发动态</text>
         </view>
-        <view v-for="rec in dailyRecords" :key="rec.id" class="card" style="margin-bottom:24rpx;overflow:hidden;">
-          <view style="display:flex;align-items:flex-start;gap:20rpx;padding:24rpx 24rpx 16rpx;">
-            <view style="width:100rpx;height:100rpx;border-radius:24rpx;display:flex;align-items:center;justify-content:center;font-size:52rpx;flex-shrink:0;" :style="{ backgroundColor: rec.photoBg + '22' }">
-              <text>{{ rec.photoEmoji }}</text>
+        <view v-for="rec in dailyRecords" :key="rec.id" class="card" style="margin-bottom:24rpx;">
+          <view style="display:flex;align-items:flex-start;padding:24rpx 24rpx 16rpx;">
+            <view style="width:100rpx;height:100rpx;border-radius:24rpx;display:flex;align-items:center;justify-content:center;font-size:52rpx;flex-shrink:0;margin-right:20rpx;overflow:hidden;" :style="{ backgroundColor: rec.photoBg + '22' }">
+              <image v-if="rec.photos[0]" :src="rec.photos[0]" mode="aspectFill" style="width:100%;height:100%;" @click="previewPhotos(rec.photos, 0)" />
+              <text v-else>{{ rec.photoEmoji }}</text>
             </view>
             <view style="flex:1;min-width:0;">
-              <view style="display:flex;align-items:center;gap:12rpx;flex-wrap:wrap;margin-bottom:8rpx;">
-                <view class="pill" :style="{ backgroundColor: '#FF704318', color: '#FF7043' }"><text style="font-size:22rpx;">{{ rec.course }}</text></view>
-                <view class="pill" :style="{ backgroundColor: statusStyle2(rec.status).bg, color: statusStyle2(rec.status).fg }"><text style="font-size:22rpx;">{{ rec.status }}</text></view>
+              <view style="display:flex;align-items:center;flex-wrap:wrap;margin-bottom:8rpx;">
+                <view class="pill" style="margin-right:12rpx;margin-bottom:4rpx;" :style="{ backgroundColor: '#FF704318', color: '#FF7043' }"><text style="font-size:22rpx;">{{ rec.course }}</text></view>
+                <view class="pill" style="margin-bottom:4rpx;" :style="{ backgroundColor: statusStyle2(rec.status).bg, color: statusStyle2(rec.status).fg }"><text style="font-size:22rpx;">{{ rec.status }}</text></view>
               </view>
-              <view style="display:flex;gap:8rpx;flex-wrap:wrap;">
-                <view v-for="s in rec.taggedStudents" :key="s" class="pill" style="background:#F5F0EC;color:#8D6E63;"><text style="font-size:20rpx;">@{{ s }}</text></view>
+              <view style="display:flex;flex-wrap:wrap;">
+                <view v-for="s in rec.taggedStudents" :key="s" class="pill" style="background:#F5F0EC;color:#8D6E63;margin-right:8rpx;margin-bottom:4rpx;"><text style="font-size:20rpx;">@{{ s }}</text></view>
               </view>
             </view>
             <text style="font-size:22rpx;color:#BDBDBD;flex-shrink:0;">{{ rec.time }}</text>
           </view>
 
+          <view v-if="rec.photos.length" style="padding:0 24rpx 16rpx;display:flex;flex-wrap:wrap;">
+            <image
+              v-for="(p, pi) in rec.photos"
+              :key="pi"
+              :src="p"
+              mode="aspectFill"
+              style="width:200rpx;height:200rpx;border-radius:16rpx;background:#F5F0EC;margin-right:12rpx;margin-bottom:12rpx;"
+              @click="previewPhotos(rec.photos, pi)"
+            />
+          </view>
+
           <view style="padding:0 24rpx 24rpx;">
-            <view v-if="rec.status === '草稿'" style="padding:20rpx;background:#F5F0EC;border-radius:20rpx;display:flex;align-items:center;justify-content:center;gap:12rpx;" @click="triggerAI(rec.id)">
-              <text style="font-size:26rpx;font-weight:700;color:#8D6E63;">✦ AI 生成家长反馈文案</text>
-            </view>
-            <view v-else-if="rec.status === 'AI已生成' || rec.status === '待发布'">
-              <view style="display:flex;align-items:center;gap:12rpx;margin-bottom:12rpx;">
-                <view style="padding:4rpx 16rpx;border-radius:8rpx;background:linear-gradient(90deg,#667eea,#764ba2);">
-                  <text style="color:white;font-size:20rpx;font-weight:800;">AI</text>
+            <view v-if="isEditable(rec)">
+              <text style="font-size:22rpx;color:#8D6E63;display:block;margin-bottom:8rpx;">家长反馈文案</text>
+              <textarea
+                class="form-input"
+                style="height:160rpx;width:100%;box-sizing:border-box;line-height:1.6;"
+                :value="rec.draftText"
+                maxlength="2000"
+                placeholder="可手动填写，或点下方自动生成"
+                placeholder-style="color:#BCAAA4;font-size:26rpx;"
+                :show-confirm-bar="false"
+                @input="e => onDraftInput(rec, e)"
+              />
+              <view style="display:flex;flex-wrap:wrap;margin-top:16rpx;">
+                <view
+                  style="flex:1;min-width:200rpx;padding:18rpx;border-radius:20rpx;text-align:center;margin-right:12rpx;margin-bottom:12rpx;"
+                  :style="{
+                    background: rec.streaming ? '#EDE7E3' : '#F5F0EC',
+                    opacity: rec.streaming ? 0.72 : 1
+                  }"
+                  @click="triggerGenerate(rec)"
+                >
+                  <text
+                    style="font-size:26rpx;font-weight:700;"
+                    :style="{ color: rec.streaming ? '#BCAAA4' : '#8D6E63' }"
+                  >{{ rec.streaming ? '生成中…' : (rec.draftText.trim() ? '再次生成' : '自动生成文案') }}</text>
                 </view>
-                <text style="font-size:22rpx;color:#8D6E63;">老师审核发布</text>
+                <view style="flex:1;min-width:200rpx;padding:18rpx;border-radius:20rpx;background:#FFF3E0;text-align:center;margin-bottom:12rpx;" @click="saveContent(rec)">
+                  <text style="font-size:26rpx;font-weight:700;color:#E65100;">保存文案</text>
+                </view>
               </view>
-              <text style="font-size:26rpx;color:#2D1F18;line-height:1.7;">{{ rec.editedText }}</text>
-              <view v-if="rec.status === '待发布'" style="display:flex;gap:16rpx;margin-top:20rpx;">
-                <view style="flex:1;padding:20rpx;border-radius:20rpx;background:#F5F0EC;text-align:center;" @click="retract(rec.id)">
+              <view v-if="rec.statusCode === 'pending'" style="display:flex;margin-top:4rpx;">
+                <view style="flex:1;padding:20rpx;border-radius:20rpx;background:#F5F0EC;text-align:center;margin-right:16rpx;" @click="retract(rec.id)">
                   <text style="font-size:26rpx;font-weight:700;color:#8D6E63;">撤回</text>
                 </view>
                 <view class="primary-btn" style="flex:2;" @click="publish(rec.id)">
                   <text style="color:white;font-size:26rpx;font-weight:800;">发布给家长</text>
                 </view>
               </view>
-              <view v-else style="margin-top:20rpx;">
-                <view class="primary-btn" style="padding:20rpx;" @click="setPending(rec.id)">
+              <view v-else-if="rec.draftText.trim()" style="margin-top:4rpx;">
+                <view class="primary-btn" style="padding:20rpx;" @click="setPending(rec)">
                   <text style="color:white;font-size:26rpx;font-weight:800;">提交发布</text>
                 </view>
               </view>
             </view>
-            <view v-else-if="rec.status === '已发布'" style="border-radius:20rpx;padding:20rpx;background:#F1F8E9;">
+            <view v-else-if="rec.statusCode === 'published'" style="border-radius:20rpx;padding:20rpx;background:#F1F8E9;">
               <text style="font-size:24rpx;color:#2E7D32;font-weight:700;display:block;margin-bottom:8rpx;">✓ 已发布给家长 · {{ rec.publishedAt }}</text>
               <text style="font-size:26rpx;color:#2D1F18;line-height:1.7;">{{ rec.editedText }}</text>
+            </view>
+            <view v-else-if="rec.statusCode === 'withdrawn'" style="padding:20rpx;background:#EEEEEE;border-radius:20rpx;">
+              <text style="font-size:26rpx;color:#757575;">已撤回，家长不可见</text>
             </view>
           </view>
         </view>
       </view>
-    </scroll-view>
+      </scroll-view>
+    </view>
 
     <view v-if="showCompose" class="overlay" @click="showCompose = false">
       <view class="sheet" @click.stop>
@@ -115,7 +149,7 @@
             </view>
           </view>
           <view class="primary-btn" @click="submitPost">
-            <text style="color:white;font-size:30rpx;font-weight:800;">提交 · AI生成文案</text>
+            <text style="color:white;font-size:30rpx;font-weight:800;">提交草稿</text>
           </view>
         </view>
       </view>
@@ -131,10 +165,13 @@ import {
   fetchDailyPosts,
   fetchDashboard,
   publishDailyPost,
+  streamAiGenerateDailyPost,
   updateDailyPost,
   withdrawDailyPost,
 } from '../../api/teacher.js'
+import { mediaUrl } from '../../config.js'
 import { uploadFile } from '../../utils/request.js'
+import { supportsChunkedStream } from '../../utils/streamRequest.js'
 
 const checkinClassId = inject('teacherCheckinClassId', null)
 
@@ -147,20 +184,43 @@ const newPost = ref({ emoji: '', course: '', classId: null, photoPreviews: [], p
 const dailyRecords = ref([])
 const classes = ref([])
 
-const publishedCount = computed(() => dailyRecords.value.filter(r => r.status === '已发布').length)
+const publishedCount = computed(() => dailyRecords.value.filter(r => r.statusCode === 'published').length)
+
+function displayStatus(code, label) {
+  if (code === 'ai_ready' || label === 'AI已生成') return '已生成'
+  return label || code
+}
 
 function mapDailyRow(p) {
+  const code = p.status || ''
   return {
     id: p.id,
     photoEmoji: p.cover_emoji || '',
     photoBg: '#FF7043',
+    photos: (p.photos || []).map(mediaUrl).filter(Boolean),
     course: p.topic || p.class_name || '日常',
     time: p.created_at || p.published_at || '',
     taggedStudents: p.tagged_students || [],
-    status: p.status_label || p.status,
+    statusCode: code,
+    status: displayStatus(code, p.status_label),
     editedText: p.content || '',
-    publishedAt: p.published_at || ''
+    draftText: p.content || '',
+    publishedAt: p.published_at || '',
+    streaming: false,
   }
+}
+
+function previewPhotos(urls, index = 0) {
+  if (!urls?.length) return
+  uni.previewImage({ urls, current: urls[index] || urls[0] })
+}
+
+function isEditable(rec) {
+  return ['draft', 'ai_ready', 'pending'].includes(rec.statusCode)
+}
+
+function onDraftInput(rec, e) {
+  rec.draftText = e.detail?.value ?? ''
 }
 
 async function loadClasses() {
@@ -168,8 +228,10 @@ async function loadClasses() {
     const dash = await fetchDashboard()
     classes.value = (dash?.classes || []).map(c => ({
       id: c.id,
-      name: c.name,
-      expected: (c.periods || []).reduce((s, p) => s + (p.expected || 0), 0),
+      name: c.biz_type === 'care'
+        ? `${c.name}·${c.attendance_type_name || '托管'}`
+        : `${c.name}·兴趣`,
+      expected: c.students_count || (c.periods || []).reduce((s, p) => s + (p.expected || 0), 0),
     }))
   } catch (_) { /* ignore */ }
 }
@@ -189,6 +251,7 @@ async function loadDailyPosts() {
 function statusStyle2(s) {
   const map = {
     '草稿': { bg: '#F5F0EC', fg: '#8D6E63' },
+    '已生成': { bg: '#E3F2FD', fg: '#1565C0' },
     'AI已生成': { bg: '#E3F2FD', fg: '#1565C0' },
     '待发布': { bg: '#FFF3E0', fg: '#E65100' },
     '已发布': { bg: '#C8E6C9', fg: '#2E7D32' },
@@ -197,24 +260,98 @@ function statusStyle2(s) {
   return map[s] || { bg: '#F5F0EC', fg: '#8D6E63' }
 }
 
-async function triggerAI(id) {
+/** 平滑打字机：网络增量先入队，按固定节奏渲染（约 30ms 一拍，积压越多步长越大）。
+ *  分块到达常为阵发（实测每 ~130ms 一批），直接渲染视觉上像整段填充。 */
+function createTypewriter(apply) {
+  let queue = ''
+  let timer = null
+  const step = () => {
+    if (!queue) {
+      timer = null
+      return
+    }
+    const n = Math.max(1, Math.ceil(queue.length / 30))
+    apply(queue.slice(0, n))
+    queue = queue.slice(n)
+    timer = setTimeout(step, 30)
+  }
+  return {
+    push(text) {
+      queue += text
+      if (timer === null) timer = setTimeout(step, 30)
+    },
+    flush() {
+      return new Promise(resolve => {
+        const check = () => (timer === null ? resolve() : setTimeout(check, 25))
+        check()
+      })
+    }
+  }
+}
+
+async function triggerGenerate(rec) {
+  if (dailyBusy.value || rec.streaming) return
+  dailyBusy.value = true
+  rec.streaming = true
+  try {
+    if (!supportsChunkedStream()) {
+      throw Object.assign(new Error('非微信小程序环境'), { unsupported: true })
+    }
+    rec.draftText = ''
+    const typer = createTypewriter(text => { rec.draftText += text })
+    let result
+    try {
+      result = await streamAiGenerateDailyPost(rec.id, { onDelta: typer.push })
+    } catch (e) {
+      if (!e || !e.unsupported) throw e
+      // 基础库过低（< 2.20.1）：降级非流式
+      await aiGenerateDailyPost(rec.id)
+      await loadDailyPosts()
+      uni.showToast({ title: '文案已生成', icon: 'success' })
+      return
+    }
+    await typer.flush()
+    Object.assign(rec, mapDailyRow(result.post))
+    uni.showToast({ title: '文案已生成', icon: 'success' })
+  } catch (e) {
+    uni.showToast({ title: e.message || '自动生成失败', icon: 'none' })
+  } finally {
+    rec.streaming = false
+    dailyBusy.value = false
+  }
+}
+
+async function saveContent(rec) {
   if (dailyBusy.value) return
+  const content = (rec.draftText || '').trim()
+  if (!content) {
+    uni.showToast({ title: '请先填写文案', icon: 'none' })
+    return
+  }
   dailyBusy.value = true
   try {
-    await aiGenerateDailyPost(id)
+    const payload = { content }
+    if (rec.statusCode === 'draft') payload.status = 'ai_ready'
+    await updateDailyPost(rec.id, payload)
     await loadDailyPosts()
+    uni.showToast({ title: '已保存', icon: 'success' })
   } catch (e) {
-    uni.showToast({ title: e.message || 'AI 生成失败', icon: 'none' })
+    uni.showToast({ title: e.message || '保存失败', icon: 'none' })
   } finally {
     dailyBusy.value = false
   }
 }
 
-async function setPending(id) {
+async function setPending(rec) {
   if (dailyBusy.value) return
+  const content = (rec.draftText || '').trim()
+  if (!content) {
+    uni.showToast({ title: '请先填写或生成文案', icon: 'none' })
+    return
+  }
   dailyBusy.value = true
   try {
-    await updateDailyPost(id, { status: 'pending' })
+    await updateDailyPost(rec.id, { content, status: 'pending' })
     await loadDailyPosts()
   } catch (e) {
     uni.showToast({ title: e.message || '操作失败', icon: 'none' })

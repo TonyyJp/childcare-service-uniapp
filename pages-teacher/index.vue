@@ -19,9 +19,9 @@
       />
       <LeaveOverlay v-else-if="activeTab === 'leave'" @back="activeTab = 'home'" />
       <NoticesOverlay v-else-if="activeTab === 'notices'" @back="activeTab = 'home'" />
-      <EventsOverlay v-else-if="activeTab === 'events'" @back="activeTab = 'home'" />
       <MessagesOverlay v-else-if="activeTab === 'messages'" @back="activeTab = 'home'" />
-      <ScheduleOverlay v-else-if="activeTab === 'schedule'" @back="activeTab = 'home'" />
+      <ScheduleOverlay v-else-if="activeTab === 'schedule'" @back="activeTab = 'home'" @detail="onCourseDetail" />
+      <CourseDetailOverlay v-else-if="activeTab === 'course-detail'" @back="activeTab = 'schedule'" />
       <GrowthOverlay v-else-if="activeTab === 'life'" @back="activeTab = 'home'" />
     </view>
 
@@ -43,18 +43,22 @@ import MealOverlay from '../components/teacher/MealOverlay.vue'
 import AttendanceOverlay from '../components/teacher/AttendanceOverlay.vue'
 import LeaveOverlay from '../components/teacher/LeaveOverlay.vue'
 import NoticesOverlay from '../components/teacher/NoticesOverlay.vue'
-import EventsOverlay from '../components/teacher/EventsOverlay.vue'
 import MessagesOverlay from '../components/teacher/MessagesOverlay.vue'
 import ScheduleOverlay from '../components/teacher/ScheduleOverlay.vue'
+import CourseDetailOverlay from '../components/teacher/CourseDetailOverlay.vue'
 import GrowthOverlay from '../components/teacher/GrowthOverlay.vue'
 import { navSafeCssVars } from '../utils/safeArea.js'
 
 const navSafeStyle = navSafeCssVars()
 const activeTab = ref('home')
 const checkinClassId = ref(null)
+const checkinPeriodId = ref(null)
+const courseDetail = ref(null)
 
 provide('teacherActiveTab', activeTab)
 provide('teacherCheckinClassId', checkinClassId)
+provide('teacherCheckinPeriodId', checkinPeriodId)
+provide('teacherCourseDetail', courseDetail)
 
 const MAIN_TABS = ['home', 'checkin', 'homework', 'daily', 'stats']
 const isMainTab = computed(() => MAIN_TABS.includes(activeTab.value))
@@ -76,9 +80,19 @@ function navigate(nav) {
   if (nav.tab) activeTab.value = nav.tab
 }
 
-function onGoCheckin(classId) {
-  if (classId != null) checkinClassId.value = classId
+function onGoCheckin(payload) {
+  if (payload != null && typeof payload === 'object') {
+    if (payload.classId != null) checkinClassId.value = payload.classId
+    if (payload.periodId != null) checkinPeriodId.value = payload.periodId
+  } else if (payload != null) {
+    checkinClassId.value = payload
+  }
   activeTab.value = 'checkin'
+}
+
+function onCourseDetail(cls) {
+  courseDetail.value = cls || null
+  activeTab.value = 'course-detail'
 }
 </script>
 

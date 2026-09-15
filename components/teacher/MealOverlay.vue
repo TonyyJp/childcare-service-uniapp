@@ -33,7 +33,12 @@
         </view>
         <view v-else>
           <view class="card" style="padding:24rpx;margin-bottom:20rpx;">
-            <text style="font-size:28rpx;font-weight:700;color:#2D1F18;display:block;margin-bottom:8rpx;">{{ selectedMealLabel }} · {{ mealDate }}</text>
+            <view style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8rpx;">
+              <text style="font-size:28rpx;font-weight:700;color:#2D1F18;">{{ selectedMealLabel }} · {{ mealDate }}</text>
+              <view class="pill" :style="{ backgroundColor: isPublished ? '#C8E6C9' : '#FFF3E0', color: isPublished ? '#2E7D32' : '#E65100' }">
+                <text style="font-size:20rpx;font-weight:700;">{{ isPublished ? '已发布' : '待发布' }}</text>
+              </view>
+            </view>
             <text style="font-size:22rpx;color:#8D6E63;display:block;margin-bottom:20rpx;">按班级上传餐食实拍，家长首页可见</text>
             <view v-if="mealPhotos.length" style="display:flex;flex-wrap:wrap;gap:12rpx;margin-bottom:20rpx;">
               <image v-for="(p, i) in mealPhotos" :key="i" :src="p" mode="aspectFill"
@@ -46,6 +51,20 @@
             <view class="primary-btn" style="background:#66BB6A;" :style="{ opacity: mealUploading ? 0.6 : 1 }" @click="uploadMealPhotos">
               <text style="color:white;font-size:30rpx;font-weight:800;">{{ mealUploading ? '上传中…' : (mealPhotos.length ? '+ 追加照片' : '拍照上传') }}</text>
             </view>
+            <view style="margin-top:20rpx;">
+              <text style="font-size:24rpx;font-weight:700;color:#8D6E63;display:block;margin-bottom:8rpx;">文案（选填）</text>
+              <textarea
+                class="form-input"
+                style="min-height:120rpx;width:100%;box-sizing:border-box;line-height:1.6;"
+                :value="mealContent"
+                maxlength="500"
+                placeholder="补充今日餐食说明，发布后家长可见"
+                @input="onMealContentInput"
+              />
+            </view>
+            <view class="primary-btn" style="margin-top:20rpx;" :style="{ opacity: mealPublishing ? 0.6 : 1 }" @click="publishCurrentMeal">
+              <text style="color:white;font-size:30rpx;font-weight:800;">{{ mealPublishing ? '发布中…' : '发布给家长' }}</text>
+            </view>
           </view>
         </view>
       </view>
@@ -55,7 +74,7 @@
 
 <script setup>
 import { ref, computed, inject, onMounted } from 'vue'
-import { createMeal, fetchDashboard, fetchMeals } from '../../api/teacher.js'
+import { createMeal, fetchDashboard, fetchMeals, publishMeal } from '../../api/teacher.js'
 import { mediaUrl } from '../../config.js'
 import { uploadFile } from '../../utils/request.js'
 
@@ -73,6 +92,8 @@ const mealClassId = ref(null)
 const selectedMealType = ref('lunch')
 const mealLoading = ref(false)
 const mealUploading = ref(false)
+const mealPublishing = ref(false)
+const mealContent = ref('')
 const mealDate = ref('')
 const mealRecords = ref([])
 const classes = ref([])
@@ -88,6 +109,8 @@ const mealPhotos = computed(() => {
   const row = mealRecords.value.find(r => r.meal_type === selectedMealType.value)
   return (row?.photos || []).map(mediaUrl).filter(Boolean)
 })
+const currentMeal = computed(() => mealRecords.value.find(r => r.meal_type === selectedMealType.value))
+const isPublished = computed(() => currentMeal.value?.status === 'published')
 
 function todayStr() {
   const d = new Date()
@@ -113,6 +136,16 @@ function selectMealClass(id) {
 
 function selectMealType(type) {
   selectedMealType.value = type
+  syncMealContent()
+}
+
+function syncMealContent() {
+  const row = mealRecords.value.find(r => r.meal_type === selectedMealType.value)
+  mealContent.value = row?.content || ''
+}
+
+function onMealContentInput(e) {
+  mealContent.value = e.detail?.value ?? ''
 }
 
 async function loadClasses() {
@@ -120,8 +153,10 @@ async function loadClasses() {
     const dash = await fetchDashboard()
     classes.value = (dash?.classes || []).map(c => ({
       id: c.id,
-      name: c.name,
-      expected: (c.periods || []).reduce((s, p) => s + (p.expected || 0), 0),
+      name: c.biz_type === 'care'
+        ? `${c.name}·${c.attendance_type_name || '托管'}`
+        : `${c.name}·兴趣`,
+      expected: c.students_count || (c.periods || []).reduce((s, p) => s + (p.expected || 0), 0),
     }))
     primaryClassName.value = classes.value[0]?.name || '—'
   } catch (_) { /* ignore */ }
@@ -131,6 +166,7 @@ async function loadMealsToday() {
   ensureMealClass()
   if (!mealClassId.value) {
     mealRecords.value = []
+    mealContent.value = ''
     return
   }
   mealLoading.value = true
@@ -138,6 +174,7 @@ async function loadMealsToday() {
   try {
     const data = await fetchMeals({ date: mealDate.value, classId: mealClassId.value })
     mealRecords.value = data?.list || []
+    syncMealContent()
   } catch (e) {
     uni.showToast({ title: e.message || '餐食加载失败', icon: 'none' })
   } finally {
@@ -170,12 +207,14 @@ function uploadMealPhotos() {
           if (uploaded?.attachment_id) ids.push(uploaded.attachment_id)
         }
         if (!ids.length) throw new Error('上传失败')
-        await createMeal({
+        const payload = {
           class_id: mealClassId.value,
           meal_date: mealDate.value || todayStr(),
           meal_type: selectedMealType.value,
-          attachment_ids: ids
-        })
+          attachment_ids: ids,
+        }
+        if (mealContent.value) payload.content = mealContent.value
+        await createMeal(payload)
         uni.showToast({ title: '已上传', icon: 'success' })
         await loadMealsToday()
       } catch (e) {
@@ -185,6 +224,25 @@ function uploadMealPhotos() {
       }
     }
   })
+}
+
+async function publishCurrentMeal() {
+  if (mealPublishing.value) return
+  const row = currentMeal.value
+  if (!row) {
+    uni.showToast({ title: '请先上传照片', icon: 'none' })
+    return
+  }
+  mealPublishing.value = true
+  try {
+    await publishMeal(row.id, mealContent.value)
+    uni.showToast({ title: '已发布', icon: 'success' })
+    await loadMealsToday()
+  } catch (e) {
+    uni.showToast({ title: e.message || '发布失败', icon: 'none' })
+  } finally {
+    mealPublishing.value = false
+  }
 }
 
 onMounted(async () => {

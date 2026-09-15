@@ -1,10 +1,11 @@
 import { API_BASE_URL, MP_APPID } from '../config.js'
 
-/** 微信后台配置运行时缓存 */
+/** 微信后台配置运行时缓存（display_name 仅来自接口，无本地品牌兜底） */
 let runtime = {
   loaded: false,
   configured: false,
   appid: null,
+  display_name: '',
   templates: {
     homework: '',
     attendance: '',
@@ -15,6 +16,10 @@ let runtime = {
 
 export function getWechatRuntime() {
   return runtime
+}
+
+export function getMpDisplayName() {
+  return (runtime.display_name || '').trim()
 }
 
 export function getSubscribeTemplates() {
@@ -60,6 +65,7 @@ export function ensureWechatRuntime(force = false) {
           loaded: true,
           configured: !!data.configured,
           appid: data.appid || MP_APPID || null,
+          display_name: data.display_name ? String(data.display_name).trim() : '',
           templates: {
             homework: data.templates?.homework || '',
             attendance: data.templates?.attendance || '',

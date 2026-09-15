@@ -2,7 +2,13 @@
   <view class="tab-page">
     <view class="gradient-header" style="background:linear-gradient(135deg,#FF7043 0%,#FF8A65 100%);">
       <view class="header-row">
-        <view class="header-side" />
+        <!-- TEMP_IDENTITY_RESELECT_BACK（DEBUG_MODE） -->
+        <view
+          v-if="debugMode"
+          class="back-btn"
+          @click="goIdentitySelect"
+        ><text class="back-icon">‹</text></view>
+        <view v-else class="header-side" />
         <text class="header-title">{{ tenantName }}</text>
         <view class="header-side" />
       </view>
@@ -36,15 +42,58 @@
         </view>
       </view>
 
+      <view v-if="unfinishedCheckins.length" style="padding:32rpx 40rpx 0;">
+        <view style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20rpx;">
+          <text style="font-size:26rpx;font-weight:800;color:#2D1F18;">未完成点名</text>
+          <text style="font-size:22rpx;color:#E65100;font-weight:700;" @click="goUnfinishedCheckin()">去处理 ›</text>
+        </view>
+        <view
+          v-for="item in unfinishedCheckins"
+          :key="`${item.class_id}-${item.period_id}`"
+          class="card"
+          style="padding:24rpx;margin-bottom:16rpx;display:flex;align-items:center;gap:16rpx;"
+          @click="goUnfinishedCheckin(item)"
+        >
+          <view style="flex:1;min-width:0;">
+            <text style="font-size:28rpx;font-weight:800;color:#2D1F18;display:block;">{{ item.class_name }}</text>
+            <text style="font-size:22rpx;color:#8D6E63;display:block;margin-top:4rpx;">{{ item.period_name }}</text>
+          </view>
+          <view class="pill" style="background:#FFECB3;color:#E65100;">
+            <text style="font-size:22rpx;font-weight:700;">缺 {{ item.remaining }} 人</text>
+          </view>
+        </view>
+      </view>
+
       <view style="padding:32rpx 40rpx 24rpx;">
         <text style="font-size:26rpx;font-weight:800;color:#2D1F18;display:block;margin-bottom:20rpx;">我的班级</text>
         <view v-for="cls in classes" :key="cls.id" class="card" style="padding:24rpx;margin-bottom:20rpx;">
           <view style="display:flex;align-items:center;gap:16rpx;margin-bottom:16rpx;">
             <view style="width:16rpx;height:40rpx;border-radius:8rpx;" :style="{ backgroundColor: cls.color }" />
-            <text style="font-size:30rpx;font-weight:800;color:#2D1F18;flex:1;">{{ cls.name }}</text>
+            <view style="flex:1;min-width:0;">
+              <view style="display:flex;align-items:center;gap:10rpx;flex-wrap:wrap;">
+                <text style="font-size:30rpx;font-weight:800;color:#2D1F18;">{{ cls.name }}</text>
+                <view class="pill" :style="{ backgroundColor: cls.tagBg, color: cls.tagColor }">
+                  <text style="font-size:20rpx;font-weight:700;">{{ cls.tag }}</text>
+                </view>
+              </view>
+              <text v-if="cls.timeLabel" style="font-size:22rpx;color:#8D6E63;display:block;margin-top:4rpx;">{{ cls.timeLabel }}</text>
+            </view>
             <view class="pill" style="background:#C8E6C9;color:#2E7D32;" v-if="cls.done"><text style="font-size:22rpx;">✓ 已点名</text></view>
-            <view class="action-btn" :style="{ backgroundColor: cls.color }" @click="goCheckinForClass(cls)">
+            <view
+              v-if="cls.canCheckin"
+              class="action-btn"
+              :style="{ backgroundColor: cls.color }"
+              @click="goCheckinForClass(cls)"
+            >
               <text style="color:white;font-size:24rpx;font-weight:700;">点名 ›</text>
+            </view>
+            <view
+              v-else
+              class="action-btn"
+              style="background:#FFB300;"
+              @click="$emit('navigate', { tab: 'schedule' })"
+            >
+              <text style="color:white;font-size:24rpx;font-weight:700;">课表 ›</text>
             </view>
           </view>
           <view style="display:flex;gap:12rpx;">
@@ -64,19 +113,31 @@
 
 <script setup>
 import { ref, computed, inject, onMounted } from 'vue'
-import { fetchDashboard, fetchProfile } from '../../api/teacher.js'
+import { fetchDashboard, fetchProfile, fetchUnreadCount } from '../../api/teacher.js'
+import { ensureWechatRuntime, getMpDisplayName } from '../../utils/wechatRuntime.js'
+import { DEBUG_MODE } from '../../config.js'
+import { clearRoleSelection } from '../../utils/auth.js'
 
 const emit = defineEmits(['navigate', 'go-checkin'])
+const debugMode = DEBUG_MODE
+
+function goIdentitySelect() {
+  // TEMP_IDENTITY_RESELECT_BACK（DEBUG_MODE）
+  if (!DEBUG_MODE) return
+  clearRoleSelection()
+  uni.reLaunch({ url: '/pages/index/index' })
+}
 
 const AVATAR_COLORS = ['#FF7043', '#AB47BC', '#3B9EEB', '#66BB6A', '#FFA726', '#EC407A']
 const checkinClassId = inject('teacherCheckinClassId', null)
 
 const homeLoading = ref(false)
 const teacherName = ref('老师')
-const tenantName = ref('智优托教')
+const tenantName = ref('')
 const teacherAvatar = computed(() => (teacherName.value || '师').slice(0, 1))
 const todayLabel = ref('')
 const primaryClassName = ref('—')
+const unreadCount = ref(0)
 const homeSummary = ref([
   { label: '应到', val: '—', warn: false },
   { label: '已到', val: '—', warn: false },
@@ -84,28 +145,55 @@ const homeSummary = ref([
   { label: '待审批', val: '—', warn: false },
 ])
 const classes = ref([])
+const unfinishedCheckins = ref([])
 
-const features = [
+const features = computed(() => [
   { icon: '🍱', label: '营养餐', color: '#66BB6A', nav: { tab: 'meal' } },
   { icon: '📝', label: '考勤', color: '#EC407A', nav: { tab: 'attendance' } },
   { icon: '🌱', label: '成长记录', color: '#66BB6A', nav: { tab: 'life' } },
   { icon: '📅', label: '课程排布', color: '#FFB300', nav: { tab: 'schedule' } },
   { icon: '📋', label: '请假', color: '#AB47BC', nav: { tab: 'leave' } },
-  { icon: '💬', label: '消息', color: '#3B9EEB', nav: { tab: 'messages' } },
+  { icon: '💬', label: unreadCount.value ? `消息(${unreadCount.value})` : '消息', color: '#3B9EEB', nav: { tab: 'messages' } },
   { icon: '📢', label: '通知', color: '#26C6DA', nav: { tab: 'notices' } },
-  { icon: '🎉', label: '活动', color: '#EC407A', nav: { tab: 'events' } },
-]
+])
+
+function goUnfinishedCheckin(item) {
+  const target = item || unfinishedCheckins.value[0]
+  if (!target) {
+    emit('go-checkin')
+    return
+  }
+  emit('go-checkin', { classId: target.class_id, periodId: target.period_id })
+}
 
 function onHomeSummaryClick(s) {
   if (s.label === '待审批') emit('navigate', { tab: 'leave' })
+  if (s.label === '未完成') goUnfinishedCheckin()
+  if (s.label === '应到' || s.label === '已到') emit('go-checkin')
+}
+
+function classBizMeta(c) {
+  if (c.biz_type === 'care') {
+    const tag = c.attendance_type_name || '托管'
+    return { tag, tagBg: '#E3F2FD', tagColor: '#1565C0' }
+  }
+  return { tag: '兴趣课', tagBg: '#FFF3E0', tagColor: '#E65100' }
 }
 
 function classStats(cls) {
+  if (cls.canCheckin) {
+    return [
+      { label: '应到', val: cls.expected, color: '#1565C0' },
+      { label: '已到', val: cls.arrived, color: '#2E7D32' },
+      { label: '剩余', val: Math.max(0, cls.expected - cls.arrived), color: '#E65100' },
+      { label: '时段', val: cls.periodCount, color: '#7B1FA2' },
+    ]
+  }
   return [
-    { label: '应到', val: cls.expected, color: '#1565C0' },
-    { label: '已到', val: cls.arrived, color: '#2E7D32' },
-    { label: '剩余', val: Math.max(0, cls.expected - cls.arrived), color: '#E65100' },
-    { label: '时段', val: cls.periodCount, color: '#7B1FA2' },
+    { label: '在班', val: cls.studentsCount, color: '#1565C0' },
+    { label: '适龄', val: cls.ageLabel || '—', color: '#2E7D32' },
+    { label: '类型', val: '兴趣', color: '#E65100' },
+    { label: '课表', val: '看', color: '#7B1FA2' },
   ]
 }
 
@@ -119,31 +207,53 @@ function formatToday(dateStr) {
 async function loadTeacherHome() {
   homeLoading.value = true
   try {
-    const [profile, dash] = await Promise.all([fetchProfile(), fetchDashboard()])
+    const [profile, dash, unread] = await Promise.all([
+      fetchProfile(),
+      fetchDashboard(),
+      fetchUnreadCount().catch(() => ({ count: 0 })),
+    ])
     teacherName.value = profile?.name || '老师'
-    tenantName.value = profile?.tenant_name || '智优托教'
+    await ensureWechatRuntime(false).catch(() => {})
+    tenantName.value = profile?.tenant_name || getMpDisplayName()
     todayLabel.value = formatToday(dash?.date)
+    unreadCount.value = Number(unread?.total || unread?.count || unread?.unread || 0)
+
     const cards = (dash?.classes || []).map((c, i) => {
       const expected = (c.periods || []).reduce((s, p) => s + (p.expected || 0), 0)
       const arrived = (c.periods || []).reduce((s, p) => s + (p.arrived || 0), 0)
+      const meta = classBizMeta(c)
+      const timeLabel = c.start_time && c.end_time
+        ? `${c.start_time}-${c.end_time}`
+        : (c.age_label || '')
       return {
         id: c.id,
         name: c.name,
         color: AVATAR_COLORS[i % AVATAR_COLORS.length],
+        bizType: c.biz_type || 'interest',
+        tag: meta.tag,
+        tagBg: meta.tagBg,
+        tagColor: meta.tagColor,
+        timeLabel,
+        ageLabel: c.age_label || '—',
+        studentsCount: c.students_count || 0,
         expected,
         arrived,
         periodCount: (c.periods || []).length,
         periods: c.periods || [],
-        done: expected > 0 && arrived >= expected
+        canCheckin: !!c.can_period_checkin,
+        hasScheduleToday: !!c.has_schedule_today,
+        done: !!c.can_period_checkin && expected > 0 && arrived >= expected
       }
     })
     classes.value = cards
     primaryClassName.value = cards[0]?.name || '暂无班级'
 
-    const unfinished = dash?.todos?.unfinished_checkins?.length || 0
+    unfinishedCheckins.value = dash?.todos?.unfinished_checkins || []
+    const unfinished = unfinishedCheckins.value.length
     const pendingLeaves = dash?.todos?.pending_leaves || 0
-    const totalExpected = cards.reduce((s, c) => s + c.expected, 0)
-    const totalArrived = cards.reduce((s, c) => s + c.arrived, 0)
+    const careCards = cards.filter(c => c.canCheckin && c.hasScheduleToday)
+    const totalExpected = careCards.reduce((s, c) => s + c.expected, 0)
+    const totalArrived = careCards.reduce((s, c) => s + c.arrived, 0)
     homeSummary.value = [
       { label: '应到', val: String(totalExpected), warn: false },
       { label: '已到', val: String(totalArrived), warn: false },
@@ -151,7 +261,7 @@ async function loadTeacherHome() {
       { label: '待审批', val: String(pendingLeaves), warn: pendingLeaves > 0 },
     ]
 
-    const preferred = cards.find(c => c.periodCount > 0) || cards[0]
+    const preferred = cards.find(c => c.canCheckin) || cards[0]
     if (preferred && checkinClassId && !checkinClassId.value) {
       checkinClassId.value = preferred.id
     }
@@ -164,7 +274,7 @@ async function loadTeacherHome() {
 
 function goCheckinForClass(cls) {
   if (checkinClassId) checkinClassId.value = cls.id
-  emit('go-checkin', cls.id)
+  emit('go-checkin', { classId: cls.id })
 }
 
 onMounted(loadTeacherHome)

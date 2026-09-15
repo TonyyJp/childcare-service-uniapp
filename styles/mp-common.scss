@@ -22,7 +22,11 @@
 
 .overlay-page {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
   background: #fff8f2;
@@ -46,22 +50,51 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--nav-pad-right, 100px) 24rpx 40rpx;
+  padding: 0 40rpx 24rpx;
   box-sizing: border-box;
 }
 
 .header-title {
   position: absolute;
-  left: 40rpx;
-  right: var(--nav-pad-right, 100px);
+  left: 0;
+  right: 0;
   text-align: center;
-  font-size: 26rpx;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.85);
+  font-size: 28rpx;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.95);
   pointer-events: none;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.header-title-wrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  min-width: 0;
+}
+
+.header-title-wrap .header-title {
+  position: static;
+  left: auto;
+  right: auto;
+  max-width: 100%;
+}
+
+.header-date {
+  margin-top: 4rpx;
+  font-size: 20rpx;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .header-side {
@@ -133,12 +166,14 @@
 
 .primary-btn {
   width: 100%;
+  max-width: 100%;
   padding: 28rpx;
   border-radius: 24rpx;
   background: linear-gradient(135deg, #ff7043 0%, #ff8a65 100%);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
 }
 
 .form-input {
@@ -150,6 +185,26 @@
   font-size: 26rpx;
   color: #2d1f18;
   box-sizing: border-box;
+  min-height: 80rpx;
+  line-height: 1.4;
+}
+
+/*
+ * 微信原生 input：上下 padding 会导致 placeholder 只露下半截。
+ * 单行用固定高度 + 左右 padding；多行 textarea 保留上下内边距。
+ */
+input.form-input {
+  height: 80rpx;
+  min-height: 80rpx;
+  padding: 0 24rpx;
+  line-height: 80rpx;
+}
+
+textarea.form-input {
+  height: auto;
+  min-height: 140rpx;
+  padding: 20rpx 24rpx;
+  line-height: 1.5;
 }
 
 .bottom-nav {
@@ -172,7 +227,9 @@
 }
 
 .nav-icon {
-  font-size: 40rpx;
+  width: 44rpx;
+  height: 44rpx;
+  display: block;
 }
 
 .nav-label {
@@ -191,7 +248,10 @@
 .overlay,
 .overlay-mask {
   position: fixed;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: flex-end;

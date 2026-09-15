@@ -2,7 +2,13 @@
       <view class="tab-page">
         <view class="gradient-header" style="background:linear-gradient(135deg,#AB47BC 0%,#CE93D8 100%);">
           <view class="header-row">
-            <view class="header-side" />
+            <!-- TEMP_IDENTITY_RESELECT_BACK（DEBUG_MODE） -->
+            <view
+              v-if="debugMode"
+              class="back-btn"
+              @click="goIdentitySelect"
+            ><text class="back-icon">‹</text></view>
+            <view v-else class="header-side" />
             <text class="header-title">机构管理后台</text>
             <view class="header-side" />
           </view>
@@ -139,7 +145,12 @@
                   <text style="font-size:20rpx;color:#8D6E63;">全园点名</text>
                 </view>
               </view>
-              <view style="display:flex;">
+              <view style="display:flex;margin-bottom:16rpx;">
+                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('daily')">
+                  <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">📷</text>
+                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">日常代发</text>
+                  <text style="font-size:20rpx;color:#8D6E63;">草稿·发布</text>
+                </view>
                 <view class="card" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('config')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">⚙️</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">系统配置</text>
@@ -155,14 +166,24 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { fetchDashboard } from '../../api/institution.js'
+import { DEBUG_MODE } from '../../config.js'
+import { clearRoleSelection } from '../../utils/auth.js'
 
 const props = defineProps({
   pageShowCount: { type: Number, default: 0 },
 })
 const emit = defineEmits(["navigate","open-announcements"])
+const debugMode = DEBUG_MODE
 
 function navigate(tab) {
   emit('navigate', tab)
+}
+
+function goIdentitySelect() {
+  // TEMP_IDENTITY_RESELECT_BACK（DEBUG_MODE）
+  if (!DEBUG_MODE) return
+  clearRoleSelection()
+  uni.reLaunch({ url: '/pages/index/index' })
 }
 
 watch(() => props.pageShowCount, () => { loadDashboard() }, { immediate: true })

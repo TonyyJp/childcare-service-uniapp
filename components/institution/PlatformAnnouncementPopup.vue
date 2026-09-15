@@ -48,7 +48,7 @@
       </scroll-view>
     </view>
 
-    <view v-if="showAnnouncement && popupAnnouncements.length" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;padding:40rpx;z-index:80;">
+    <view v-if="showAnnouncement && popupAnnouncements.length" style="position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;padding:40rpx;z-index:80;">
       <view style="width:100%;background:white;border-radius:48rpx;overflow:hidden;max-height:80vh;display:flex;flex-direction:column;">
         <!-- 弹窗头部 -->
         <view style="padding:40rpx;flex-shrink:0;background:linear-gradient(135deg,#AB47BC 0%,#CE93D8 100%);">

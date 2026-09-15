@@ -26,7 +26,9 @@
           <view style="height:8rpx;" :style="{ background: `linear-gradient(90deg, ${rec.color} 0%, ${rec.color}80 100%)` }" />
           <view style="padding:24rpx;">
             <view style="display:flex;align-items:flex-start;gap:20rpx;margin-bottom:12rpx;">
-              <view style="width:80rpx;height:80rpx;border-radius:24rpx;display:flex;align-items:center;justify-content:center;font-size:40rpx;flex-shrink:0;" :style="{ backgroundColor: rec.color + '18' }"><text>📋</text></view>
+              <view style="width:80rpx;height:80rpx;border-radius:24rpx;display:flex;align-items:center;justify-content:center;flex-shrink:0;" :style="{ backgroundColor: rec.color + '18' }">
+                <MpIcon name="clipboard-list" :size="40" :color="rec.color || '#3B9EEB'" />
+              </view>
               <view style="flex:1;">
                 <view style="display:flex;align-items:center;gap:12rpx;flex-wrap:wrap;margin-bottom:8rpx;">
                   <view class="pill" :style="{ backgroundColor: rec.statusBg, color: rec.statusColor }"><text style="font-size:22rpx;font-weight:700;">{{ rec.statusLabel }}</text></view>
@@ -92,6 +94,7 @@ import { onShow } from '@dcloudio/uni-app'
 import { fetchHomework, fetchHomeworks, submitHomework } from '../../api/parent.js'
 import { uploadFile } from '../../utils/request.js'
 import { PARENT_CTX_KEY } from './parentContext.js'
+import MpIcon from '../MpIcon.vue'
 
 const props = defineProps({ active: { type: Boolean, default: false } })
 const ctx = inject(PARENT_CTX_KEY)

@@ -76,7 +76,7 @@ watch(() => props.pageShowCount, () => { loadReports() }, { immediate: true })
 
 const periods = [
   { id: 'month', label: '本月' },
-  { id: 'term', label: '本学期' },
+  { id: 'half', label: '本半年' },
   { id: 'year', label: '本年' },
 ]
 const period = ref('month')

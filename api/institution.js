@@ -1,4 +1,5 @@
 import { http } from '../utils/request.js'
+import { ssePost } from '../utils/streamRequest.js'
 
 /** GET /institution/dashboard */
 export function fetchDashboard() {
@@ -58,6 +59,11 @@ export function fetchCourses(status) {
   const data = {}
   if (status) data.status = status
   return http.get('/institution/courses', data)
+}
+
+/** GET /institution/catalogs/options */
+export function fetchCatalogOptions() {
+  return http.get('/institution/catalogs/options')
 }
 
 /** POST /institution/courses */
@@ -187,4 +193,42 @@ export function checkinStudents({ classId, periodId, studentIds, date, method = 
   }
   if (date) data.date = date
   return http.post('/institution/attendance/checkin', data)
+}
+
+/** GET /institution/daily-posts */
+export function fetchDailyPosts(params = {}) {
+  const data = {}
+  if (params.classId != null) data.class_id = params.classId
+  if (params.status) data.status = params.status
+  return http.get('/institution/daily-posts', data)
+}
+
+/** POST /institution/daily-posts */
+export function createDailyPost(payload) {
+  return http.post('/institution/daily-posts', payload)
+}
+
+/** PUT /institution/daily-posts/{id} */
+export function updateDailyPost(id, payload) {
+  return http.put(`/institution/daily-posts/${id}`, payload)
+}
+
+/** POST /institution/daily-posts/{id}/ai-generate */
+export function aiGenerateDailyPost(id, data = {}) {
+  return http.post(`/institution/daily-posts/${id}/ai-generate`, data)
+}
+
+/** POST /institution/daily-posts/{id}/ai-generate/stream（SSE 流式生成） */
+export function streamAiGenerateDailyPost(id, handlers = {}) {
+  return ssePost(`/institution/daily-posts/${id}/ai-generate/stream`, {}, handlers)
+}
+
+/** POST /institution/daily-posts/{id}/publish */
+export function publishDailyPost(id) {
+  return http.post(`/institution/daily-posts/${id}/publish`)
+}
+
+/** POST /institution/daily-posts/{id}/withdraw */
+export function withdrawDailyPost(id) {
+  return http.post(`/institution/daily-posts/${id}/withdraw`)
 }

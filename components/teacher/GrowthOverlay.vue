@@ -178,8 +178,10 @@ async function loadClasses() {
     const dash = await fetchDashboard()
     classes.value = (dash?.classes || []).map(c => ({
       id: c.id,
-      name: c.name,
-      expected: (c.periods || []).reduce((s, p) => s + (p.expected || 0), 0),
+      name: c.biz_type === 'care'
+        ? `${c.name}·${c.attendance_type_name || '托管'}`
+        : `${c.name}·兴趣`,
+      expected: c.students_count || (c.periods || []).reduce((s, p) => s + (p.expected || 0), 0),
     }))
   } catch (_) { /* ignore */ }
 }

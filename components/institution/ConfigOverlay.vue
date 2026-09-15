@@ -6,7 +6,7 @@
               <view class="back-btn" @click="navigate('home')"><text class="back-icon">‹</text></view>
               <view>
                 <text style="font-size:40rpx;font-weight:800;color:white;display:block;">系统配置</text>
-                <text style="font-size:24rpx;color:rgba(255,255,255,0.8);">功能开关 · 签到规则 · AI · 家长权限</text>
+                <text style="font-size:24rpx;color:rgba(255,255,255,0.8);">功能开关 · 签到规则 · 家长权限</text>
               </view>
             </view>
           </view>
@@ -60,7 +60,6 @@ const configSections = ref([
     items: [
       { key: 'feature.face_checkin', label: '刷脸签到', desc: '启用人脸识别签到功能', type: 'toggle', enabled: true },
       { key: 'feature.parent_growth', label: '家长查看成长档案', desc: '允许家长在家长端查看', type: 'toggle', enabled: true },
-      { key: 'feature.ai_feedback', label: 'AI 反馈生成', desc: '日常动态自动生成文案', type: 'toggle', enabled: true },
     ],
   },
   {
@@ -135,7 +134,6 @@ async function onConfigTimeChange(item, value) {
     item.value = prev
   }
 }
-
 </script>
 
 <style lang="scss" scoped>

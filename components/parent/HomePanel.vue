@@ -2,24 +2,42 @@
   <view class="tab-page">
     <view class="gradient-header" :style="{ background: `linear-gradient(150deg, ${accentColor} 0%, ${accentColor}99 100%)` }">
       <view class="header-row">
-        <view class="header-side" />
-        <text class="header-title">{{ homeDateLabel }}</text>
+        <!-- TEMP_IDENTITY_RESELECT_BACK（DEBUG_MODE） -->
+        <view
+          v-if="debugMode"
+          class="back-btn"
+          @click="goIdentitySelect"
+        ><text class="back-icon">‹</text></view>
+        <view v-else class="header-side" />
+        <view class="header-title-wrap">
+          <text class="header-title">{{ homeTitle }}</text>
+          <text v-if="homeDateLabel" class="header-date">{{ homeDateLabel }}</text>
+        </view>
         <view class="header-side" />
       </view>
 
       <view style="display:flex;align-items:flex-start;padding:0 40rpx 16rpx;">
-        <view style="width:120rpx;height:120rpx;border-radius:36rpx;background:white;display:flex;align-items:center;justify-content:center;font-size:60rpx;flex-shrink:0;box-shadow:0 8rpx 24rpx rgba(0,0,0,0.12);margin-right:24rpx;">
-          <text>{{ activeChild.emoji }}</text>
+        <view style="width:120rpx;height:120rpx;border-radius:36rpx;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 8rpx 24rpx rgba(0,0,0,0.12);margin-right:24rpx;overflow:hidden;">
+          <image v-if="activeChild.avatarUrl" :src="activeChild.avatarUrl" mode="aspectFill" style="width:120rpx;height:120rpx;" />
+          <MpIcon v-else :name="activeChild.emoji || 'circle-user-round'" :size="64" :color="activeChild.avatarColor || accentColor" />
         </view>
         <view style="flex:1;padding-top:4rpx;min-width:0;">
           <view style="display:flex;align-items:center;">
             <text style="font-size:48rpx;font-weight:800;color:white;flex:1;min-width:0;">{{ activeChild.name }}</text>
-            <view class="avatar-btn" style="flex-shrink:0;margin-left:16rpx;" @click="openProfile"><text class="avatar-text">{{ parentAvatar }}</text></view>
+            <view class="avatar-btn" style="flex-shrink:0;margin-left:16rpx;overflow:hidden;" @click="openProfile">
+              <image v-if="parentAvatarUrl" :src="parentAvatarUrl" mode="aspectFill" style="width:64rpx;height:64rpx;" />
+              <text v-else class="avatar-text">{{ parentAvatar }}</text>
+            </view>
           </view>
           <text style="font-size:24rpx;color:rgba(255,255,255,0.8);display:block;margin-top:4rpx;">{{ activeChild.class }} · {{ activeChild.tenant }}</text>
           <view style="display:flex;margin-top:16rpx;flex-wrap:wrap;">
-            <view class="pill" style="background:rgba(255,255,255,0.25);color:white;margin-right:16rpx;">
-              <text style="font-size:22rpx;">{{ activeChild.checkinLabel }}</text>
+            <view
+              class="pill"
+              style="background:rgba(255,255,255,0.25);color:white;margin-right:16rpx;"
+              :style="activeChild.needsBind ? { background: 'rgba(255,255,255,0.95)', color: accentColor } : {}"
+              @click="onCheckinPillClick"
+            >
+              <text style="font-size:22rpx;font-weight:700;">{{ activeChild.checkinLabel }}</text>
             </view>
             <view v-if="activeChild.inGarden" class="pill" style="background:rgba(255,255,255,0.18);color:white;">
               <text style="font-size:22rpx;">在园中</text>
@@ -50,11 +68,11 @@
     <scroll-view scroll-y style="flex:1;height:0;background:#F0F7FF;">
       <view style="padding:24rpx 40rpx;">
         <view v-if="homeLoading" style="padding:40rpx 0;text-align:center;">
-          <text style="color:#8D6E63;font-size:26rpx;">加载今日动态…</text>
+          <text style="color:#8D6E63;font-size:26rpx;">加载中…</text>
         </view>
 
         <view v-else-if="!currentItems.length" style="padding:48rpx 24rpx;text-align:center;background:white;border-radius:20rpx;margin-bottom:20rpx;">
-          <text style="font-size:28rpx;color:#8D6E63;">暂无{{ dayTab === 'today' ? '今日' : '昨日' }}动态</text>
+          <text style="font-size:28rpx;color:#8D6E63;">暂无{{ dayTab === 'today' ? '今日' : '昨日' }}记录</text>
           <text style="font-size:22rpx;color:#BDBDBD;display:block;margin-top:12rpx;">教师点名后，考勤会出现在这里</text>
         </view>
 
@@ -63,7 +81,7 @@
             <view style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:88rpx;">
               <text style="font-size:20rpx;color:#BDBDBD;line-height:40rpx;">{{ item.time }}</text>
               <view style="width:48rpx;height:48rpx;border-radius:24rpx;display:flex;align-items:center;justify-content:center;margin-top:4rpx;" :style="{ backgroundColor: typeConfig[item.type].bg }">
-                <text style="font-size:22rpx;">{{ typeConfig[item.type].icon }}</text>
+                <MpIcon :name="typeConfig[item.type].icon" :size="28" :color="typeConfig[item.type].color" />
               </view>
             </view>
 
@@ -83,10 +101,13 @@
 
               <view v-else-if="item.type === 'meal'" class="card" style="padding:20rpx 24rpx;">
                 <view style="display:flex;align-items:center;gap:20rpx;margin-bottom:12rpx;">
-                  <view style="width:72rpx;height:72rpx;border-radius:20rpx;display:flex;align-items:center;justify-content:center;font-size:36rpx;background:#F1F8E9;flex-shrink:0;"><text>{{ item.mealEmoji }}</text></view>
+                  <view style="width:72rpx;height:72rpx;border-radius:20rpx;display:flex;align-items:center;justify-content:center;background:#F1F8E9;flex-shrink:0;">
+                    <MpIcon :name="item.mealIcon || 'soup'" :size="36" color="#2E7D32" />
+                  </view>
                   <view style="flex:1;">
                     <text style="font-size:28rpx;font-weight:700;color:#2D1F18;display:block;margin-bottom:8rpx;">{{ item.mealName }}</text>
                     <text style="font-size:22rpx;color:#8D6E63;">{{ item.mealItems }}</text>
+                    <text v-if="item.mealContent" style="font-size:24rpx;color:#2D1F18;line-height:1.6;display:block;margin-top:8rpx;">{{ item.mealContent }}</text>
                   </view>
                 </view>
                 <scroll-view v-if="item.photos?.length" scroll-x style="white-space:nowrap;">
@@ -102,41 +123,58 @@
                 <text style="font-size:24rpx;color:#8D6E63;line-height:1.6;">{{ item.noticeBody }}</text>
                 <text v-if="item.id === 'menu'" style="font-size:22rpx;color:#3B9EEB;display:block;margin-top:8rpx;">点击查看完整食谱 ›</text>
               </view>
-
-              <view v-else-if="item.type === 'daily'" class="card" style="padding:20rpx 24rpx;">
-                <view style="display:flex;align-items:center;gap:12rpx;margin-bottom:12rpx;">
-                  <text style="font-size:36rpx;">{{ item.coverEmoji || '📷' }}</text>
-                  <view class="pill" style="background:#F3E5F5;color:#7B1FA2;"><text style="font-size:20rpx;">{{ item.topic || '日常' }}</text></view>
-                </view>
-                <text style="font-size:26rpx;color:#2D1F18;line-height:1.7;">{{ item.aiText }}</text>
-              </view>
             </view>
           </view>
         </view>
 
         <view v-if="currentItems.length > 2" style="display:flex;align-items:center;justify-content:center;gap:12rpx;padding:20rpx;background:white;border-radius:20rpx;margin-bottom:20rpx;" @click="timelineExpanded = !timelineExpanded">
-          <text style="font-size:24rpx;font-weight:700;" :style="{ color: accentColor }">{{ timelineExpanded ? '收起' : `展开全部 ${currentItems.length} 条动态` }}</text>
+          <text style="font-size:24rpx;font-weight:700;" :style="{ color: accentColor }">{{ timelineExpanded ? '收起' : `展开全部 ${currentItems.length} 条` }}</text>
           <text style="font-size:20rpx;" :style="{ color: accentColor }">{{ timelineExpanded ? '▲' : '▼' }}</text>
+        </view>
+
+        <view style="margin-bottom:28rpx;">
+          <text style="font-size:26rpx;font-weight:800;color:#2D1F18;display:block;margin-bottom:16rpx;">快捷功能</text>
+          <view style="display:grid;grid-template-columns:repeat(4,1fr);gap:16rpx;">
+            <view
+              v-for="f in features"
+              :key="f.label"
+              class="feature-item"
+              :style="{ backgroundColor: f.color + '18' }"
+              @click="openFeature(f.nav)"
+            >
+              <view class="feature-icon-wrap" :style="{ backgroundColor: f.color + '28' }">
+                <MpIcon :name="f.icon" :size="36" :color="f.color" />
+              </view>
+              <text class="feature-label">{{ f.label }}</text>
+            </view>
+          </view>
         </view>
 
         <view style="margin-bottom:24rpx;">
           <view style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16rpx;">
-            <text style="font-size:26rpx;font-weight:800;color:#2D1F18;">🏫 机构课程</text>
-            <text style="font-size:22rpx;" :style="{ color: accentColor }">智优托教 · {{ courses.length }}门在招</text>
+            <view style="display:flex;align-items:center;gap:10rpx;">
+              <MpIcon name="building-2" :size="32" color="#2D1F18" />
+              <text style="font-size:26rpx;font-weight:800;color:#2D1F18;">机构课程</text>
+            </view>
+            <text
+              style="font-size:22rpx;"
+              :style="{ color: accentColor }"
+              @click="activeTab = 'courses'"
+            >{{ homeTitle ? `${homeTitle} · ` : '' }}{{ courses.length }}门在招 ›</text>
           </view>
           <scroll-view scroll-x style="margin:0 -40rpx;padding:0 40rpx;">
             <view style="display:flex;gap:24rpx;">
               <view v-for="c in courses" :key="c.id" style="width:280rpx;flex-shrink:0;border-radius:28rpx;overflow:hidden;background:white;box-shadow:0 2rpx 16rpx rgba(0,0,0,0.08);" @click="openCourseDetail(c)">
-                <view style="height:140rpx;display:flex;align-items:center;justify-content:center;" :style="{ background: `linear-gradient(135deg, ${c.color}22 0%, ${c.color}10 100%)` }">
-                  <text style="font-size:72rpx;">{{ c.icon }}</text>
+                <view style="height:140rpx;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(135deg,#3B9EEB22 0%,#3B9EEB10 100%);">
+                  <image v-if="c.coverUrl" :src="c.coverUrl" mode="aspectFill" style="width:100%;height:100%;" />
                 </view>
                 <view style="padding:20rpx;">
                   <view style="display:flex;align-items:center;gap:8rpx;margin-bottom:8rpx;">
-                    <view class="pill" :style="{ backgroundColor: c.color + '18', color: c.color }"><text style="font-size:20rpx;">{{ c.tag }}</text></view>
+                    <view class="pill" style="background:#3B9EEB18;color:#3B9EEB;"><text style="font-size:20rpx;">{{ c.tag }}</text></view>
                   </view>
                   <text style="font-size:26rpx;font-weight:800;color:#2D1F18;display:block;">{{ c.title }}</text>
                   <text style="font-size:22rpx;color:#8D6E63;display:block;margin-top:4rpx;">{{ c.teacher }} · {{ c.age }}</text>
-                  <text style="font-size:28rpx;font-weight:800;display:block;margin-top:8rpx;" :style="{ color: c.color }">{{ c.price }}</text>
+                  <text style="font-size:28rpx;font-weight:800;display:block;margin-top:8rpx;color:#3B9EEB;">{{ c.price }}</text>
                 </view>
               </view>
               <view v-if="!courses.length" style="padding:32rpx 16rpx;">
@@ -144,15 +182,6 @@
               </view>
             </view>
           </scroll-view>
-        </view>
-
-        <view class="card" style="padding:24rpx;display:flex;align-items:center;gap:20rpx;margin-bottom:32rpx;" @click="activeTab = 'homework'">
-          <view style="width:88rpx;height:88rpx;border-radius:24rpx;display:flex;align-items:center;justify-content:center;font-size:44rpx;background:#E3F2FD;flex-shrink:0;"><text>📋</text></view>
-          <view style="flex:1;">
-            <text style="font-size:28rpx;font-weight:700;color:#2D1F18;display:block;">作业查看</text>
-            <text style="font-size:22rpx;color:#8D6E63;margin-top:4rpx;display:block;">{{ homeworkEntryHint }}</text>
-          </view>
-          <text style="font-size:32rpx;color:#BDBDBD;">›</text>
         </view>
       </view>
     </scroll-view>
@@ -163,29 +192,57 @@
 import { computed, inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { fetchCourse } from '../../api/parent.js'
+import { DEBUG_MODE } from '../../config.js'
+import { clearRoleSelection } from '../../utils/auth.js'
 import { PARENT_CTX_KEY } from './parentContext.js'
+import MpIcon from '../MpIcon.vue'
 
 const props = defineProps({ active: { type: Boolean, default: false } })
 const ctx = inject(PARENT_CTX_KEY)
+const debugMode = DEBUG_MODE
 
 const accentColor = ctx.accentColor
 const activeTab = ctx.activeTab
 const homeLoading = ctx.homeLoading
+const homeTitle = ctx.homeTitle
 const homeDateLabel = ctx.homeDateLabel
 const activeChild = ctx.activeChild
 const activeChildId = ctx.activeChildId
 const childOptions = ctx.childOptions
 const parentAvatar = ctx.parentAvatar
+const parentAvatarUrl = ctx.parentAvatarUrl
 const todayItems = ctx.todayItems
 const yesterdayItems = ctx.yesterdayItems
-const homeworkEntryHint = ctx.homeworkEntryHint
 const courses = ctx.courses
 const selectedCourse = ctx.selectedCourse
 const menuVisible = ctx.menuVisible
 const openProfile = ctx.openProfile
+const goBindChild = ctx.goBindChild
+const openFeature = ctx.openFeature
+const refreshUnreadCount = ctx.refreshUnreadCount
+
+const features = [
+  { icon: 'clipboard-list', label: '作业', color: '#3B9EEB', nav: { tab: 'homework' } },
+  { icon: 'sprout', label: '成长', color: '#66BB6A', nav: { tab: 'growth' } },
+  { icon: 'images', label: '成长影集', color: '#AB47BC', nav: { tab: 'growth-album' } },
+  { icon: 'utensils', label: '周食谱', color: '#00897B', nav: { menu: true } },
+]
+
+function onCheckinPillClick() {
+  if (activeChild.value?.needsBind) {
+    goBindChild()
+  }
+}
 
 function openMenu() {
   menuVisible.value = true
+}
+
+function goIdentitySelect() {
+  // TEMP_IDENTITY_RESELECT_BACK（DEBUG_MODE）
+  if (!DEBUG_MODE) return
+  clearRoleSelection()
+  uni.reLaunch({ url: '/pages/index/index' })
 }
 const selectChild = ctx.selectChild
 const loadParentHome = ctx.loadParentHome
@@ -195,12 +252,11 @@ const dayTab = ref('today')
 const timelineExpanded = ref(false)
 
 const typeConfig = {
-  checkin:  { icon: '✅', label: '签到',  color: '#2E7D32', bg: '#C8E6C9' },
-  checkout: { icon: '🏠', label: '离园',  color: '#1565C0', bg: '#BBDEFB' },
-  daily:    { icon: '📷', label: '日常',  color: '#7B1FA2', bg: '#F3E5F5' },
-  homework: { icon: '📋', label: '作业',  color: '#E65100', bg: '#FFF3E0' },
-  meal:     { icon: '🍱', label: '餐食',  color: '#2E7D32', bg: '#F1F8E9' },
-  notice:   { icon: '📢', label: '通知',  color: '#1565C0', bg: '#E3F2FD' },
+  checkin:  { icon: 'circle-check', label: '签到',  color: '#2E7D32', bg: '#C8E6C9' },
+  checkout: { icon: 'door-open', label: '离园',  color: '#1565C0', bg: '#BBDEFB' },
+  homework: { icon: 'clipboard-list', label: '作业',  color: '#E65100', bg: '#FFF3E0' },
+  meal:     { icon: 'soup', label: '餐食',  color: '#2E7D32', bg: '#F1F8E9' },
+  notice:   { icon: 'megaphone', label: '通知',  color: '#1565C0', bg: '#E3F2FD' },
 }
 
 const currentItems = computed(() => dayTab.value === 'today' ? todayItems.value : yesterdayItems.value)
@@ -215,16 +271,18 @@ function previewTimelinePhotos(urls, index) {
 }
 
 async function openCourseDetail(c) {
-  if (!activeChildId.value) return
+  const studentId = activeChildId.value
+  const tenantId = ctx.membershipTenantId.value
+  if (!studentId && !tenantId) return
   try {
-    const detail = await fetchCourse(c.id, activeChildId.value)
+    const detail = await fetchCourse(c.id, studentId || undefined, studentId ? undefined : tenantId)
     selectedCourse.value = {
       ...c,
       ...detail,
-      highlights: detail.highlights || c.highlights || [],
+      outlines: detail.outlines || c.outlines || [],
     }
   } catch {
-    selectedCourse.value = { ...c, highlights: c.highlights || [] }
+    selectedCourse.value = { ...c, outlines: c.outlines || [] }
   }
 }
 
@@ -232,16 +290,38 @@ watch(() => props.active, (v) => {
   if (v) {
     timelineExpanded.value = false
     loadParentHome()
+    refreshUnreadCount()
   }
 }, { immediate: true })
 
 watch(todayItems, () => { timelineExpanded.value = false })
 
 onShow(() => {
-  if (props.active) loadParentHome()
+  if (props.active) {
+    loadParentHome()
+    refreshUnreadCount()
+  }
 })
 </script>
 
 <style lang="scss">
 @import '../../styles/mp-common.scss';
+
+.feature-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+  padding: 20rpx 8rpx;
+  border-radius: 20rpx;
+}
+.feature-icon-wrap {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 22rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.feature-label { font-size: 22rpx; color: #5D4037; font-weight: 600; }
 </style>

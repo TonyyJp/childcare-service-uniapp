@@ -1,43 +1,77 @@
 <template>
-  <view class="tab-page">
-    <view class="safe-nav-header" style="background:white;flex-shrink:0;border-bottom:1rpx solid #E3F2FD;padding-bottom:24rpx;">
-      <view class="safe-nav-bar" style="display:flex;align-items:center;justify-content:space-between;">
-        <text style="font-size:40rpx;font-weight:800;color:#2D1F18;">消息</text>
-        <view style="padding:10rpx 24rpx;background:#E3F2FD;border-radius:16rpx;" @click="markAllRead">
-          <text style="font-size:22rpx;font-weight:700;color:#3B9EEB;">全部已读</text>
+  <view class="subpage">
+    <view class="safe-nav-header subpage-nav">
+      <text class="subpage-nav__title">站内消息</text>
+      <view class="subpage-nav__row">
+        <view v-if="showBack" class="subpage-nav__back" @click="goProfilePage('main')">
+          <text class="subpage-nav__back-icon">‹</text>
         </view>
+        <view v-else class="subpage-nav__side" />
+        <view class="subpage-nav__side" />
       </view>
     </view>
-    <scroll-view scroll-y style="flex:1;height:0;background:#F0F7FF;">
-      <view style="padding:20rpx 40rpx;">
-        <view v-if="messagesLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">加载中…</text></view>
-        <view v-else-if="!messages.length" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">暂无消息</text></view>
-        <view v-for="msg in messages" :key="msg.id" class="card" style="margin-bottom:16rpx;overflow:hidden;" @click="markMessageRead(msg)">
-          <view v-if="msg.urgent" style="height:5rpx;background:#E53935;" />
-          <view style="padding:24rpx;display:flex;align-items:flex-start;gap:20rpx;">
-            <view style="position:relative;flex-shrink:0;">
-              <view style="width:88rpx;height:88rpx;border-radius:24rpx;display:flex;align-items:center;justify-content:center;font-size:40rpx;" :style="{ backgroundColor: (msgTypeCfg[msg.type] || msgTypeCfg.system).bg }">
-                <text>{{ (msgTypeCfg[msg.type] || msgTypeCfg.system).icon }}</text>
-              </view>
-              <view v-if="msg.unread" style="position:absolute;top:-6rpx;right:-6rpx;width:24rpx;height:24rpx;border-radius:12rpx;background:#E53935;" />
+    <view class="subpage-body">
+      <scroll-view scroll-y class="subpage-scroll">
+        <view class="subpage-pad">
+          <view v-if="messages.length" class="subpage-toolbar">
+            <view class="subpage-toolbar__btn" @click="markAllRead">
+              <text class="subpage-toolbar__btn-text">全部已读</text>
             </view>
-            <view style="flex:1;min-width:0;">
-              <view style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8rpx;">
-                <view style="display:flex;align-items:center;gap:12rpx;">
-                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;">{{ msg.sender }}</text>
-                  <view class="pill" :style="{ backgroundColor: (msgTypeCfg[msg.type] || msgTypeCfg.system).bg, color: (msgTypeCfg[msg.type] || msgTypeCfg.system).color }">
-                    <text style="font-size:20rpx;">{{ (msgTypeCfg[msg.type] || msgTypeCfg.system).label }}</text>
-                  </view>
+          </view>
+
+          <view v-if="messagesLoading" class="empty-block">
+            <text class="empty-block__text">加载中…</text>
+          </view>
+          <view v-else-if="!messages.length" class="empty-block empty-block--card">
+            <text class="empty-block__title">暂无消息</text>
+            <text class="empty-block__hint">园所通知与提醒会出现在这里</text>
+          </view>
+
+          <view
+            v-for="msg in messages"
+            :key="msg.id"
+            class="list-card msg-card"
+            @click="markMessageRead(msg)"
+          >
+            <view v-if="msg.urgent" class="msg-card__urgent" />
+            <view class="list-card__row" style="align-items:flex-start;">
+              <view class="msg-card__icon-wrap">
+                <view
+                  class="msg-card__icon"
+                  :style="{ backgroundColor: (msgTypeCfg[msg.type] || msgTypeCfg.system).bg }"
+                >
+                  <MpIcon
+                    :name="(msgTypeCfg[msg.type] || msgTypeCfg.system).icon"
+                    :size="40"
+                    :color="(msgTypeCfg[msg.type] || msgTypeCfg.system).color"
+                  />
                 </view>
-                <text style="font-size:20rpx;color:#BDBDBD;flex-shrink:0;">{{ msg.time }}</text>
+                <view v-if="msg.unread" class="msg-card__dot" />
               </view>
-              <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;margin-bottom:6rpx;">{{ msg.title }}</text>
-              <text style="font-size:22rpx;color:#8D6E63;line-height:1.6;">{{ msg.body }}</text>
+              <view class="list-card__body">
+                <view class="msg-card__head">
+                  <view class="msg-card__head-left">
+                    <text class="msg-card__sender">{{ msg.sender }}</text>
+                    <view
+                      class="pill"
+                      :style="{
+                        backgroundColor: (msgTypeCfg[msg.type] || msgTypeCfg.system).bg,
+                        color: (msgTypeCfg[msg.type] || msgTypeCfg.system).color,
+                      }"
+                    >
+                      <text style="font-size:20rpx;">{{ (msgTypeCfg[msg.type] || msgTypeCfg.system).label }}</text>
+                    </view>
+                  </view>
+                  <text class="msg-card__time">{{ msg.time }}</text>
+                </view>
+                <text class="list-card__title" style="margin-bottom:6rpx;">{{ msg.title }}</text>
+                <text class="list-card__sub" style="line-height:1.6;">{{ msg.body }}</text>
+              </view>
             </view>
           </view>
         </view>
-      </view>
-    </scroll-view>
+      </scroll-view>
+    </view>
   </view>
 </template>
 
@@ -46,21 +80,28 @@ import { inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { fetchMessages, readMessages } from '../../api/parent.js'
 import { PARENT_CTX_KEY } from './parentContext.js'
+import MpIcon from '../MpIcon.vue'
 
-const props = defineProps({ active: { type: Boolean, default: false } })
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  showBack: { type: Boolean, default: false },
+})
 const ctx = inject(PARENT_CTX_KEY)
 const unreadCount = ctx.unreadCount
+const refreshUnreadCount = ctx.refreshUnreadCount
+const goProfilePage = ctx.goProfilePage
 
 const msgTypeCfg = {
-  notice: { label: '通知', icon: '📢', color: '#1565C0', bg: '#E3F2FD' },
-  homework: { label: '作业', icon: '📋', color: '#E65100', bg: '#FFF3E0' },
-  daily: { label: '动态', icon: '📷', color: '#7B1FA2', bg: '#F3E5F5' },
-  attendance: { label: '考勤', icon: '✅', color: '#00897B', bg: '#E0F2F1' },
-  fee: { label: '费用', icon: '💰', color: '#EF6C00', bg: '#FFF3E0' },
-  system: { label: '系统', icon: '🔔', color: '#2E7D32', bg: '#F1F8E9' },
-  audit: { label: '审核', icon: '📝', color: '#5E35B1', bg: '#EDE7F6' },
-  comment: { label: '点评', icon: '💬', color: '#1565C0', bg: '#E3F2FD' },
-  todo: { label: '待办', icon: '📌', color: '#C62828', bg: '#FFEBEE' },
+  notice: { label: '通知', icon: 'megaphone', color: '#1565C0', bg: '#E3F2FD' },
+  homework: { label: '作业', icon: 'clipboard-list', color: '#E65100', bg: '#FFF3E0' },
+  daily: { label: '动态', icon: 'camera', color: '#7B1FA2', bg: '#F3E5F5' },
+  daily_comment: { label: '评论', icon: 'message-circle', color: '#8E24AA', bg: '#F3E5F5' },
+  attendance: { label: '考勤', icon: 'circle-check', color: '#00897B', bg: '#E0F2F1' },
+  fee: { label: '费用', icon: 'wallet', color: '#EF6C00', bg: '#FFF3E0' },
+  system: { label: '系统', icon: 'bell', color: '#2E7D32', bg: '#F1F8E9' },
+  audit: { label: '审核', icon: 'notebook-pen', color: '#5E35B1', bg: '#EDE7F6' },
+  comment: { label: '点评', icon: 'message-circle', color: '#1565C0', bg: '#E3F2FD' },
+  todo: { label: '待办', icon: 'pin', color: '#C62828', bg: '#FFEBEE' },
 }
 const messages = ref([])
 const messagesLoading = ref(false)
@@ -83,6 +124,7 @@ function senderForType(type) {
   if (type === 'notice') return '机构通知'
   if (type === 'homework') return '作业提醒'
   if (type === 'daily') return '日常动态'
+  if (type === 'daily_comment') return '动态评论'
   if (type === 'attendance') return '考勤通知'
   if (type === 'system') return '系统通知'
   return '消息'
@@ -90,6 +132,7 @@ function senderForType(type) {
 
 function syncUnread() {
   unreadCount.value = messages.value.filter(m => m.unread).length
+  refreshUnreadCount()
 }
 
 async function loadMessages() {
@@ -148,4 +191,73 @@ defineExpose({ loadMessages })
 
 <style lang="scss">
 @import '../../styles/mp-common.scss';
+@import '../../styles/profile-subpage.scss';
+
+.msg-card {
+  position: relative;
+  overflow: hidden;
+  padding-top: 28rpx;
+}
+
+.msg-card__urgent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5rpx;
+  background: #e53935;
+}
+
+.msg-card__icon-wrap {
+  position: relative;
+  flex-shrink: 0;
+  margin-right: 20rpx;
+}
+
+.msg-card__icon {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.msg-card__dot {
+  position: absolute;
+  top: -6rpx;
+  right: -6rpx;
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 12rpx;
+  background: #e53935;
+}
+
+.msg-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+  gap: 12rpx;
+}
+
+.msg-card__head-left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  min-width: 0;
+  flex: 1;
+}
+
+.msg-card__sender {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #2d1f18;
+}
+
+.msg-card__time {
+  font-size: 20rpx;
+  color: #bdbdbd;
+  flex-shrink: 0;
+}
 </style>

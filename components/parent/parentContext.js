@@ -6,20 +6,21 @@ import {
   fetchMealsToday,
   fetchProfile,
   fetchStudents,
+  fetchUnreadCount,
   reportSubscribe,
 } from '../../api/parent.js'
 import { mediaUrl } from '../../config.js'
-import { ensureWechatRuntime, getSubscribeTemplates } from '../../utils/wechatRuntime.js'
+import { ensureWechatRuntime, getMpDisplayName, getSubscribeTemplates } from '../../utils/wechatRuntime.js'
 
 export const PARENT_CTX_KEY = 'parentCtx'
 export const ACCENT = '#3B9EEB'
 
 const METHOD_LABEL = { manual: '名单签到', photo: '拍照签到', face: '刷脸签到' }
 const MEAL_META = {
-  breakfast: { name: '早餐', emoji: '🌅' },
-  lunch: { name: '午餐', emoji: '🍱' },
-  dinner: { name: '晚餐', emoji: '🌙' },
-  snack: { name: '加餐', emoji: '🍎' },
+  breakfast: { name: '早餐', icon: 'sunrise' },
+  lunch: { name: '午餐', icon: 'utensils' },
+  dinner: { name: '晚餐', icon: 'moon' },
+  snack: { name: '加餐', icon: 'apple' },
 }
 
 export function maskPhone(phone) {
@@ -43,8 +44,17 @@ export function shiftDate(dateStr, days) {
   return `${y}-${m}-${day}`
 }
 
-export function genderEmoji(gender) {
-  return gender === 'female' ? '👧' : '🧒'
+/** 孩子默认头像（人像）：男 user / 女 user-round / 保密·未知 circle-user-round */
+export function childAvatarIcon(gender) {
+  if (gender === 'male') return 'user'
+  if (gender === 'female') return 'user-round'
+  return 'circle-user-round'
+}
+
+export function childAvatarColor(gender) {
+  if (gender === 'male') return '#42A5F5'
+  if (gender === 'female') return '#EC407A'
+  return '#8D6E63'
 }
 
 /** Shared parent shell state: child selection + profile header fields. */
@@ -55,44 +65,48 @@ export function createParentContext() {
   const profilePage = ref('main')
   const selectedCourse = ref(null)
   const menuVisible = ref(false)
-  const unreadCount = ref(0)
 
   const homeLoading = ref(false)
   const parentName = ref('家长')
   const parentPhone = ref('')
+  const parentAvatarUrl = ref('')
   const parentAvatar = computed(() => (parentName.value || '家').slice(0, 1))
   const parentPhoneMasked = computed(() => maskPhone(parentPhone.value))
   const homeDate = ref('')
-  const homeDateLabel = computed(() => formatDateLabel(homeDate.value) || '今日动态')
+  const homeDateLabel = computed(() => formatDateLabel(homeDate.value) || '')
+  const brandName = ref(getMpDisplayName())
+  /** 机构名册（无孩子也可归属机构） */
+  const membershipTenants = ref([])
+  const membershipTenantName = computed(() => {
+    const first = membershipTenants.value[0]
+    return (first?.name || '').trim()
+  })
+  const membershipTenantId = computed(() => membershipTenants.value[0]?.id || null)
+  /** 已加入机构 → 机构名；否则 → 后台配置的小程序显示名 */
+  const homeTitle = computed(() => {
+    const fromChild = (activeChild.value?.tenant || '').trim()
+    if (fromChild && fromChild !== '—') return fromChild
+    if (membershipTenantName.value) return membershipTenantName.value
+    return brandName.value
+  })
   const childOptions = ref([])
   const activeChildId = ref(null)
-  const activeChild = ref({
+    const activeChild = ref({
     name: '—',
-    emoji: '🧒',
+    gender: 'unknown',
+    emoji: childAvatarIcon('unknown'),
+    avatarColor: childAvatarColor('unknown'),
+    avatarUrl: '',
     class: '—',
     tenant: '—',
     checkinLabel: '暂无签到',
     inGarden: false,
+    needsBind: false,
   })
   const todayItems = ref([])
   const yesterdayItems = ref([])
   const homeworkEntryHint = ref('查看已发布作业')
   const courses = ref([])
-
-  const healthArchive = computed(() => {
-    const s = childOptions.value.find(c => c.id === activeChildId.value)?.binding?.student || {}
-    const genderMap = { male: '男', female: '女', unknown: '未填' }
-    return {
-      name: s.name || activeChild.value.name || '宝贝',
-      genderLabel: genderMap[s.gender] || '未填',
-      birth_date: s.birth_date || '',
-      school: s.school || '',
-      grade_level: s.grade_level || '',
-      health_note: s.health_note || '',
-      emergency_contact: s.emergency_contact || '',
-      emergency_phone: s.emergency_phone || '',
-    }
-  })
 
   function buildAttendanceItems(list, prefix) {
     const items = []
@@ -167,7 +181,7 @@ export function createParentContext() {
       homeworkEntryHint.value = '暂无新作业'
     }
     ;(home?.meals_today || []).forEach((m, idx) => {
-      const meta = MEAL_META[m.meal_type] || { name: m.meal_type || '餐食', emoji: '🍱' }
+      const meta = MEAL_META[m.meal_type] || { name: m.meal_type || '餐食', icon: 'soup' }
       const detail = mealDetails.find(d => d.meal_type === m.meal_type)
       const photos = (detail?.photos || []).map(mediaUrl).filter(Boolean)
       items.push({
@@ -175,21 +189,12 @@ export function createParentContext() {
         type: 'meal',
         time: '餐食',
         mealName: meta.name,
-        mealEmoji: meta.emoji,
+        mealIcon: meta.icon,
         mealItems: photos.length
           ? `已上传 ${photos.length} 张照片`
           : (m.photo_count ? `已上传 ${m.photo_count} 张照片` : '已记录'),
+        mealContent: m.content || '',
         photos,
-      })
-    })
-    ;(home?.daily_posts_today || []).forEach((d) => {
-      items.push({
-        id: `daily-${d.id}`,
-        type: 'daily',
-        time: d.time || '日常',
-        aiText: d.content || '',
-        topic: d.topic || '日常',
-        coverEmoji: d.cover_emoji || '📷',
       })
     })
     if (home?.menu_published) {
@@ -213,26 +218,34 @@ export function createParentContext() {
     const student = binding?.student || home?.student || {}
     const attendance = home?.attendance_today || []
     const arrived = attendance.find(a => a.arrive_time || ['arrived', 'left'].includes(a.status))
+    const className = binding?.class?.name || binding?.clazz?.name || student.class_name || '—'
+    const tenantName = binding?.tenant?.name || '—'
+    const gender = student.gender || 'unknown'
     activeChild.value = {
       name: student.name || '宝贝',
-      emoji: genderEmoji(student.gender),
-      class: binding?.tenant?.name || '—',
-      tenant: binding?.tenant?.name || '—',
+      gender,
+      emoji: childAvatarIcon(gender),
+      avatarColor: childAvatarColor(gender),
+      avatarUrl: mediaUrl(student.avatar || ''),
+      class: className,
+      tenant: tenantName,
       checkinLabel: arrived?.arrive_time ? `✓ ${arrived.arrive_time} 已签到` : '今日暂无签到',
       inGarden: !!(arrived && arrived.status === 'arrived'),
+      needsBind: false,
     }
   }
 
   async function loadMarketingCourses() {
-    if (!activeChildId.value) {
+    const studentId = activeChildId.value
+    const tenantId = membershipTenantId.value
+    if (!studentId && !tenantId) {
       courses.value = []
       return
     }
     try {
-      const data = await fetchCourses(activeChildId.value)
+      const data = await fetchCourses(studentId || undefined, studentId ? undefined : tenantId)
       courses.value = (data?.list || []).map(c => ({
         ...c,
-        highlights: c.highlights || [],
       }))
     } catch {
       courses.value = []
@@ -280,35 +293,60 @@ export function createParentContext() {
     }
   }
 
+  function applyGuardianProfile(profile) {
+    parentName.value = profile?.nickname || profile?.name || '家长'
+    parentPhone.value = profile?.phone || ''
+    parentAvatarUrl.value = mediaUrl(profile?.avatar || '')
+  }
+
   async function loadParentHome() {
     homeLoading.value = true
     try {
-      const [profile, studentsRes] = await Promise.all([fetchProfile(), fetchStudents()])
-      parentName.value = profile?.name || profile?.nickname || '家长'
-      parentPhone.value = profile?.phone || ''
+      try {
+        await ensureWechatRuntime(false)
+        brandName.value = getMpDisplayName()
+      } catch (_) {
+        brandName.value = getMpDisplayName()
+      }
 
-      const list = (studentsRes?.list || []).filter(i => i.binding_status === 'approved' || i.student)
-      childOptions.value = list.map(i => ({
-        id: i.student.id,
-        name: i.student.name,
-        emoji: genderEmoji(i.student.gender),
-        tenant: i.tenant?.name || '—',
-        binding: i,
-      }))
+      const [profile, studentsRes] = await Promise.all([fetchProfile(), fetchStudents()])
+      applyGuardianProfile(profile)
+      membershipTenants.value = (profile?.tenants || [])
+        .filter(t => t?.id && t?.name)
+        .map(t => ({ id: t.id, name: String(t.name).trim() }))
+
+      const list = (studentsRes?.list || []).filter(i => i.binding_status === 'approved' && i.student?.id)
+      childOptions.value = list.map(i => {
+        const gender = i.student.gender || 'unknown'
+        return {
+          id: i.student.id,
+          name: i.student.name,
+          gender,
+          emoji: childAvatarIcon(gender),
+          avatarColor: childAvatarColor(gender),
+          avatarUrl: mediaUrl(i.student.avatar || ''),
+          tenant: i.tenant?.name || '—',
+          binding: i,
+        }
+      })
 
       if (!childOptions.value.length) {
         activeChildId.value = null
         todayItems.value = []
         yesterdayItems.value = []
-        courses.value = []
         activeChild.value = {
           name: '未绑定宝贝',
-          emoji: '🧒',
+          gender: 'unknown',
+          emoji: childAvatarIcon('unknown'),
+          avatarColor: childAvatarColor('unknown'),
+          avatarUrl: '',
           class: '—',
-          tenant: '—',
-          checkinLabel: '请先绑定',
+          tenant: membershipTenantName.value || '—',
+          checkinLabel: '去绑定',
           inGarden: false,
+          needsBind: true,
         }
+        await loadMarketingCourses()
         return
       }
 
@@ -337,25 +375,76 @@ export function createParentContext() {
     }
   }
 
+  const unreadCount = ref(0)
+  const unreadByType = ref({})
+  const feedDailyUnread = computed(() => Number(unreadByType.value.daily || 0))
+  const feedCommentUnread = computed(() => Number(unreadByType.value.daily_comment || 0))
+
+  async function refreshUnreadCount() {
+    try {
+      const data = await fetchUnreadCount()
+      unreadCount.value = data?.total || 0
+      unreadByType.value = data?.by_type || {}
+    } catch {
+      // ignore
+    }
+  }
+
   function openProfile() {
     profilePage.value = 'main'
-    showProfile.value = true
+    activeTab.value = 'me'
+    showProfile.value = false
   }
 
   function closeProfile() {
+    if (profilePage.value !== 'main') {
+      profilePage.value = 'main'
+      return
+    }
     showProfile.value = false
+    // 「我的」已是底栏 Tab：主页不再因返回切走
   }
 
   function goProfilePage(page) {
     profilePage.value = page
+    if (activeTab.value !== 'me') {
+      activeTab.value = 'me'
+    }
+    showProfile.value = false
+  }
+
+  function openFeature(nav) {
+    if (!nav) return
+    if (nav.tab) {
+      activeTab.value = nav.tab
+      if (nav.tab === 'me' && nav.page) profilePage.value = nav.page
+      return
+    }
+    if (nav.page) goProfilePage(nav.page)
+    if (nav.menu) menuVisible.value = true
+  }
+
+  /** 首页「去绑定」→ 我的宝贝 + 打开添加宝贝表单 */
+  const pendingOpenBindingCompose = ref(false)
+  function goBindChild() {
+    pendingOpenBindingCompose.value = true
+    profilePage.value = 'child'
+    activeTab.value = 'me'
+    showProfile.value = false
+  }
+
+  function consumeOpenBindingCompose() {
+    if (!pendingOpenBindingCompose.value) return false
+    pendingOpenBindingCompose.value = false
+    return true
   }
 
   const NOTIFY_PREF_KEY = 'parent_notify_prefs'
   const defaultNotifyPrefs = () => ([
-    { key: 'homework', label: '作业提醒', desc: '布置、批改与截止提醒', on: true },
-    { key: 'attendance', label: '考勤提醒', desc: '到园、离园与请假结果', on: true },
-    { key: 'notice', label: '园所通知', desc: '机构通知与活动安排', on: true },
-    { key: 'daily', label: '日常动态', desc: '班级日常发布提醒', on: true },
+    { key: 'homework', label: '作业提醒', desc: '布置、批改与截止提醒', on: false, busy: false },
+    { key: 'attendance', label: '考勤提醒', desc: '到园、离园与请假结果', on: false, busy: false },
+    { key: 'notice', label: '园所通知', desc: '机构通知与活动安排', on: false, busy: false },
+    { key: 'daily', label: '日常动态', desc: '班级日常发布提醒', on: false, busy: false },
   ])
   function loadNotifyPrefs() {
     try {
@@ -363,7 +452,7 @@ export function createParentContext() {
       if (raw) {
         const saved = typeof raw === 'string' ? JSON.parse(raw) : raw
         const base = defaultNotifyPrefs()
-        return base.map(b => ({ ...b, on: saved[b.key] !== false }))
+        return base.map(b => ({ ...b, on: saved[b.key] === true, busy: false }))
       }
     } catch (_) {}
     return defaultNotifyPrefs()
@@ -378,24 +467,75 @@ export function createParentContext() {
     notifyPrefs.value.forEach(n => { map[n.key] = !!n.on })
     uni.setStorageSync(NOTIFY_PREF_KEY, map)
   }
-  function toggleNotifyPref(key) {
-    const row = notifyPrefs.value.find(n => n.key === key)
-    if (!row) return
-    row.on = !row.on
-    persistNotifyPrefs()
-    if (row.on) {
-      ensureWechatRuntime().then(() => {
-        const tplId = getSubscribeTemplates()[key]
-        const report = () => reportSubscribe(`parent_${key}`, 1).catch(() => {})
-        if (tplId && typeof uni.requestSubscribeMessage === 'function') {
-          uni.requestSubscribeMessage({
-            tmplIds: [tplId],
-            complete: () => report(),
-          })
-        } else {
-          report()
-        }
+
+  /** 开启某类通知：拉起微信订阅弹窗，仅「允许」时上报 remain_count */
+  async function requestNotifySubscribe(key) {
+    await ensureWechatRuntime(false)
+    const tplId = (getSubscribeTemplates()[key] || '').trim()
+    if (!tplId) {
+      uni.showToast({ title: '尚未配置该类模板消息', icon: 'none' })
+      return false
+    }
+    if (typeof uni.requestSubscribeMessage !== 'function') {
+      uni.showToast({ title: '当前环境不支持订阅消息', icon: 'none' })
+      return false
+    }
+    return new Promise((resolve) => {
+      uni.requestSubscribeMessage({
+        tmplIds: [tplId],
+        success: async (res) => {
+          const status = res?.[tplId]
+          if (status === 'accept') {
+            try {
+              await reportSubscribe(`parent_${key}`, 1)
+              uni.showToast({ title: '已开启微信通知', icon: 'success' })
+              resolve(true)
+            } catch (e) {
+              uni.showToast({ title: e.message || '上报失败', icon: 'none' })
+              resolve(false)
+            }
+            return
+          }
+          if (status === 'reject') {
+            uni.showToast({ title: '你已拒绝该类通知', icon: 'none' })
+          } else if (status === 'ban') {
+            uni.showToast({ title: '该类通知已被禁用，请在设置中开启', icon: 'none' })
+          } else {
+            uni.showToast({ title: '未完成订阅授权', icon: 'none' })
+          }
+          resolve(false)
+        },
+        fail: (err) => {
+          const msg = err?.errMsg || ''
+          if (/cancel|取消/i.test(msg)) {
+            uni.showToast({ title: '已取消', icon: 'none' })
+          } else {
+            uni.showToast({ title: msg || '订阅失败', icon: 'none' })
+          }
+          resolve(false)
+        },
       })
+    })
+  }
+
+  async function toggleNotifyPref(key) {
+    const row = notifyPrefs.value.find(n => n.key === key)
+    if (!row || row.busy) return
+    if (row.on) {
+      row.on = false
+      persistNotifyPrefs()
+      uni.showToast({ title: '已关闭本机偏好', icon: 'none' })
+      return
+    }
+    row.busy = true
+    try {
+      const ok = await requestNotifySubscribe(key)
+      if (ok) {
+        row.on = true
+        persistNotifyPrefs()
+      }
+    } finally {
+      row.busy = false
     }
   }
   function clearLocalCache() {
@@ -419,13 +559,24 @@ export function createParentContext() {
     selectedCourse,
     menuVisible,
     unreadCount,
+    unreadByType,
+    feedDailyUnread,
+    feedCommentUnread,
+    refreshUnreadCount,
+    openFeature,
     homeLoading,
     parentName,
     parentPhone,
     parentAvatar,
+    parentAvatarUrl,
     parentPhoneMasked,
     homeDate,
     homeDateLabel,
+    homeTitle,
+    brandName,
+    membershipTenants,
+    membershipTenantId,
+    membershipTenantName,
     childOptions,
     activeChildId,
     activeChild,
@@ -433,15 +584,18 @@ export function createParentContext() {
     yesterdayItems,
     homeworkEntryHint,
     courses,
-    healthArchive,
+    loadMarketingCourses,
     notifyPrefs,
     notifyPrefsOnLabel,
+    applyGuardianProfile,
     loadParentHome,
     refreshTimeline,
     selectChild,
     openProfile,
     closeProfile,
     goProfilePage,
+    goBindChild,
+    consumeOpenBindingCompose,
     toggleNotifyPref,
     clearLocalCache,
   }

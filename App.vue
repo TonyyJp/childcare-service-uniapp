@@ -54,4 +54,19 @@ button {
 button::after {
   border: none;
 }
+
+/* 全局兜底：未使用 form-input 的原生框也避免 placeholder 被裁切 */
+input {
+  box-sizing: border-box;
+  /* 微信小程序：上下 padding 易裁切 placeholder，统一改为左右内边距 */
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  min-height: 72rpx;
+  line-height: 1.4;
+}
+
+textarea {
+  box-sizing: border-box;
+  line-height: 1.5;
+}
 </style>

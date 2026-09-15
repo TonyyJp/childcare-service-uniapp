@@ -21,13 +21,15 @@
       <view style="padding:24rpx 40rpx;">
         <view v-if="scheduleViewTab === 'timetable'">
           <view v-if="scheduleLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">加载中…</text></view>
-          <view v-else-if="!dayLessons.length" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">当日暂无课程</text></view>
+          <view v-else-if="!dayLessons.length" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">{{ activeChild?.needsBind ? '绑定宝贝后可查看课程表' : '当日暂无课程' }}</text></view>
           <view v-for="lesson in dayLessons" :key="lesson.id" style="display:flex;gap:20rpx;margin-bottom:12rpx;">
             <view style="width:88rpx;flex-shrink:0;padding-top:16rpx;">
               <text style="font-size:22rpx;color:#BDBDBD;display:block;text-align:right;">{{ lesson.time }}</text>
             </view>
             <view class="card" style="flex:1;padding:20rpx 24rpx;display:flex;align-items:center;gap:16rpx;">
-              <view style="width:64rpx;height:64rpx;border-radius:20rpx;display:flex;align-items:center;justify-content:center;font-size:30rpx;flex-shrink:0;" :style="{ backgroundColor: lesson.color + '18' }"><text>{{ lesson.icon }}</text></view>
+              <view style="width:64rpx;height:64rpx;border-radius:20rpx;display:flex;align-items:center;justify-content:center;flex-shrink:0;" :style="{ backgroundColor: lesson.color + '18' }">
+                <MpIcon name="calendar" :size="30" :color="lesson.color || '#3B9EEB'" />
+              </view>
               <view style="flex:1;">
                 <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">{{ lesson.subject }}</text>
                 <text style="font-size:22rpx;color:#8D6E63;">{{ lesson.teacher ? lesson.teacher + ' · ' : '' }}{{ lesson.duration }}</text>
@@ -41,13 +43,15 @@
             <text style="font-size:26rpx;color:#8D6E63;">加载中…</text>
           </view>
           <view v-else-if="!enrolledCourses.length" style="padding:32rpx 0;text-align:center;margin-bottom:24rpx;">
-            <text style="font-size:26rpx;color:#8D6E63;">暂无报名进度数据</text>
+            <text style="font-size:26rpx;color:#8D6E63;">{{ activeChild?.needsBind ? '暂无报名进度，可先浏览机构课程' : '暂无报名进度数据' }}</text>
           </view>
           <view v-for="c in enrolledCourses" :key="c.id || c.title" class="card" style="margin-bottom:24rpx;overflow:hidden;">
-            <view style="height:8rpx;" :style="{ background: `linear-gradient(90deg, ${c.color} 0%, ${c.color}80 100%)` }" />
+            <view style="height:8rpx;background:linear-gradient(90deg,#3B9EEB 0%,#3B9EEB80 100%);" />
             <view style="padding:24rpx;">
               <view style="display:flex;align-items:flex-start;gap:20rpx;margin-bottom:20rpx;">
-                <view style="width:88rpx;height:88rpx;border-radius:24rpx;display:flex;align-items:center;justify-content:center;font-size:44rpx;flex-shrink:0;" :style="{ backgroundColor: c.color + '18' }"><text>{{ c.icon }}</text></view>
+                <view style="width:88rpx;height:88rpx;border-radius:24rpx;overflow:hidden;flex-shrink:0;background:#3B9EEB18;">
+                  <image v-if="c.coverUrl" :src="c.coverUrl" mode="aspectFill" style="width:100%;height:100%;" />
+                </view>
                 <view style="flex:1;">
                   <text style="font-size:28rpx;font-weight:800;color:#2D1F18;display:block;">{{ c.title }}</text>
                   <text style="font-size:22rpx;color:#8D6E63;display:block;margin-top:4rpx;">{{ c.teacher }} · {{ c.schedule }}</text>
@@ -55,19 +59,21 @@
               </view>
               <view style="display:flex;justify-content:space-between;margin-bottom:8rpx;">
                 <text style="font-size:22rpx;color:#8D6E63;">课程进度</text>
-                <text style="font-size:22rpx;font-weight:700;" :style="{ color: c.color }">{{ (c.total || 0) - (c.sessionsLeft || 0) }}/{{ c.total || 0 }} 节</text>
+                <text style="font-size:22rpx;font-weight:700;color:#3B9EEB;">{{ (c.total || 0) - (c.sessionsLeft || 0) }}/{{ c.total || 0 }} 节</text>
               </view>
-              <view style="height:12rpx;border-radius:12rpx;background:#F5F0EC;overflow:hidden;margin-bottom:16rpx;">
-                <view style="height:100%;border-radius:12rpx;" :style="{ width: (c.total ? (((c.total - c.sessionsLeft) / c.total) * 100) : 0) + '%', backgroundColor: c.color }" />
+              <view style="height:12rpx;border-radius:12rpx;background:#E3F2FD;overflow:hidden;margin-bottom:16rpx;">
+                <view style="height:100%;border-radius:12rpx;background:#3B9EEB;" :style="{ width: (c.total ? (((c.total - c.sessionsLeft) / c.total) * 100) : 0) + '%' }" />
               </view>
               <view style="display:flex;align-items:center;justify-content:space-between;">
-                <text style="font-size:22rpx;color:#8D6E63;">🗓 下次：{{ c.nextClass }}</text>
-                <view class="pill" :style="{ backgroundColor: c.color + '15', color: c.color }"><text style="font-size:22rpx;font-weight:700;">剩余 {{ c.sessionsLeft }} 节</text></view>
+                <text style="font-size:22rpx;color:#8D6E63;">下次：{{ c.nextClass }}</text>
+                <view class="pill" style="background:#3B9EEB15;color:#3B9EEB;"><text style="font-size:22rpx;font-weight:700;">剩余 {{ c.sessionsLeft }} 节</text></view>
               </view>
             </view>
           </view>
           <view class="card" style="padding:24rpx;display:flex;align-items:center;gap:20rpx;border:3rpx dashed #3B9EEB40;" @click="activeTab = 'home'">
-            <view style="width:88rpx;height:88rpx;border-radius:24rpx;display:flex;align-items:center;justify-content:center;font-size:44rpx;background:#E3F2FD;flex-shrink:0;"><text>🏫</text></view>
+            <view style="width:88rpx;height:88rpx;border-radius:24rpx;display:flex;align-items:center;justify-content:center;background:#E3F2FD;flex-shrink:0;">
+              <MpIcon name="building-2" :size="44" color="#3B9EEB" />
+            </view>
             <view style="flex:1;">
               <text style="font-size:28rpx;font-weight:700;color:#2D1F18;display:block;">探索更多课程</text>
               <text style="font-size:22rpx;color:#8D6E63;margin-top:4rpx;display:block;">机构还有 {{ Math.max(0, publishedCourseCount - enrolledCourses.length) }} 门课程可浏览</text>
@@ -86,12 +92,12 @@
             </view>
             <view style="flex:1;">
               <view style="display:flex;align-items:center;gap:12rpx;margin-bottom:8rpx;">
-                <text style="font-size:26rpx;">{{ ev.icon }}</text>
+                <MpIcon :name="eventIcon(ev.type)" :size="26" :color="(typeStyleMap[ev.type] || typeStyleMap.activity).text" />
                 <text style="font-size:26rpx;font-weight:700;color:#2D1F18;">{{ ev.title }}</text>
               </view>
               <view style="display:flex;align-items:center;gap:12rpx;flex-wrap:wrap;">
                 <view class="pill" :style="{ backgroundColor: (typeStyleMap[ev.type] || typeStyleMap.activity).bg, color: (typeStyleMap[ev.type] || typeStyleMap.activity).text }"><text style="font-size:20rpx;">{{ (typeStyleMap[ev.type] || typeStyleMap.activity).label }}</text></view>
-                <text v-if="ev.location" style="font-size:22rpx;color:#8D6E63;">📍 {{ ev.location }}</text>
+                <text v-if="ev.location" style="font-size:22rpx;color:#8D6E63;">{{ ev.location }}</text>
               </view>
             </view>
             <text style="font-size:22rpx;color:#8D6E63;">{{ ev.weekday }}</text>
@@ -105,14 +111,17 @@
 <script setup>
 import { computed, inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
-import { fetchEnrollments, fetchEvents, fetchSchedules } from '../../api/parent.js'
+import { fetchCourses, fetchEnrollments, fetchEvents, fetchSchedules } from '../../api/parent.js'
 import { PARENT_CTX_KEY } from './parentContext.js'
+import MpIcon from '../MpIcon.vue'
 
 const props = defineProps({ active: { type: Boolean, default: false } })
 const ctx = inject(PARENT_CTX_KEY)
 const activeTab = ctx.activeTab
 const activeChild = ctx.activeChild
 const activeChildId = ctx.activeChildId
+const membershipTenantId = ctx.membershipTenantId
+const courses = ctx.courses
 
 const scheduleTabs = [{ val: 'timetable', label: '课程表' }, { val: 'courses', label: '已报名' }, { val: 'events', label: '活动日历' }]
 const scheduleViewTab = ref('timetable')
@@ -132,6 +141,17 @@ const typeStyleMap = {
   holiday: { bg: '#F1F8E9', text: '#2E7D32', label: '假期' },
   parents: { bg: '#E3F2FD', text: '#1565C0', label: '家长会' },
   exam: { bg: '#F3E5F5', text: '#7B1FA2', label: '学情评估' },
+}
+
+const eventIconMap = {
+  activity: 'star',
+  holiday: 'calendar',
+  parents: 'users',
+  exam: 'notebook-pen',
+}
+
+function eventIcon(type) {
+  return eventIconMap[type] || 'calendar'
 }
 
 const scheduleHeaderSub = computed(() => {
@@ -166,7 +186,22 @@ function setSchedDay(i) {
 async function loadParentEnrollments() {
   if (!activeChildId.value) {
     enrolledCourses.value = []
-    publishedCourseCount.value = 0
+    enrollmentsLoading.value = true
+    try {
+      if (membershipTenantId.value) {
+        const data = await fetchCourses(undefined, membershipTenantId.value)
+        publishedCourseCount.value = (data?.list || []).length
+        if (!courses.value?.length) {
+          courses.value = (data?.list || []).map(c => ({ ...c }))
+        }
+      } else {
+        publishedCourseCount.value = courses.value?.length || 0
+      }
+    } catch {
+      publishedCourseCount.value = courses.value?.length || 0
+    } finally {
+      enrollmentsLoading.value = false
+    }
     return
   }
   enrollmentsLoading.value = true
@@ -186,13 +221,15 @@ async function loadParentEnrollments() {
 }
 
 async function loadParentEvents() {
-  if (!activeChildId.value) {
+  const studentId = activeChildId.value
+  const tenantId = membershipTenantId.value
+  if (!studentId && !tenantId) {
     events.value = []
     return
   }
   eventsLoading.value = true
   try {
-    const data = await fetchEvents(activeChildId.value)
+    const data = await fetchEvents(studentId || undefined, studentId ? undefined : tenantId)
     events.value = data?.list || []
   } catch (e) {
     uni.showToast({ title: e.message || '活动加载失败', icon: 'none' })

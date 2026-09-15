@@ -89,7 +89,12 @@ const statsHeaderSub = computed(() => {
 async function loadClasses() {
   try {
     const dash = await fetchDashboard()
-    classes.value = (dash?.classes || []).map(c => ({ id: c.id, name: c.name }))
+    classes.value = (dash?.classes || []).map(c => ({
+      id: c.id,
+      name: c.biz_type === 'care'
+        ? `${c.name}·${c.attendance_type_name || '托管'}`
+        : `${c.name}·兴趣`,
+    }))
     primaryClassName.value = classes.value[0]?.name || '—'
   } catch (_) { /* ignore */ }
 }

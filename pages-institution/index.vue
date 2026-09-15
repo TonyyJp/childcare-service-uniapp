@@ -18,6 +18,7 @@
       <BindingsOverlay v-if="activeTab === 'bindings'" :page-show-count="pageShowCount" @navigate="onNavigate" />
       <LeavesOverlay v-if="activeTab === 'leaves'" :page-show-count="pageShowCount" @navigate="onNavigate" />
       <MealsOverlay v-if="activeTab === 'meals'" :page-show-count="pageShowCount" @navigate="onNavigate" />
+      <DailyOverlay v-if="activeTab === 'daily'" :page-show-count="pageShowCount" @navigate="onNavigate" />
       <HomeworkOverlay v-if="activeTab === 'homework'" :page-show-count="pageShowCount" @navigate="onNavigate" />
       <AttendanceOverlay v-if="activeTab === 'attendance'" :page-show-count="pageShowCount" @navigate="onNavigate" />
       <EnrollmentsOverlay v-if="activeTab === 'enrollments'" :page-show-count="pageShowCount" @navigate="onNavigate" />
@@ -51,6 +52,7 @@ import EventsOverlay from '../components/institution/EventsOverlay.vue'
 import BindingsOverlay from '../components/institution/BindingsOverlay.vue'
 import LeavesOverlay from '../components/institution/LeavesOverlay.vue'
 import MealsOverlay from '../components/institution/MealsOverlay.vue'
+import DailyOverlay from '../components/institution/DailyOverlay.vue'
 import HomeworkOverlay from '../components/institution/HomeworkOverlay.vue'
 import AttendanceOverlay from '../components/institution/AttendanceOverlay.vue'
 import EnrollmentsOverlay from '../components/institution/EnrollmentsOverlay.vue'

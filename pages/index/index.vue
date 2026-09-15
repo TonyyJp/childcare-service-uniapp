@@ -7,9 +7,9 @@
     <template v-else>
       <view class="header">
         <view class="logo-wrap">
-          <view class="logo">🌱</view>
+          <MpIcon name="sprout" :size="64" color="#66BB6A" />
         </view>
-        <text class="title">智优托教</text>
+        <text class="title">{{ displayName || ' ' }}</text>
         <text class="subtitle">专业的托育机构管理平台</text>
       </view>
 
@@ -23,7 +23,7 @@
           @click="selectRole(role.id)"
         >
           <view class="role-icon-wrap" :style="{ boxShadow: `0 8rpx 24rpx ${role.accent}40` }">
-            <text class="role-icon">{{ role.emoji }}</text>
+            <MpIcon :name="role.icon" :size="52" :color="role.accent" />
           </view>
           <view class="role-info">
             <text class="role-label">{{ role.label }}</text>
@@ -36,7 +36,7 @@
       </view>
 
       <view v-else class="phone-panel">
-        <view class="phone-back" @click="pendingRole = null">
+        <view class="phone-back" @click="backToRoles">
           <text class="phone-back-text">‹ 重选身份</text>
         </view>
         <text class="phone-title">微信手机号登录</text>
@@ -67,8 +67,9 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
-import { getToken, clearSession } from '../../utils/auth.js'
-import { ensureWechatRuntime } from '../../utils/wechatRuntime.js'
+import { getToken, clearSession, consumeForceReselect } from '../../utils/auth.js'
+import { DEBUG_MODE } from '../../config.js'
+import { ensureWechatRuntime, getMpDisplayName } from '../../utils/wechatRuntime.js'
 import {
   enterAsRole,
   fetchMe,
@@ -76,19 +77,21 @@ import {
   loginWithWxPhone,
   resolveBoundRole,
 } from '../../api/mp.js'
+import MpIcon from '../../components/MpIcon.vue'
 
 const booting = ref(true)
 const loading = ref(false)
 const loggedIn = ref(false)
 const pendingRole = ref(null)
 const meSnapshot = ref(null)
+const displayName = ref('')
 
 const roles = [
   {
     id: 'teacher',
     label: '教师端',
     desc: '管理课程、考勤、作业及评语',
-    emoji: '👩‍🏫',
+    icon: 'graduation-cap',
     bg: '#FFF3E0',
     accent: '#FF7043',
     border: '#FFCCBC'
@@ -97,7 +100,7 @@ const roles = [
     id: 'parent',
     label: '家长端',
     desc: '查看宝贝的成长与日常记录',
-    emoji: '👨‍👩‍👧',
+    icon: 'users',
     bg: '#E3F2FD',
     accent: '#42A5F5',
     border: '#BBDEFB'
@@ -106,7 +109,7 @@ const roles = [
     id: 'institution',
     label: '机构端',
     desc: '统筹管理师资、课程与运营',
-    emoji: '🏫',
+    icon: 'school',
     bg: '#F3E5F5',
     accent: '#AB47BC',
     border: '#E1BEE7'
@@ -132,10 +135,44 @@ function goHome(role) {
   uni.reLaunch({ url })
 }
 
+/** 同步本地 token → 已登录态（登录成功但角色校验失败后仍可重选身份） */
+async function syncLoggedInFromSession() {
+  if (!getToken()) {
+    loggedIn.value = false
+    meSnapshot.value = null
+    return false
+  }
+  loggedIn.value = true
+  try {
+    meSnapshot.value = await fetchMe()
+  } catch (e) {
+    if (e?.code === 40100) {
+      clearSession()
+      loggedIn.value = false
+      meSnapshot.value = null
+      return false
+    }
+  }
+  return true
+}
+
+function backToRoles() {
+  pendingRole.value = null
+  if (getToken()) {
+    loggedIn.value = true
+    if (!meSnapshot.value) {
+      syncLoggedInFromSession()
+    }
+  }
+}
+
 async function bootstrap() {
   booting.value = true
   pendingRole.value = null
   try {
+    await ensureWechatRuntime(false).catch(() => {})
+    displayName.value = getMpDisplayName()
+
     if (!getToken()) {
       loggedIn.value = false
       meSnapshot.value = null
@@ -145,6 +182,11 @@ async function bootstrap() {
     const me = await fetchMe()
     loggedIn.value = true
     meSnapshot.value = me
+
+    // TEMP_IDENTITY_RESELECT_BACK（DEBUG_MODE）：返回键触发后停留本页重选
+    if (DEBUG_MODE && consumeForceReselect()) {
+      return
+    }
 
     const bound = resolveBoundRole(me)
     if (bound) {
@@ -222,13 +264,20 @@ async function onGetPhoneNumber(e) {
   uni.showLoading({ title: '登录中', mask: true })
   try {
     const cfg = await ensureWechatRuntime(true)
+    displayName.value = getMpDisplayName()
     if (!cfg.configured) {
       throw new Error('请先在平台后台启用微信小程序配置')
     }
-    await loginWithWxPhone(phoneCode, pendingRole.value)
+    const role = pendingRole.value
+    await loginWithWxPhone(phoneCode, role)
     loggedIn.value = true
-    goHome(pendingRole.value)
+    goHome(role)
   } catch (err) {
+    // 微信登录已成功、仅目标身份无权限：保留会话，回到选身份
+    if (getToken() || err?.sessionEstablished) {
+      await syncLoggedInFromSession()
+      pendingRole.value = null
+    }
     uni.showToast({ title: err.message || '登录失败', icon: 'none', duration: 2500 })
   } finally {
     uni.hideLoading()

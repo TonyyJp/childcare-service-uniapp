@@ -7,7 +7,9 @@
         <view style="width:64rpx;" />
       </view>
       <view style="display:flex;align-items:flex-end;gap:24rpx;">
-        <view style="width:120rpx;height:120rpx;border-radius:36rpx;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;font-size:64rpx;flex-shrink:0;"><text>🍱</text></view>
+        <view style="width:120rpx;height:120rpx;border-radius:36rpx;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <MpIcon name="utensils" :size="64" color="#FFFFFF" />
+        </view>
         <view style="flex:1;padding-bottom:8rpx;">
           <text style="font-size:36rpx;font-weight:800;color:white;display:block;line-height:1.3;">{{ weekLabel }}</text>
           <text style="font-size:22rpx;color:rgba(255,255,255,0.85);display:block;margin-top:8rpx;">由机构发布，如有过敏原疑问请联系老师</text>
@@ -22,7 +24,9 @@
           </view>
 
           <view v-else-if="!meals.length" style="padding:64rpx 24rpx;text-align:center;">
-            <text style="font-size:56rpx;display:block;margin-bottom:16rpx;">🍽️</text>
+            <view style="display:flex;justify-content:center;margin-bottom:16rpx;">
+              <MpIcon name="utensils" :size="56" color="#BDBDBD" />
+            </view>
             <text style="font-size:28rpx;color:#2D1F18;font-weight:700;display:block;">本周食谱暂未发布</text>
             <text style="font-size:22rpx;color:#BDBDBD;display:block;margin-top:12rpx;">机构发布后可在此查看每日餐点安排</text>
           </view>
@@ -30,7 +34,9 @@
           <view v-else>
             <view v-for="m in meals" :key="m.meal_type" class="card" style="padding:24rpx;margin-bottom:20rpx;">
               <view style="display:flex;align-items:center;gap:16rpx;margin-bottom:16rpx;">
-                <view style="width:72rpx;height:72rpx;border-radius:20rpx;display:flex;align-items:center;justify-content:center;font-size:36rpx;background:#E3F2FD;flex-shrink:0;"><text>{{ m.icon }}</text></view>
+                <view style="width:72rpx;height:72rpx;border-radius:20rpx;display:flex;align-items:center;justify-content:center;background:#E3F2FD;flex-shrink:0;">
+                  <MpIcon :name="m.icon" :size="36" color="#3B9EEB" />
+                </view>
                 <text style="font-size:28rpx;font-weight:800;color:#2D1F18;flex:1;">{{ m.label }}</text>
               </view>
               <view v-for="(dish, i) in m.dishLines" :key="i" style="display:flex;align-items:flex-start;gap:12rpx;margin-bottom:10rpx;">
@@ -49,14 +55,15 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { fetchCurrentMenu } from '../../api/parent.js'
+import MpIcon from '../MpIcon.vue'
 
 defineEmits(['close'])
 
 const MEAL_META = [
-  { type: 'breakfast', label: '早餐', icon: '🌅' },
-  { type: 'lunch', label: '午餐', icon: '🍚' },
-  { type: 'dinner', label: '晚餐', icon: '🌙' },
-  { type: 'snack', label: '点心', icon: '🍪' },
+  { type: 'breakfast', label: '早餐', icon: 'sunrise' },
+  { type: 'lunch', label: '午餐', icon: 'utensils' },
+  { type: 'dinner', label: '晚餐', icon: 'moon' },
+  { type: 'snack', label: '点心', icon: 'apple' },
 ]
 
 const loading = ref(true)

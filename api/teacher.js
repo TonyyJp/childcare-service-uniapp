@@ -1,4 +1,5 @@
 import { http } from '../utils/request.js'
+import { ssePost } from '../utils/streamRequest.js'
 
 /** GET /teacher/dashboard */
 export function fetchDashboard(date) {
@@ -34,16 +35,29 @@ export function checkinStudents({ classId, periodId, studentIds, date, method = 
   return http.post('/teacher/attendance/checkin', data)
 }
 
+/** POST /teacher/attendance/records/{id}/checkout */
+export function checkoutStudent(recordId, pickupPersonId) {
+  const data = {}
+  if (pickupPersonId) data.pickup_person_id = pickupPersonId
+  return http.post(`/teacher/attendance/records/${recordId}/checkout`, data)
+}
+
 /** POST /teacher/attendance/records/{id}/mark-absent */
 export function markAbsent(recordId) {
   return http.post(`/teacher/attendance/records/${recordId}/mark-absent`)
 }
 
+/** GET /teacher/students/{id}/pickup-persons */
+export function fetchPickupPersons(studentId) {
+  return http.get(`/teacher/students/${studentId}/pickup-persons`)
+}
+
 /** GET /teacher/homeworks */
-export function fetchHomeworks({ classId, status, page, perPage } = {}) {
+export function fetchHomeworks({ classId, status, kind, page, perPage } = {}) {
   const data = {}
   if (classId) data.class_id = classId
   if (status) data.status = status
+  if (kind) data.kind = kind
   if (page) data.page = page
   if (perPage) data.per_page = perPage
   return http.get('/teacher/homeworks', data)
@@ -52,6 +66,11 @@ export function fetchHomeworks({ classId, status, page, perPage } = {}) {
 /** POST /teacher/homeworks */
 export function createHomework(payload) {
   return http.post('/teacher/homeworks', payload)
+}
+
+/** POST /teacher/homeworks/start-check — 当日学校作业检查会话 */
+export function startHomeworkCheck(payload) {
+  return http.post('/teacher/homeworks/start-check', payload)
 }
 
 /** GET /teacher/homeworks/{id} */
@@ -69,6 +88,11 @@ export function fetchHomeworkSubmissions(id, status) {
   const data = {}
   if (status) data.status = status
   return http.get(`/teacher/homeworks/${id}/submissions`, data)
+}
+
+/** POST /teacher/homeworks/{id}/feedback — 未提交也可直接反馈 */
+export function feedbackHomework(id, payload) {
+  return http.post(`/teacher/homeworks/${id}/feedback`, payload)
 }
 
 /** GET /teacher/submissions/{id} */
@@ -95,6 +119,13 @@ export function createMeal(payload) {
   return http.post('/teacher/meals', payload)
 }
 
+/** POST /teacher/meals/{id}/publish — 发布餐食（可顺带更新文案） */
+export function publishMeal(id, content) {
+  const data = {}
+  if (content != null) data.content = content
+  return http.post(`/teacher/meals/${id}/publish`, data)
+}
+
 /** GET /teacher/daily-posts */
 export function fetchDailyPosts({ classId, status } = {}) {
   const data = {}
@@ -118,6 +149,11 @@ export function aiGenerateDailyPost(id, content) {
   const data = {}
   if (content) data.content = content
   return http.post(`/teacher/daily-posts/${id}/ai-generate`, data)
+}
+
+/** POST /teacher/daily-posts/{id}/ai-generate/stream（SSE 流式生成） */
+export function streamAiGenerateDailyPost(id, handlers = {}) {
+  return ssePost(`/teacher/daily-posts/${id}/ai-generate/stream`, {}, handlers)
 }
 
 /** POST /teacher/daily-posts/{id}/publish */
@@ -176,13 +212,6 @@ export function fetchAnalytics(classId) {
   return http.get('/teacher/analytics', data)
 }
 
-/** GET /teacher/events?class_id= */
-export function fetchEvents(classId) {
-  const data = {}
-  if (classId) data.class_id = classId
-  return http.get('/teacher/events', data)
-}
-
 /** GET /teacher/notices?class_id= */
 export function fetchNotices(classId) {
   const data = {}
@@ -214,4 +243,14 @@ export function fetchMessages(type) {
 /** POST /teacher/messages/read */
 export function readMessages(ids) {
   return http.post('/teacher/messages/read', { ids })
+}
+
+/** GET /teacher/messages/unread-count */
+export function fetchUnreadCount() {
+  return http.get('/teacher/messages/unread-count')
+}
+
+/** POST /teacher/attendance/face-search 抓拍帧 1:N 识别 */
+export function faceSearch(payload) {
+  return http.post('/teacher/attendance/face-search', payload)
 }

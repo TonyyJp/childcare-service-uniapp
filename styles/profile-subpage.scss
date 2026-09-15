@@ -1,0 +1,306 @@
+/* 家长端「我的」子页统一壳（顶栏居中 + 系统蓝底 #F0F7FF）
+   与 ProfileChild 样板对齐；各页 @import 本文件即可。 */
+
+$ps-accent: #3b9eeb;
+$ps-accent-soft: #e3f2fd;
+$ps-page-bg: #f0f7ff;
+$ps-ink: #2d1f18;
+$ps-muted: #8d6e63;
+$ps-line: #e3f2fd;
+
+.subpage {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  background: $ps-page-bg;
+  box-sizing: border-box;
+}
+
+.subpage-nav {
+  position: relative;
+  flex-shrink: 0;
+  background: #fff;
+  padding-bottom: 20rpx;
+  padding-left: 40rpx !important;
+  padding-right: 40rpx !important;
+  border-bottom: 1rpx solid $ps-line;
+  box-shadow: 0 4rpx 24rpx rgba(59, 158, 235, 0.06);
+}
+
+.subpage-nav__title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--nav-pad-top, 88rpx);
+  height: 64rpx;
+  line-height: 64rpx;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 800;
+  color: $ps-ink;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.subpage-nav__row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+}
+
+.subpage-nav__back {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 20rpx;
+  background: $ps-accent-soft;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.subpage-nav__back-icon {
+  font-size: 40rpx;
+  color: $ps-accent;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.subpage-nav__side {
+  width: 64rpx;
+  height: 64rpx;
+  flex-shrink: 0;
+}
+
+.subpage-body {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+  background: $ps-page-bg;
+}
+
+.subpage-scroll {
+  height: 100%;
+  background: $ps-page-bg;
+}
+
+.subpage-pad {
+  padding: 28rpx 40rpx calc(48rpx + env(safe-area-inset-bottom, 0px));
+  min-height: 100%;
+  box-sizing: border-box;
+  background: $ps-page-bg;
+}
+
+.subpage-section-title {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: $ps-muted;
+  display: block;
+  margin-bottom: 12rpx;
+  padding-left: 8rpx;
+}
+
+.subpage-hint {
+  font-size: 22rpx;
+  color: $ps-muted;
+  display: block;
+  margin-bottom: 20rpx;
+  line-height: 1.5;
+}
+
+.subpage-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16rpx;
+}
+
+.subpage-toolbar__btn {
+  padding: 12rpx 22rpx;
+  border-radius: 16rpx;
+  background: $ps-accent-soft;
+}
+
+.subpage-toolbar__btn-text {
+  font-size: 22rpx;
+  font-weight: 700;
+  color: $ps-accent;
+}
+
+.empty-block {
+  padding: 64rpx 24rpx;
+  text-align: center;
+}
+
+.empty-block--card {
+  background: #fff;
+  border-radius: 28rpx;
+  box-shadow: 0 2rpx 16rpx rgba(45, 31, 24, 0.06);
+}
+
+.empty-block__text {
+  font-size: 26rpx;
+  color: $ps-muted;
+}
+
+.empty-block__title {
+  font-size: 30rpx;
+  font-weight: 800;
+  color: $ps-ink;
+  display: block;
+}
+
+.empty-block__hint {
+  font-size: 24rpx;
+  color: $ps-muted;
+  display: block;
+  margin-top: 12rpx;
+}
+
+.tip-card {
+  padding: 24rpx;
+  border-radius: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 16rpx rgba(45, 31, 24, 0.04);
+}
+
+.tip-card--ok {
+  background: #e8f5e9;
+}
+
+.tip-card--warn {
+  background: #fff3e0;
+}
+
+.tip-card__text {
+  font-size: 22rpx;
+  line-height: 1.6;
+}
+
+.tip-card--ok .tip-card__text {
+  color: #2e7d32;
+}
+
+.tip-card--warn .tip-card__text {
+  color: #e65100;
+}
+
+.list-card {
+  background: #fff;
+  border-radius: 28rpx;
+  padding: 28rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 16rpx rgba(45, 31, 24, 0.06);
+}
+
+.list-card__row {
+  display: flex;
+  align-items: center;
+}
+
+.list-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.list-card__title {
+  font-size: 28rpx;
+  font-weight: 800;
+  color: $ps-ink;
+  display: block;
+}
+
+.list-card__sub {
+  font-size: 22rpx;
+  color: $ps-muted;
+  display: block;
+  margin-top: 6rpx;
+}
+
+.list-card__action {
+  padding: 12rpx 22rpx;
+  border-radius: 16rpx;
+  flex-shrink: 0;
+  margin-left: 16rpx;
+}
+
+.list-card__action--primary {
+  background: $ps-accent-soft;
+}
+
+.list-card__action--danger {
+  background: #ffebee;
+}
+
+.list-card__action-text {
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.list-card__action--primary .list-card__action-text {
+  color: $ps-accent;
+}
+
+.list-card__action--danger .list-card__action-text {
+  color: #e53935;
+}
+
+.add-dashed {
+  margin-top: 8rpx;
+  padding: 28rpx;
+  border-radius: 24rpx;
+  border: 2rpx dashed rgba(59, 158, 235, 0.4);
+  background: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+}
+
+.add-dashed__text {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: $ps-accent;
+}
+
+.add-hint {
+  font-size: 22rpx;
+  color: $ps-muted;
+  display: block;
+  margin-top: 16rpx;
+  text-align: center;
+}
+
+.form-section {
+  background: #f0f7ff;
+  border-radius: 24rpx;
+  padding: 24rpx 24rpx 8rpx;
+  margin-bottom: 20rpx;
+}
+
+.form-section__title {
+  font-size: 22rpx;
+  font-weight: 800;
+  color: $ps-accent;
+  letter-spacing: 1rpx;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.form-field {
+  margin-bottom: 20rpx;
+}
+
+.form-label {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: $ps-muted;
+  display: block;
+  margin-bottom: 8rpx;
+}

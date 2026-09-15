@@ -49,13 +49,19 @@
           <text style="font-size:26rpx;color:#8D6E63;">加载考勤…</text>
         </view>
         <view v-else-if="!attStudents.length" style="padding:48rpx 0;text-align:center;">
-          <text style="font-size:26rpx;color:#8D6E63;">当前班级/时段暂无应到学生</text>
+          <text style="font-size:26rpx;color:#8D6E63;">{{ emptyHint }}</text>
         </view>
         <view v-for="s in attStudents" :key="s.id" class="card" style="padding:20rpx 24rpx;margin-bottom:16rpx;display:flex;align-items:center;">
           <view style="width:72rpx;height:72rpx;border-radius:36rpx;margin-right:20rpx;display:flex;align-items:center;justify-content:center;font-size:28rpx;font-weight:700;flex-shrink:0;" :style="{ backgroundColor: s.color + '20', color: s.color }"><text>{{ s.avatar }}</text></view>
           <view style="flex:1;min-width:0;">
             <text style="font-size:28rpx;font-weight:700;color:#2D1F18;display:block;">{{ s.name }}</text>
             <text style="font-size:22rpx;color:#8D6E63;">{{ s.sub }}</text>
+          </view>
+          <view v-if="s.rawStatus === 'waiting'" style="display:flex;flex-direction:column;gap:8rpx;align-items:flex-end;margin-right:12rpx;">
+            <text style="font-size:22rpx;color:#C62828;font-weight:700;" @click="doMarkAbsent(s)">缺勤</text>
+          </view>
+          <view v-else-if="s.rawStatus === 'arrived'" class="action-btn" style="background:#3B9EEB;margin-right:12rpx;" @click="doCheckout(s)">
+            <text style="color:white;font-size:22rpx;font-weight:700;">签退</text>
           </view>
           <view class="pill" :style="attStatusStyle(s.status)"><text style="font-size:22rpx;font-weight:700;">{{ s.status }}</text></view>
         </view>
@@ -66,7 +72,13 @@
 
 <script setup>
 import { ref, computed, inject, onMounted } from 'vue'
-import { fetchAttendanceToday, fetchDashboard, fetchPeriods } from '../../api/teacher.js'
+import {
+  checkoutStudent,
+  fetchAttendanceToday,
+  fetchDashboard,
+  fetchPeriods,
+  markAbsent,
+} from '../../api/teacher.js'
 
 defineEmits(['back', 'go-checkin'])
 
@@ -90,22 +102,39 @@ const checkinClassId = computed({
 })
 
 const checkinLoading = ref(false)
+const checkinBusy = ref(false)
 const checkinPeriodId = ref(null)
 const allPeriods = ref([])
 const checkinSummary = ref({ expected: 0, arrived: 0, left: 0, leave: 0, absent: 0 })
 const checkinRawList = ref([])
 const classes = ref([])
 
-const checkinClassOptions = computed(() => classes.value.map(c => ({ id: c.id, name: c.name })))
+const checkinClassOptions = computed(() => classes.value.map(c => ({
+  id: c.id,
+  name: c.tag ? `${c.name}·${c.tag}` : c.name
+})))
 const checkinPeriodOptions = computed(() => {
   const cls = classes.value.find(c => c.id === checkinClassId.value)
   if (cls?.periods?.length) {
-    return cls.periods.map(p => ({ id: p.period_id, name: p.period_name }))
+    return cls.periods.map(p => ({
+      id: p.period_id,
+      name: p.start_time ? `${p.period_name} ${p.start_time}` : p.period_name
+    }))
   }
-  return allPeriods.value.map(p => ({ id: p.id, name: p.name }))
+  if (cls?.attendanceTypeId) {
+    return allPeriods.value
+      .filter(p => p.attendance_type_id === cls.attendanceTypeId)
+      .map(p => ({ id: p.id, name: p.start_time ? `${p.name} ${p.start_time}` : p.name }))
+  }
+  return []
 })
-const checkinClassName = computed(() => checkinClassOptions.value.find(c => c.id === checkinClassId.value)?.name || '')
+const checkinClassName = computed(() => classes.value.find(c => c.id === checkinClassId.value)?.name || '')
 const checkinPeriodName = computed(() => checkinPeriodOptions.value.find(p => p.id === checkinPeriodId.value)?.name || '')
+const emptyHint = computed(() => {
+  if (!classes.value.length) return '暂无可查看的托管考勤（兴趣课请看课表）'
+  if (!checkinPeriodOptions.value.length) return '该托管班暂无考勤时段'
+  return '当前班级/时段暂无应到学生'
+})
 
 const attStats = computed(() => {
   const s = checkinSummary.value
@@ -146,6 +175,7 @@ const attStudents = computed(() => checkinRawList.value.map((row, i) => {
     avatar: name.slice(0, 1),
     color: AVATAR_COLORS[i % AVATAR_COLORS.length],
     status,
+    rawStatus: row.status,
     sub: sub.trim()
   }
 }))
@@ -171,16 +201,20 @@ async function ensurePeriods() {
 async function loadClasses() {
   try {
     const dash = await fetchDashboard()
-    classes.value = (dash?.classes || []).map((c, i) => ({
-      id: c.id,
-      name: c.name,
-      color: AVATAR_COLORS[i % AVATAR_COLORS.length],
-      periods: c.periods || [],
-      periodCount: (c.periods || []).length,
-    }))
-    if (!checkinClassId.value) {
+    classes.value = (dash?.classes || [])
+      .filter(c => c.biz_type === 'care' || c.can_period_checkin || c.attendance_type_id)
+      .map((c, i) => ({
+        id: c.id,
+        name: c.name,
+        tag: c.attendance_type_name || (c.biz_type === 'care' ? '托管' : ''),
+        color: AVATAR_COLORS[i % AVATAR_COLORS.length],
+        attendanceTypeId: c.attendance_type_id,
+        periods: c.periods || [],
+        periodCount: (c.periods || []).length,
+      }))
+    if (!checkinClassId.value || !classes.value.some(c => c.id === checkinClassId.value)) {
       const preferred = classes.value.find(c => c.periodCount > 0) || classes.value[0]
-      if (preferred) checkinClassId.value = preferred.id
+      checkinClassId.value = preferred?.id || null
     }
   } catch (e) {
     uni.showToast({ title: e.message || '班级加载失败', icon: 'none' })
@@ -188,7 +222,11 @@ async function loadClasses() {
 }
 
 async function loadCheckinToday() {
-  if (!checkinClassId.value) return
+  if (!checkinClassId.value) {
+    checkinRawList.value = []
+    checkinSummary.value = { expected: 0, arrived: 0, left: 0, leave: 0, absent: 0 }
+    return
+  }
   checkinLoading.value = true
   try {
     await ensurePeriods()
@@ -225,6 +263,46 @@ function selectCheckinPeriod(id) {
   if (checkinPeriodId.value === id) return
   checkinPeriodId.value = id
   loadCheckinToday()
+}
+
+async function doCheckout(row) {
+  if (checkinBusy.value || !row.id) return
+  checkinBusy.value = true
+  try {
+    await checkoutStudent(row.id)
+    uni.showToast({ title: `${row.name} 已签退`, icon: 'success' })
+    await loadCheckinToday()
+  } catch (e) {
+    uni.showToast({ title: e.message || '签退失败', icon: 'none' })
+  } finally {
+    checkinBusy.value = false
+  }
+}
+
+async function doMarkAbsent(row) {
+  if (checkinBusy.value || !row.id) return
+  try {
+    await new Promise((resolve, reject) => {
+      uni.showModal({
+        title: '标记缺勤',
+        content: `确认将「${row.name}」记为缺勤？`,
+        success: (res) => (res.confirm ? resolve() : reject('cancel')),
+        fail: reject
+      })
+    })
+  } catch (_) {
+    return
+  }
+  checkinBusy.value = true
+  try {
+    await markAbsent(row.id)
+    uni.showToast({ title: '已记缺勤', icon: 'success' })
+    await loadCheckinToday()
+  } catch (e) {
+    uni.showToast({ title: e.message || '操作失败', icon: 'none' })
+  } finally {
+    checkinBusy.value = false
+  }
 }
 
 onMounted(async () => {
