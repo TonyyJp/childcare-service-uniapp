@@ -6,13 +6,8 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 3000,
-    strictPort: false,
+    strictPort: true,
     // 允许 v0 预览沙箱域名访问 dev server
-    allowedHosts: true,
-    hmr: {
-      // 通过代理/隧道访问时使用同源 wss
-      clientPort: 443,
-      protocol: 'wss'
-    }
+    allowedHosts: true
   }
 })
