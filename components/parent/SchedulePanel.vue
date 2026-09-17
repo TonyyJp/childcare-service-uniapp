@@ -28,7 +28,7 @@
               <text v-if="lesson.end_time" style="font-size:20rpx;color:#9CA3AF;display:block;text-align:right;margin-top:4rpx;">{{ lesson.end_time }}</text>
             </view>
             <view style="width:24rpx;flex-shrink:0;display:flex;flex-direction:column;align-items:center;">
-              <view style="width:20rpx;height:20rpx;border-radius:50%;margin-top:28rpx;border:4rpx solid #fff;box-shadow:0 0 0 2rpx currentColor;" :style="{ backgroundColor: lesson.color || '#3B9EEB', color: lesson.color || '#3B9EEB' }" />
+              <view style="width:20rpx;height:20rpx;border-radius:50%;margin-top:28rpx;border:4rpx solid #fff;" :style="{ backgroundColor: lesson.color || '#3B9EEB', boxShadow: '0 0 0 2rpx ' + (lesson.color || '#3B9EEB') }" />
               <view v-if="li < dayLessons.length - 1" style="flex:1;width:2rpx;background:#E5E7EB;margin-top:6rpx;" />
             </view>
             <view class="card" style="flex:1;min-width:0;padding:20rpx 24rpx;margin-bottom:20rpx;display:flex;align-items:center;gap:16rpx;border-left:6rpx solid;" :style="{ borderLeftColor: lesson.color || '#3B9EEB' }">
