@@ -28,28 +28,28 @@
             <rich-text v-if="descNodes" :nodes="descNodes" />
           </view>
 
-          <view v-if="course.need_materials" style="margin-top:28rpx;padding:24rpx;border-radius:24rpx;background:#F0F7FF;">
-            <text style="font-size:28rpx;font-weight:800;color:#2D1F18;display:block;margin-bottom:12rpx;">教学材料</text>
-            <text style="font-size:24rpx;color:#4A3F38;white-space:pre-wrap;display:block;line-height:1.7;">{{ course.materials_list }}</text>
-            <text style="font-size:24rpx;color:#8A7A70;display:block;margin-top:12rpx;">材料费：¥{{ course.materials_price || 0 }}</text>
-            <text style="font-size:24rpx;color:#8A7A70;display:block;margin-top:8rpx;">购买方式：{{ course.materials_purchase_label || '—' }}</text>
+          <view v-if="course.need_materials" style="margin-top:28rpx;padding:24rpx;border-radius:24rpx;background:#F5F7FA;">
+            <text style="font-size:28rpx;font-weight:800;color:#1F2937;display:block;margin-bottom:12rpx;">教学材料</text>
+            <text style="font-size:24rpx;color:#4B5563;white-space:pre-wrap;display:block;line-height:1.7;">{{ course.materials_list }}</text>
+            <text style="font-size:24rpx;color:#6B7280;display:block;margin-top:12rpx;">材料费：¥{{ course.materials_price || 0 }}</text>
+            <text style="font-size:24rpx;color:#6B7280;display:block;margin-top:8rpx;">购买方式：{{ course.materials_purchase_label || '—' }}</text>
           </view>
 
           <view v-if="(course.outlines || []).length" style="margin-top:28rpx;">
-            <text style="font-size:28rpx;font-weight:800;color:#2D1F18;display:block;margin-bottom:16rpx;">课程大纲</text>
+            <text style="font-size:28rpx;font-weight:800;color:#1F2937;display:block;margin-bottom:16rpx;">课程大纲</text>
             <view
               v-for="(o, idx) in course.outlines"
               :key="o.id || idx"
-              style="margin-bottom:16rpx;padding:20rpx;border-radius:20rpx;background:#F0F7FF;display:flex;gap:16rpx;"
+              style="margin-bottom:16rpx;padding:20rpx;border-radius:20rpx;background:#F5F7FA;display:flex;gap:16rpx;"
             >
-              <text style="font-size:24rpx;font-weight:700;color:#8A7A70;flex-shrink:0;">{{ idx + 1 }}.</text>
-              <text style="font-size:26rpx;color:#2D1F18;line-height:1.7;white-space:pre-wrap;flex:1;">{{ o.content }}</text>
+              <text style="font-size:24rpx;font-weight:700;color:#3B9EEB;flex-shrink:0;">{{ idx + 1 }}.</text>
+              <text style="font-size:26rpx;color:#1F2937;line-height:1.7;white-space:pre-wrap;flex:1;">{{ o.content }}</text>
             </view>
           </view>
-          <view v-if="showTrialApply" class="primary-btn" style="margin-top:32rpx;background:linear-gradient(135deg,#FF7043 0%,#FF8A65 100%);" :style="{ opacity: busy ? 0.6 : 1 }" @click="openTrialApply">
-            <text style="color:white;font-size:30rpx;font-weight:800;">申请试课</text>
+          <view v-if="showTrialApply" class="primary-btn" style="margin-top:32rpx;background:#EAF4FD;border:2rpx solid #3B9EEB;" :style="{ opacity: busy ? 0.6 : 1 }" @click="openTrialApply">
+            <text style="color:#3B9EEB;font-size:30rpx;font-weight:800;">申请试课</text>
           </view>
-          <view class="primary-btn" :style="{ marginTop: showTrialApply ? '20rpx' : '32rpx', background: 'linear-gradient(135deg,#3B9EEB 0%,#3B9EEBCC 100%)', opacity: busy ? 0.6 : 1 }" @click="consult">
+          <view class="primary-btn" :style="{ marginTop: showTrialApply ? '20rpx' : '32rpx', background: 'linear-gradient(135deg,#3B9EEB 0%,#2F8FD8 100%)', opacity: busy ? 0.6 : 1 }" @click="consult">
             <text style="color:white;font-size:30rpx;font-weight:800;">立即咨询报名</text>
           </view>
         </view>
@@ -60,19 +60,19 @@
     <view class="sheet" @click.stop>
       <view class="sheet-handle" />
       <text class="sheet-title">申请试课</text>
-      <text style="font-size:24rpx;color:#8D6E63;display:block;margin-bottom:20rpx;">
+      <text style="font-size:24rpx;color:#6B7280;display:block;margin-bottom:20rpx;">
         {{ course?.title || '兴趣课' }} · 课次由机构确认后通知
       </text>
-      <view style="background:#F0F7FF;border-radius:24rpx;padding:24rpx 24rpx 8rpx;margin-bottom:20rpx;">
+      <view style="background:#F5F7FA;border-radius:24rpx;padding:24rpx 24rpx 8rpx;margin-bottom:20rpx;">
         <view style="margin-bottom:20rpx;">
-          <text style="font-size:24rpx;font-weight:700;color:#8D6E63;display:block;margin-bottom:8rpx;">试课宝贝</text>
+          <text style="font-size:24rpx;font-weight:700;color:#6B7280;display:block;margin-bottom:8rpx;">试课宝贝</text>
           <view style="display:flex;gap:12rpx;flex-wrap:wrap;">
             <view
               v-for="c in childOptions"
               :key="c.id"
               class="pill"
               style="padding:12rpx 20rpx;"
-              :style="{ backgroundColor: applyForm.studentId === c.id ? '#FF704318' : '#F5F0EC', color: applyForm.studentId === c.id ? '#FF7043' : '#8D6E63' }"
+              :style="{ backgroundColor: applyForm.studentId === c.id ? '#3B9EEB18' : '#F5F7FA', color: applyForm.studentId === c.id ? '#3B9EEB' : '#6B7280' }"
               @click="applyForm.studentId = c.id"
             >
               <text style="font-size:22rpx;">{{ c.name }}</text>
@@ -81,7 +81,7 @@
           <text v-if="!childOptions.length" style="font-size:22rpx;color:#E53935;">请先绑定宝贝</text>
         </view>
         <view style="margin-bottom:20rpx;">
-          <text style="font-size:24rpx;font-weight:700;color:#8D6E63;display:block;margin-bottom:8rpx;">备注（可选）</text>
+          <text style="font-size:24rpx;font-weight:700;color:#6B7280;display:block;margin-bottom:8rpx;">备注（可选）</text>
           <textarea
             class="form-input"
             style="height:140rpx;"
@@ -91,7 +91,7 @@
           />
         </view>
       </view>
-      <view class="primary-btn" style="background:linear-gradient(135deg,#FF7043 0%,#FF8A65 100%);" :style="{ opacity: busy ? 0.6 : 1 }" @click="submitTrialApply">
+      <view class="primary-btn" style="background:linear-gradient(135deg,#3B9EEB 0%,#2F8FD8 100%);" :style="{ opacity: busy ? 0.6 : 1 }" @click="submitTrialApply">
         <text style="color:white;font-size:30rpx;font-weight:800;">{{ busy ? '提交中…' : '提交申请' }}</text>
       </view>
     </view>
@@ -220,7 +220,7 @@ async function submitTrialApply() {
   overflow: hidden;
   margin-bottom: 24rpx;
   font-size: 26rpx;
-  color: #2D1F18;
+  color: #1F2937;
   line-height: 1.7;
   box-sizing: border-box;
 }

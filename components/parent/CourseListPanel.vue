@@ -1,13 +1,13 @@
 <template>
-  <view class="tab-page" style="background:#F0F7FF;">
-    <view class="safe-nav-header" style="background:white;flex-shrink:0;border-bottom:1rpx solid #BBDEFB;padding-bottom:20rpx;">
+  <view class="tab-page" style="background:#F5F7FA;">
+    <view class="safe-nav-header" style="background:white;flex-shrink:0;border-bottom:1rpx solid #EFF1F4;padding-bottom:20rpx;">
       <view style="display:flex;align-items:center;gap:20rpx;padding:0 40rpx;">
-        <view class="back-btn" style="background:#F0F7FF;" @click="activeTab = 'home'">
-          <text style="font-size:40rpx;color:#2D1F18;line-height:1;">‹</text>
+        <view class="back-btn" style="background:#F5F7FA;" @click="activeTab = 'home'">
+          <text style="font-size:40rpx;color:#1F2937;line-height:1;">‹</text>
         </view>
         <view style="flex:1;min-width:0;">
-          <text style="font-size:36rpx;font-weight:800;color:#2D1F18;display:block;">机构课程</text>
-          <text style="font-size:22rpx;color:#8D6E63;margin-top:4rpx;">
+          <text style="font-size:36rpx;font-weight:800;color:#1F2937;display:block;">机构课程</text>
+          <text style="font-size:22rpx;color:#6B7280;margin-top:4rpx;">
             {{ courses.length }}门在招
           </text>
         </view>
@@ -17,10 +17,10 @@
     <scroll-view scroll-y style="flex:1;height:0;">
       <view style="padding:24rpx 40rpx;">
         <view v-if="loading" style="padding:64rpx 0;text-align:center;">
-          <text style="font-size:26rpx;color:#8D6E63;">加载中…</text>
+          <text style="font-size:26rpx;color:#6B7280;">加载中…</text>
         </view>
         <view v-else-if="!courses.length" style="padding:64rpx 0;text-align:center;">
-          <text style="font-size:26rpx;color:#8D6E63;">暂无在招课程</text>
+          <text style="font-size:26rpx;color:#6B7280;">暂无在招课程</text>
         </view>
         <view
           v-for="c in courses"
@@ -37,10 +37,10 @@
               <view class="pill" style="background:#3B9EEB18;color:#3B9EEB;">
                 <text style="font-size:20rpx;">{{ c.tag || '课程' }}</text>
               </view>
-              <text v-if="c.sessions != null && c.sessions !== ''" style="font-size:22rpx;color:#8D6E63;">{{ c.sessions }}课时</text>
+              <text v-if="c.sessions != null && c.sessions !== ''" style="font-size:22rpx;color:#6B7280;">{{ c.sessions }}课时</text>
             </view>
-            <text style="font-size:30rpx;font-weight:800;color:#2D1F18;display:block;">{{ c.title }}</text>
-            <text v-if="c.age" style="font-size:24rpx;color:#8D6E63;display:block;margin-top:8rpx;">{{ c.age }}</text>
+            <text style="font-size:30rpx;font-weight:800;color:#1F2937;display:block;">{{ c.title }}</text>
+            <text v-if="c.age" style="font-size:24rpx;color:#6B7280;display:block;margin-top:8rpx;">{{ c.age }}</text>
             <view style="display:flex;align-items:center;justify-content:space-between;margin-top:16rpx;">
               <text style="font-size:32rpx;font-weight:800;color:#3B9EEB;">{{ c.price }}</text>
               <text style="font-size:22rpx;color:#3B9EEB;">查看详情 ›</text>
