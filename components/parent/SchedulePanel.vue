@@ -20,7 +20,7 @@
     <scroll-view scroll-y style="flex:1;height:0;background:#F5F7FA;">
       <view style="padding:24rpx 40rpx;">
         <view v-if="scheduleViewTab === 'timetable'">
-          <view v-if="scheduleLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#6B7280;">加载中…</text></view>
+          <LoadingSkeleton v-if="scheduleLoading" variant="timeline" :count="4" padding="8rpx 0" />
           <view v-else-if="!dayLessons.length" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#6B7280;">{{ activeChild?.needsBind ? '绑定宝贝后可查看课程表' : '当日暂无课程' }}</text></view>
           <view v-for="(lesson, li) in dayLessons" :key="lesson.id" style="display:flex;gap:16rpx;">
             <view style="width:92rpx;flex-shrink:0;padding-top:24rpx;">
@@ -46,9 +46,7 @@
         </view>
 
         <view v-if="scheduleViewTab === 'courses'">
-          <view v-if="enrollmentsLoading" style="padding:48rpx 0;text-align:center;margin-bottom:24rpx;">
-            <text style="font-size:26rpx;color:#6B7280;">加载中…</text>
-          </view>
+          <LoadingSkeleton v-if="enrollmentsLoading" variant="list" :count="3" thumb padding="8rpx 0" />
           <view v-else-if="!enrolledCourses.length" style="padding:32rpx 0;text-align:center;margin-bottom:24rpx;">
             <text style="font-size:26rpx;color:#6B7280;">{{ activeChild?.needsBind ? '暂无报名进度，可先浏览机构课程' : '暂无报名进度数据' }}</text>
           </view>
@@ -90,7 +88,7 @@
         </view>
 
         <view v-if="scheduleViewTab === 'events'">
-          <view v-if="eventsLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#6B7280;">加载中…</text></view>
+          <LoadingSkeleton v-if="eventsLoading" variant="list" :count="4" thumb padding="8rpx 0" />
           <view v-else-if="!events.length" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#6B7280;">近期暂无活动</text></view>
           <view v-for="ev in events" :key="ev.id || ev.title" class="card" style="padding:20rpx 24rpx;margin-bottom:16rpx;display:flex;align-items:center;gap:20rpx;">
             <view style="width:80rpx;height:80rpx;border-radius:24rpx;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;" :style="{ backgroundColor: (typeStyleMap[ev.type] || typeStyleMap.activity).bg }">
@@ -116,6 +114,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { computed, inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { fetchCourses, fetchEnrollments, fetchEvents, fetchSchedules } from '../../api/parent.js'

@@ -15,9 +15,7 @@
       <scroll-view scroll-y class="subpage-scroll" :enable-flex="true">
         <view class="subpage-pad">
           <!-- 加载 / 空态 -->
-          <view v-if="listLoading" class="empty-block">
-            <text class="empty-block__text">加载中…</text>
-          </view>
+          <LoadingSkeleton v-if="listLoading" variant="list" :count="3" padding="8rpx 0" />
           <view v-else-if="!childList.length" class="empty-block empty-block--card">
             <view class="empty-block__icon-wrap">
               <MpIcon name="users" :size="56" color="#3B9EEB" />
@@ -345,6 +343,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { computed, inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { fetchDicts } from '../../api/common.js'

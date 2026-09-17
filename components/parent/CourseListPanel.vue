@@ -16,9 +16,7 @@
 
     <scroll-view scroll-y style="flex:1;height:0;">
       <view style="padding:24rpx 40rpx;">
-        <view v-if="loading" style="padding:64rpx 0;text-align:center;">
-          <text style="font-size:26rpx;color:#6B7280;">加载中…</text>
-        </view>
+        <LoadingSkeleton v-if="loading" variant="list" :count="4" cover padding="0" />
         <view v-else-if="!courses.length" style="padding:64rpx 0;text-align:center;">
           <text style="font-size:26rpx;color:#6B7280;">暂无在招课程</text>
         </view>
@@ -53,6 +51,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { fetchCourse } from '../../api/parent.js'

@@ -28,9 +28,7 @@
         <view v-if="!activeChildId" class="feed-empty">
           <text class="feed-empty__text">请先绑定宝贝后再查看动态</text>
         </view>
-        <view v-else-if="loading && !posts.length" class="feed-empty">
-          <text class="feed-empty__text">加载中…</text>
-        </view>
+        <LoadingSkeleton v-else-if="loading && !posts.length" variant="feed" :count="3" padding="8rpx 0" />
         <view v-else-if="!posts.length" class="feed-empty feed-empty--card">
           <view class="feed-empty__icon">
             <MpIcon name="camera" :size="48" color="#3B9EEB" />
@@ -143,6 +141,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import {

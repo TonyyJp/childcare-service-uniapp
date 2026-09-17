@@ -14,9 +14,7 @@
         <view class="subpage-pad">
           <text class="subpage-hint">{{ activeChild.name || '—' }} · {{ satisfactionPeriodLabel || '本月' }}</text>
 
-          <view v-if="satisfactionLoading" class="empty-block">
-            <text class="empty-block__text">加载中…</text>
-          </view>
+          <LoadingSkeleton v-if="satisfactionLoading" variant="list" :count="2" padding="8rpx 0" />
           <template v-else>
             <view v-if="satisfactionCurrent" class="tip-card tip-card--ok">
               <text class="tip-card__text">本月已评 · 综合 {{ satisfactionCurrent.score_overall }} 分。可修改后重新提交，覆盖本月评价。</text>
@@ -82,6 +80,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { fetchSatisfaction, submitSatisfaction } from '../../api/parent.js'

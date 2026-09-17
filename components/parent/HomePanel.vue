@@ -67,9 +67,7 @@
 
     <scroll-view scroll-y style="flex:1;height:0;background:#F5F7FA;">
       <view style="padding:24rpx 40rpx;">
-        <view v-if="homeLoading" style="padding:40rpx 0;text-align:center;">
-          <text style="color:#6B7280;font-size:26rpx;">加载中…</text>
-        </view>
+        <LoadingSkeleton v-if="homeLoading" variant="list" :count="3" padding="8rpx 0" />
 
         <view v-else-if="!currentItems.length" style="padding:48rpx 24rpx;text-align:center;background:white;border-radius:20rpx;margin-bottom:20rpx;">
           <text style="font-size:28rpx;color:#6B7280;">暂无{{ dayTab === 'today' ? '今日' : '昨日' }}记录</text>
@@ -190,6 +188,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { computed, inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { fetchCourse } from '../../api/parent.js'

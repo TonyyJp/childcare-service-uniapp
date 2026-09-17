@@ -20,9 +20,7 @@
             <text class="tip-card__text">授权后，教师端刷脸设备可识别宝贝完成签到。人脸信息存储于腾讯云人脸库，照片仅用于签到识别；可随时撤回，撤回后云端人脸与本机照片立即删除。</text>
           </view>
 
-          <view v-if="faceLoading" class="empty-block">
-            <text class="empty-block__text">加载中…</text>
-          </view>
+          <LoadingSkeleton v-if="faceLoading" variant="list" :count="2" padding="8rpx 0" />
           <view v-else-if="!faceList.length" class="empty-block empty-block--card">
             <text class="empty-block__title">请先绑定宝贝</text>
             <text class="empty-block__hint">绑定后可为宝贝采集人脸授权</text>
@@ -88,6 +86,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { computed, inject, ref, watch } from 'vue'
 import { PARENT_CTX_KEY } from './parentContext.js'
 import { fetchFaceStatus, authorizeFace, revokeFace } from '../../api/parent.js'

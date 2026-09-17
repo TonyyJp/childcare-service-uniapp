@@ -30,9 +30,7 @@
           </view>
 
           <text class="subpage-section-title">我的反馈</text>
-          <view v-if="ticketsLoading" class="empty-block">
-            <text class="empty-block__text">加载中…</text>
-          </view>
+          <LoadingSkeleton v-if="ticketsLoading" variant="list" :count="3" padding="8rpx 0" />
           <view v-else-if="!tickets.length" class="empty-block empty-block--card" style="margin-bottom:20rpx;">
             <text class="empty-block__title">暂无反馈记录</text>
             <text class="empty-block__hint">有问题可通过下方入口提交</text>
@@ -102,6 +100,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { createTicket, fetchTickets } from '../../api/parent.js'

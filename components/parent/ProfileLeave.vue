@@ -18,9 +18,7 @@
             <text class="empty-block__title">请先绑定宝贝</text>
             <text class="empty-block__hint">绑定后可为孩子提交请假</text>
           </view>
-          <view v-else-if="parentLeaveLoading" class="empty-block">
-            <text class="empty-block__text">加载中…</text>
-          </view>
+          <LoadingSkeleton v-else-if="parentLeaveLoading" variant="list" :count="3" padding="8rpx 0" />
           <view v-else-if="!parentLeaves.length" class="empty-block empty-block--card">
             <text class="empty-block__title">暂无请假记录</text>
             <text class="empty-block__hint">点击下方发起请假申请</text>
@@ -99,6 +97,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { cancelLeave, createLeave, fetchLeaves } from '../../api/parent.js'

@@ -19,9 +19,7 @@
             </view>
           </view>
 
-          <view v-if="messagesLoading" class="empty-block">
-            <text class="empty-block__text">加载中…</text>
-          </view>
+          <LoadingSkeleton v-if="messagesLoading" variant="list" :count="4" padding="8rpx 0" />
           <view v-else-if="!messages.length" class="empty-block empty-block--card">
             <text class="empty-block__title">暂无消息</text>
             <text class="empty-block__hint">园所通知与提醒会出现在这里</text>
@@ -76,6 +74,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { fetchMessages, readMessages } from '../../api/parent.js'

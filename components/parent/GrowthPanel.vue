@@ -13,7 +13,7 @@
     </view>
     <scroll-view scroll-y style="flex:1;height:0;">
       <view style="padding:24rpx 40rpx;">
-        <view v-if="growthLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">加载中…</text></view>
+        <LoadingSkeleton v-if="growthLoading" variant="list" :count="3" padding="8rpx 0" />
         <template v-else>
           <view class="card" style="padding:24rpx;margin-bottom:24rpx;">
             <text style="font-size:28rpx;font-weight:800;color:#2D1F18;display:block;margin-bottom:20rpx;">能力发展概览</text>
@@ -69,6 +69,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { fetchGrowth } from '../../api/parent.js'

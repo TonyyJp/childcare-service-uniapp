@@ -19,9 +19,7 @@
               <text class="empty-block__title">请先绑定宝贝</text>
               <text class="empty-block__hint">绑定后可查看课时余额</text>
             </view>
-            <view v-else-if="loading" class="empty-block">
-              <text class="empty-block__text">加载中…</text>
-            </view>
+            <LoadingSkeleton v-else-if="loading" variant="list" :count="3" padding="8rpx 0" />
             <view v-else-if="errorMsg" class="empty-block empty-block--card">
               <text class="empty-block__title">暂时无法加载</text>
               <text class="empty-block__hint">{{ errorMsg }}</text>
@@ -87,6 +85,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { fetchLessonConsumeLogs, fetchLessonPackages } from '../../api/parent.js'

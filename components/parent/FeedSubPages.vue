@@ -13,9 +13,7 @@
       </view>
       <scroll-view scroll-y class="feed-scroll">
         <view class="feed-pad">
-          <view v-if="bellLoading" class="feed-empty">
-            <text class="feed-empty__text">加载中…</text>
-          </view>
+          <LoadingSkeleton v-if="bellLoading" variant="list" :count="5" padding="8rpx 0" />
           <view v-else-if="!interactions.length" class="feed-empty feed-empty--card">
             <text class="feed-empty__title">暂无互动消息</text>
             <text class="feed-empty__hint">有人回复你时会出现在这里</text>
@@ -49,9 +47,7 @@
         </view>
       </view>
       <scroll-view scroll-y class="feed-scroll">
-        <view v-if="detailLoading" class="feed-empty">
-          <text class="feed-empty__text">加载中…</text>
-        </view>
+        <LoadingSkeleton v-if="detailLoading" variant="feed" :count="1" padding="24rpx 32rpx" />
         <view v-else-if="detail" class="feed-pad">
           <view class="moment-card">
             <view class="moment-card__head">
@@ -152,6 +148,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { inject, ref, watch } from 'vue'
 import {
   createDailyComment,

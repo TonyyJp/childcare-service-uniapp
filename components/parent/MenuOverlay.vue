@@ -19,9 +19,7 @@
     <view style="flex:1;background:white;border-radius:40rpx 40rpx 0 0;overflow:hidden;">
       <scroll-view scroll-y style="height:100%;">
         <view style="padding:32rpx 40rpx;">
-          <view v-if="loading" style="padding:48rpx 0;text-align:center;">
-            <text style="font-size:26rpx;color:#6B7280;">加载中…</text>
-          </view>
+          <LoadingSkeleton v-if="loading" variant="list" :count="4" thumb padding="8rpx 0" />
 
           <view v-else-if="!meals.length" style="padding:64rpx 24rpx;text-align:center;">
             <view style="display:flex;justify-content:center;margin-bottom:16rpx;">
@@ -53,6 +51,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { computed, ref } from 'vue'
 import { fetchCurrentMenu } from '../../api/parent.js'
 import MpIcon from '../MpIcon.vue'
