@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "智优托教机构管理平台 - UniApp版",
   "scripts": {
+    "dev": "UNI_INPUT_DIR=. UNI_OUTPUT_DIR=dist/dev/h5 uni -p h5",
     "dev:mp-weixin": "uni -p mp-weixin",
     "dev:app": "uni -p app-plus",
     "dev:h5": "UNI_INPUT_DIR=. UNI_OUTPUT_DIR=dist/dev/h5 uni -p h5",
