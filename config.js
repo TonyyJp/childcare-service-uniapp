@@ -17,6 +17,9 @@ export const MP_APPID = ''
  */
 export const DEBUG_MODE = true
 
+/** 调试直登（H5 预览 /mp/dev/login）默认使用的测试账号手机号 */
+export const DEBUG_LOGIN_PHONE = '13268028272'
+
 /** 附件相对 path → 可访问 URL（真机要求 https；http 会被微信拦截且不跟随 301） */
 export function mediaUrl(path) {
   if (!path) return ''

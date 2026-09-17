@@ -28,9 +28,7 @@
         <view v-if="!activeChildId" class="feed-empty">
           <text class="feed-empty__text">请先绑定宝贝后再查看动态</text>
         </view>
-        <view v-else-if="loading && !posts.length" class="feed-empty">
-          <text class="feed-empty__text">加载中…</text>
-        </view>
+        <LoadingSkeleton v-else-if="loading && !posts.length" variant="feed" :count="3" padding="8rpx 0" />
         <view v-else-if="!posts.length" class="feed-empty feed-empty--card">
           <view class="feed-empty__icon">
             <MpIcon name="camera" :size="48" color="#3B9EEB" />
@@ -48,7 +46,7 @@
             <view class="moment-card__head">
               <view class="moment-card__avatar">
                 <text v-if="post.cover_emoji" class="moment-card__emoji">{{ post.cover_emoji }}</text>
-                <MpIcon v-else name="camera" :size="36" color="#7B1FA2" />
+                <MpIcon v-else name="camera" :size="36" color="#3B9EEB" />
               </view>
               <view class="moment-card__who">
                 <text class="moment-card__name">{{ post.publisher || '老师' }}</text>
@@ -88,14 +86,14 @@
               <MpIcon
                 name="heart"
                 :size="28"
-                :color="post.liked ? '#E53935' : '#8D6E63'"
+                :color="post.liked ? '#E53935' : '#9CA3AF'"
               />
               <text class="moment-action__text" :class="{ 'is-liked': post.liked }">
                 {{ post.like_count > 0 ? post.like_count : '赞' }}
               </text>
             </view>
             <view class="moment-action" @click="openListComment(post)">
-              <MpIcon name="message-circle" :size="28" color="#8D6E63" />
+              <MpIcon name="message-circle" :size="28" color="#9CA3AF" />
               <text class="moment-action__text">
                 {{ post.comment_count > 0 ? post.comment_count : '评论' }}
               </text>
@@ -143,6 +141,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import {
@@ -348,10 +347,10 @@ onShow(() => {
 
 $accent: #3b9eeb;
 $accent-soft: #e3f2fd;
-$page-bg: #f0f7ff;
-$ink: #2d1f18;
-$muted: #8d6e63;
-$line: #e3f2fd;
+$page-bg: #f5f7fa;
+$ink: #1f2937;
+$muted: #6b7280;
+$line: #eff1f4;
 
 .feed-page {
   display: flex;
@@ -484,7 +483,7 @@ $line: #e3f2fd;
 .feed-empty--card {
   background: #fff;
   border-radius: 28rpx;
-  box-shadow: 0 2rpx 16rpx rgba(45, 31, 24, 0.06);
+  box-shadow: 0 2rpx 16rpx rgba(31, 41, 55, 0.06);
   margin-bottom: 20rpx;
 }
 
@@ -527,7 +526,7 @@ $line: #e3f2fd;
   border-radius: 28rpx;
   padding: 28rpx;
   margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 16rpx rgba(45, 31, 24, 0.06);
+  box-shadow: 0 2rpx 16rpx rgba(31, 41, 55, 0.06);
 }
 
 .moment-card__head {
@@ -541,7 +540,7 @@ $line: #e3f2fd;
   width: 80rpx;
   height: 80rpx;
   border-radius: 24rpx;
-  background: #f3e5f5;
+  background: #e3f2fd;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -624,7 +623,7 @@ $line: #e3f2fd;
   margin-top: 16rpx;
   padding: 16rpx;
   border-radius: 16rpx;
-  background: #f7fbff;
+  background: #f5f7fa;
 }
 
 .moment-card__preview-row {
@@ -637,7 +636,7 @@ $line: #e3f2fd;
 
 .moment-card__preview-text {
   font-size: 24rpx;
-  color: #5d4037;
+  color: #4b5563;
   line-height: 1.5;
 }
 
@@ -685,7 +684,7 @@ $line: #e3f2fd;
 
 .feed-more__text {
   font-size: 22rpx;
-  color: #bdbdbd;
+  color: #9ca3af;
 }
 
 .photo-grid {
@@ -704,7 +703,7 @@ $line: #e3f2fd;
   width: 100%;
   aspect-ratio: 1;
   border-radius: 12rpx;
-  background: #f5f0ec;
+  background: #eef1f5;
 }
 
 .photo-cell--single {
@@ -717,7 +716,7 @@ $line: #e3f2fd;
   border-radius: 24rpx;
   padding: 24rpx;
   margin-bottom: 16rpx;
-  box-shadow: 0 2rpx 16rpx rgba(45, 31, 24, 0.06);
+  box-shadow: 0 2rpx 16rpx rgba(31, 41, 55, 0.06);
 }
 
 .comment-card__main {
@@ -754,7 +753,7 @@ $line: #e3f2fd;
 
 .comment-card__time {
   font-size: 20rpx;
-  color: #bdbdbd;
+  color: #9ca3af;
   display: block;
   margin-top: 8rpx;
 }

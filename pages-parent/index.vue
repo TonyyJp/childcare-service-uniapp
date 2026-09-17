@@ -1,12 +1,15 @@
 <template>
   <view class="page" :style="navSafeStyle">
     <view class="content">
-      <HomePanel v-if="shellTab === 'home'" :active="shellTab === 'home'" />
-      <SchedulePanel v-else-if="shellTab === 'schedule'" :active="true" />
-      <FeedPanel v-else-if="shellTab === 'feed'" :active="true" />
-      <ProfileHub v-else-if="shellTab === 'me'" />
+      <view class="shell-anim" :key="shellTab" style="height:100%;">
+        <HomePanel v-if="shellTab === 'home'" :active="true" />
+        <SchedulePanel v-else-if="shellTab === 'schedule'" :active="true" />
+        <FeedPanel v-else-if="shellTab === 'feed'" :active="true" />
+        <ProfileHub v-else-if="shellTab === 'me'" />
+      </view>
 
-      <!-- 全页唯一 page-container：承接所有内页右滑 / 系统返回 -->
+      <!-- 小程序端：page-container 承接所有内页右滑 / 系统返回 -->
+      <!-- #ifndef H5 -->
       <page-container
         :show="innerShow"
         :position="pcProps.position"
@@ -58,16 +61,65 @@
           />
         </view>
       </page-container>
+      <!-- #endif -->
+
+      <!-- H5 端：page-container 不受支持，改用普通全屏浮层承接内页 -->
+      <!-- #ifdef H5 -->
+      <transition name="h5-slide">
+      <view v-if="innerShow" class="h5-inner-overlay" :style="innerWrapStyle">
+        <view class="profile-sub-wrap" :style="innerWrapStyle">
+          <ProfileChild v-if="innerKey === 'profile:child'" :active="innerShow" />
+          <ProfilePickup v-else-if="innerKey === 'profile:pickup'" :active="innerShow" />
+          <ProfileFace v-else-if="innerKey === 'profile:face'" />
+          <ProfileLeave v-else-if="innerKey === 'profile:leave'" :active="innerShow" />
+          <ProfileLessonPackage v-else-if="innerKey === 'profile:lesson-package'" :active="innerShow" />
+          <ProfileTrial v-else-if="innerKey === 'profile:trial'" :active="innerShow" />
+          <ProfileInfo v-else-if="innerKey === 'profile:info'" :active="innerShow" />
+          <ProfileNotify v-else-if="innerKey === 'profile:notify'" :active="innerShow" />
+          <ProfilePrivacy v-else-if="innerKey === 'profile:privacy'" />
+          <ProfileHelp v-else-if="innerKey === 'profile:help'" :active="innerShow" />
+          <ProfileSatisfaction v-else-if="innerKey === 'profile:satisfaction'" :active="innerShow" />
+          <ProfileAbout v-else-if="innerKey === 'profile:about'" />
+          <MessagesPanel v-else-if="innerKey === 'profile:messages'" :active="innerShow" :show-back="true" />
+
+          <HomeworkPanel v-else-if="innerKey === 'tab:homework'" :active="true" />
+          <CourseListPanel v-else-if="innerKey === 'tab:courses'" :active="true" />
+          <GrowthAlbumPanel v-else-if="innerKey === 'tab:growth-album'" :active="true" />
+          <GrowthPanel v-else-if="innerKey === 'tab:growth'" :active="true" />
+
+          <CourseDetailOverlay
+            v-else-if="innerKey === 'course-detail'"
+            :course="selectedCourse || courseSnap"
+            @close="selectedCourse = null"
+          />
+          <MenuOverlay v-else-if="innerKey === 'menu'" @close="menuVisible = false" />
+
+          <FeedSubPages
+            v-else-if="innerKey === 'feed-bell'"
+            mode="bell"
+            @close="onFeedSubClose"
+            @opened-detail="onFeedOpenedDetail"
+          />
+          <FeedSubPages
+            v-else-if="innerKey === 'feed-detail'"
+            mode="detail"
+            :post-id="feedDetailPostId || feedPostSnap"
+            @close="onFeedSubClose"
+          />
+        </view>
+      </view>
+      </transition>
+      <!-- #endif -->
     </view>
 
     <view v-if="showBottomNav" class="bottom-nav">
-      <view v-for="tab in navTabs" :key="tab.id" class="nav-item" @click="activeTab = tab.id">
+      <view v-for="tab in navTabs" :key="tab.id" class="nav-item" :class="{ 'nav-item--active': activeTab === tab.id }" @click="activeTab = tab.id">
         <view style="position:relative;display:inline-flex;">
           <MpIcon
             class="nav-icon"
             :name="tab.icon"
             :size="44"
-            :color="activeTab === tab.id ? accentColor : '#8D6E63'"
+            :color="activeTab === tab.id ? accentColor : '#9CA3AF'"
           />
           <view
             v-if="tab.id === 'feed' && feedCommentUnread > 0"
@@ -80,7 +132,7 @@
             style="position:absolute;top:-4rpx;right:-4rpx;width:16rpx;height:16rpx;border-radius:8rpx;background:#E53935;"
           />
         </view>
-        <text class="nav-label" :style="{ color: activeTab === tab.id ? accentColor : '#8D6E63', fontWeight: activeTab === tab.id ? '700' : '500' }">{{ tab.label }}</text>
+        <text class="nav-label" :style="{ color: activeTab === tab.id ? accentColor : '#9CA3AF', fontWeight: activeTab === tab.id ? '700' : '500' }">{{ tab.label }}</text>
         <view v-if="activeTab === tab.id" class="nav-dot" :style="{ backgroundColor: accentColor }" />
       </view>
     </view>
@@ -257,9 +309,9 @@ watch(contentAlive, (alive) => {
 })
 
 const innerWrapStyle = computed(() => {
-  if (String(innerKey.value).startsWith('feed-')) return { background: '#f0f7ff' }
+  if (String(innerKey.value).startsWith('feed-')) return { background: '#f5f7fa' }
   if (innerKey.value === 'menu' || String(innerKey.value).startsWith('profile:')) {
-    return { background: '#f0f7ff' }
+    return { background: '#f5f7fa' }
   }
   return { background: '#ffffff' }
 })
@@ -285,4 +337,46 @@ onShow(() => {
   position: relative;
   overflow: hidden;
 }
+
+/* 主 tab 切换入场：淡入 + 轻微上移（CSS animation，跨端安全） */
+.shell-anim {
+  animation: shellIn 0.24s ease;
+}
+
+@keyframes shellIn {
+  from {
+    opacity: 0;
+    transform: translateY(12rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* #ifdef H5 */
+.h5-inner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  overflow: hidden;
+}
+
+/* H5 内页：入场 / 退场对称右滑，贴近原生二级页手感 */
+.h5-slide-enter-active {
+  transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.h5-slide-leave-active {
+  transition: transform 0.24s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.h5-slide-enter-from,
+.h5-slide-leave-to {
+  transform: translateX(100%);
+}
+/* #endif */
 </style>

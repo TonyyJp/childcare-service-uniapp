@@ -18,7 +18,7 @@
                 <text class="list-card__title">绑定手机</text>
                 <text class="list-card__sub">用于登录与接收重要通知</text>
               </view>
-              <text style="font-size:26rpx;font-weight:700;color:#2D1F18;flex-shrink:0;">{{ parentPhoneMasked || '未绑定' }}</text>
+              <text style="font-size:26rpx;font-weight:700;color:#1F2937;flex-shrink:0;">{{ parentPhoneMasked || '未绑定' }}</text>
             </view>
             <view class="pref-row" style="border-bottom:1rpx solid #E3F2FD;">
               <view class="pref-row__meta">

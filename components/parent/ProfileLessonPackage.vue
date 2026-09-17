@@ -19,9 +19,7 @@
               <text class="empty-block__title">请先绑定宝贝</text>
               <text class="empty-block__hint">绑定后可查看课时余额</text>
             </view>
-            <view v-else-if="loading" class="empty-block">
-              <text class="empty-block__text">加载中…</text>
-            </view>
+            <LoadingSkeleton v-else-if="loading" variant="list" :count="3" padding="8rpx 0" />
             <view v-else-if="errorMsg" class="empty-block empty-block--card">
               <text class="empty-block__title">暂时无法加载</text>
               <text class="empty-block__hint">{{ errorMsg }}</text>
@@ -48,15 +46,15 @@
               <text class="list-card__sub" style="margin-bottom:8rpx;">
                 剩余 {{ remainOf(pkg) }} / 总计 {{ totalOf(pkg) }} 课时
               </text>
-              <text style="font-size:22rpx;color:#8D6E63;">
+              <text style="font-size:22rpx;color:#6B7280;">
                 有效期 {{ formatRange(pkg) }}
               </text>
               <text style="font-size:22rpx;color:#3B9EEB;display:block;margin-top:12rpx;font-weight:700;">查看消课流水 ›</text>
             </view>
 
             <view v-if="activeChildId && !loading" class="card" style="padding:24rpx;margin-top:8rpx;">
-              <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;margin-bottom:8rpx;">续费说明</text>
-              <text style="font-size:24rpx;color:#8D6E63;line-height:1.6;">请联系机构续费。在线购买上线后可在此缴费。</text>
+              <text style="font-size:26rpx;font-weight:700;color:#1F2937;display:block;margin-bottom:8rpx;">续费说明</text>
+              <text style="font-size:24rpx;color:#6B7280;line-height:1.6;">请联系机构续费。在线购买上线后可在此缴费。</text>
             </view>
           </template>
 
@@ -87,6 +85,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { fetchLessonConsumeLogs, fetchLessonPackages } from '../../api/parent.js'
@@ -214,7 +213,7 @@ function deltaColor(log) {
   const d = Number(log.delta)
   if (d > 0) return '#2E7D32'
   if (d < 0) return '#E65100'
-  return '#8D6E63'
+  return '#6B7280'
 }
 
 function logTime(log) {

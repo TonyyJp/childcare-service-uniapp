@@ -18,9 +18,7 @@
             <text class="empty-block__title">请先绑定宝贝</text>
             <text class="empty-block__hint">绑定后可为孩子提交请假</text>
           </view>
-          <view v-else-if="parentLeaveLoading" class="empty-block">
-            <text class="empty-block__text">加载中…</text>
-          </view>
+          <LoadingSkeleton v-else-if="parentLeaveLoading" variant="list" :count="3" padding="8rpx 0" />
           <view v-else-if="!parentLeaves.length" class="empty-block empty-block--card">
             <text class="empty-block__title">暂无请假记录</text>
             <text class="empty-block__hint">点击下方发起请假申请</text>
@@ -34,7 +32,7 @@
               </view>
             </view>
             <text class="list-card__sub" style="margin-bottom:8rpx;">{{ parentLeaveTypeLabel(item.leave_type) }} · 全天时段</text>
-            <text style="font-size:26rpx;color:#2D1F18;line-height:1.6;">{{ item.reason }}</text>
+            <text style="font-size:26rpx;color:#1F2937;line-height:1.6;">{{ item.reason }}</text>
             <text v-if="item.reject_reason" style="font-size:22rpx;color:#E53935;display:block;margin-top:8rpx;">驳回：{{ item.reject_reason }}</text>
             <view
               v-if="item.status === 'pending'"
@@ -66,7 +64,7 @@
                 :key="t.id"
                 class="pill"
                 style="padding:12rpx 20rpx;"
-                :style="{ backgroundColor: newLeave.type === t.id ? '#3B9EEB18' : '#F5F0EC', color: newLeave.type === t.id ? '#3B9EEB' : '#8D6E63' }"
+                :style="{ backgroundColor: newLeave.type === t.id ? '#3B9EEB18' : '#F5F7FA', color: newLeave.type === t.id ? '#3B9EEB' : '#6B7280' }"
                 @click="newLeave.type = t.id"
               >
                 <text style="font-size:22rpx;">{{ t.label }}</text>
@@ -99,6 +97,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { cancelLeave, createLeave, fetchLeaves } from '../../api/parent.js'

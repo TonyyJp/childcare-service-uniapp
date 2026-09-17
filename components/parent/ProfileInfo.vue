@@ -1,11 +1,11 @@
 <template>
-      <view style="flex:1;display:flex;flex-direction:column;background:#F0F7FF;">
+      <view style="flex:1;display:flex;flex-direction:column;background:#F5F7FA;">
         <view class="safe-nav-header" style="background:white;padding-bottom:24rpx;border-bottom:1rpx solid #E3F2FD;flex-shrink:0;">
           <view style="display:flex;align-items:center;padding:0 40rpx;">
-            <view style="width:64rpx;height:64rpx;border-radius:24rpx;background:#F0F7FF;display:flex;align-items:center;justify-content:center;margin-right:20rpx;" @click="goProfilePage('main')">
-              <text style="font-size:40rpx;color:#2D1F18;line-height:1;">‹</text>
+            <view style="width:64rpx;height:64rpx;border-radius:24rpx;background:#F5F7FA;display:flex;align-items:center;justify-content:center;margin-right:20rpx;" @click="goProfilePage('main')">
+              <text style="font-size:40rpx;color:#1F2937;line-height:1;">‹</text>
             </view>
-            <text style="font-size:32rpx;font-weight:800;color:#2D1F18;">个人资料</text>
+            <text style="font-size:32rpx;font-weight:800;color:#1F2937;">个人资料</text>
           </view>
         </view>
         <view style="flex:1;overflow:hidden;"><scroll-view scroll-y style="height:100%;">
@@ -23,12 +23,12 @@
                 <view class="profile-avatar__badge"><text style="font-size:22rpx;color:white;">✎</text></view>
               </button>
               <view style="flex:1;min-width:0;margin-left:24rpx;">
-                <text style="font-size:32rpx;font-weight:800;color:#2D1F18;display:block;">{{ parentName }}</text>
-                <text style="font-size:24rpx;color:#8D6E63;display:block;margin-top:8rpx;">{{ parentPhoneMasked || '未绑定手机' }}</text>
+                <text style="font-size:32rpx;font-weight:800;color:#1F2937;display:block;">{{ parentName }}</text>
+                <text style="font-size:24rpx;color:#6B7280;display:block;margin-top:8rpx;">{{ parentPhoneMasked || '未绑定手机' }}</text>
               </view>
             </view>
             <view class="card" style="padding:24rpx;margin-bottom:24rpx;">
-              <text style="font-size:24rpx;font-weight:700;color:#8D6E63;display:block;margin-bottom:12rpx;">昵称</text>
+              <text style="font-size:24rpx;font-weight:700;color:#6B7280;display:block;margin-bottom:12rpx;">昵称</text>
               <input
                 class="form-input"
                 type="nickname"
@@ -39,16 +39,16 @@
                 maxlength="20"
                 placeholder="请输入昵称"
               />
-              <text style="font-size:22rpx;color:#8D6E63;display:block;margin-top:12rpx;">将用于请假、反馈等场景的署名</text>
+              <text style="font-size:22rpx;color:#6B7280;display:block;margin-top:12rpx;">将用于请假、反馈等场景的署名</text>
             </view>
             <view class="card" style="overflow:hidden;margin-bottom:24rpx;">
-              <view style="display:flex;justify-content:space-between;padding:24rpx;border-bottom:1rpx solid #F5F0EC;">
-                <text style="font-size:26rpx;color:#8D6E63;">手机号</text>
-                <text style="font-size:26rpx;font-weight:700;color:#2D1F18;">{{ parentPhoneMasked || '—' }}</text>
+              <view style="display:flex;justify-content:space-between;padding:24rpx;border-bottom:1rpx solid #F5F7FA;">
+                <text style="font-size:26rpx;color:#6B7280;">手机号</text>
+                <text style="font-size:26rpx;font-weight:700;color:#1F2937;">{{ parentPhoneMasked || '—' }}</text>
               </view>
               <view style="display:flex;justify-content:space-between;padding:24rpx;">
-                <text style="font-size:26rpx;color:#8D6E63;">已绑定宝贝</text>
-                <text style="font-size:26rpx;font-weight:700;color:#2D1F18;">{{ childOptions.length }} 名</text>
+                <text style="font-size:26rpx;color:#6B7280;">已绑定宝贝</text>
+                <text style="font-size:26rpx;font-weight:700;color:#1F2937;">{{ childOptions.length }} 名</text>
               </view>
             </view>
             <view class="primary-btn" :style="{ opacity: profileBusy ? 0.6 : 1 }" @click="saveNickname">

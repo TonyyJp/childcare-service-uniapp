@@ -1,11 +1,23 @@
 /* Shared mini-program page chrome (teacher / parent / institution).
-   Role-specific colors should be applied inline or in local styles. */
+   Role-specific colors should be applied inline or in local styles.
+
+   ── 家长端设计系统色板（蓝主色 + 中性灰）──────────────
+   主色蓝    #3B9EEB   （accentColor，随角色注入）
+   主色深蓝  #2F8FD8   （按钮渐变末端 / 强调）
+   文字主    #1F2937   （标题、正文）
+   文字次    #6B7280   （辅助说明）
+   文字弱    #9CA3AF   （占位、时间戳）
+   分隔线    #EFF1F4
+   卡片描边  #E5E7EB
+   页面背景  #F5F7FA
+   卡片白    #FFFFFF
+   ──────────────────────────────────────────────── */
 
 .page {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: #fff8f2;
+  background: #f5f7fa;
 }
 
 .content {
@@ -29,7 +41,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #fff8f2;
+  background: #f5f7fa;
   z-index: 30;
 }
 
@@ -146,7 +158,7 @@
 .card {
   background: white;
   border-radius: 24rpx;
-  box-shadow: 0 2rpx 16rpx rgba(45, 31, 24, 0.06);
+  box-shadow: 0 2rpx 16rpx rgba(31, 41, 55, 0.06);
 }
 
 .pill {
@@ -169,7 +181,7 @@
   max-width: 100%;
   padding: 28rpx;
   border-radius: 24rpx;
-  background: linear-gradient(135deg, #ff7043 0%, #ff8a65 100%);
+  background: linear-gradient(135deg, #3b9eeb 0%, #2f8fd8 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -180,10 +192,10 @@
   width: 100%;
   padding: 20rpx 24rpx;
   border-radius: 20rpx;
-  background: #fff8f5;
-  border: 1rpx solid #ffccbc;
+  background: #f5f7fa;
+  border: 1rpx solid #e5e7eb;
   font-size: 26rpx;
-  color: #2d1f18;
+  color: #1f2937;
   box-sizing: border-box;
   min-height: 80rpx;
   line-height: 1.4;
@@ -210,8 +222,9 @@ textarea.form-input {
 .bottom-nav {
   height: 120rpx;
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  background: white;
-  border-top: 1rpx solid #f5f0ec;
+  background: #ffffff;
+  border-top: 1rpx solid #eff1f4;
+  box-shadow: 0 -2rpx 16rpx rgba(31, 41, 55, 0.04);
   display: flex;
   flex-shrink: 0;
 }
@@ -230,19 +243,37 @@ textarea.form-input {
   width: 44rpx;
   height: 44rpx;
   display: block;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nav-item--active .nav-icon {
+  transform: scale(1.12);
 }
 
 .nav-label {
   font-size: 20rpx;
+  transition: color 0.2s ease;
 }
 
 .nav-dot {
   width: 8rpx;
   height: 8rpx;
   border-radius: 4rpx;
-  background: #ff7043;
+  background: #3b9eeb;
   position: absolute;
   bottom: 12rpx;
+  animation: navDotIn 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes navDotIn {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .overlay,
@@ -272,14 +303,14 @@ textarea.form-input {
   width: 80rpx;
   height: 8rpx;
   border-radius: 8rpx;
-  background: #e0e0e0;
+  background: #e5e7eb;
   margin: 0 auto 32rpx;
 }
 
 .sheet-title {
   font-size: 36rpx;
   font-weight: 800;
-  color: #2d1f18;
+  color: #1f2937;
   display: block;
   margin-bottom: 32rpx;
 }

@@ -18,7 +18,7 @@
           <text class="about-name">{{ brandName || '—' }}</text>
           <text class="about-ver">版本 1.0.0</text>
           <view class="list-card" style="margin-top:40rpx;text-align:left;">
-            <text style="font-size:26rpx;color:#2D1F18;line-height:1.8;display:block;">
+            <text style="font-size:26rpx;color:#1F2937;line-height:1.8;display:block;">
               面向托管机构、教师与家长的数智托育小程序，覆盖签到、作业、日常、成长档案与家园沟通。
             </text>
           </view>
@@ -54,20 +54,20 @@ const { goProfilePage, brandName } = inject(PARENT_CTX_KEY)
 .about-name {
   font-size: 36rpx;
   font-weight: 800;
-  color: #2d1f18;
+  color: #1f2937;
   display: block;
 }
 
 .about-ver {
   font-size: 24rpx;
-  color: #8d6e63;
+  color: #6b7280;
   display: block;
   margin-top: 8rpx;
 }
 
 .about-copy {
   font-size: 22rpx;
-  color: #bdbdbd;
+  color: #9ca3af;
   display: block;
   margin-top: 40rpx;
 }

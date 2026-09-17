@@ -54,9 +54,7 @@
           <text style="font-size:22rpx;color:#F57F17;line-height:1.5;">{{ faceHint }}</text>
         </view>
 
-        <view v-if="loading && !photos.length" style="padding:64rpx 0;text-align:center;">
-          <text style="font-size:26rpx;color:#8D6E63;">加载中…</text>
-        </view>
+        <LoadingSkeleton v-if="loading && !photos.length" variant="grid" :count="9" padding="8rpx 0" />
         <view v-else-if="!photos.length" style="padding:64rpx 0;text-align:center;">
           <text style="font-size:26rpx;color:#8D6E63;">暂无动态照片</text>
           <text style="font-size:22rpx;color:#BDBDBD;display:block;margin-top:12rpx;">老师发布带图日常后会出现在这里</text>
@@ -85,6 +83,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { fetchGrowthAlbum } from '../../api/parent.js'

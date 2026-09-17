@@ -22,17 +22,15 @@
               @click="toggleFaq(i)"
             >
               <view style="display:flex;align-items:center;justify-content:space-between;">
-                <text style="font-size:28rpx;font-weight:700;color:#2D1F18;flex:1;margin-right:16rpx;">{{ faq.q }}</text>
-                <text style="font-size:24rpx;color:#BDBDBD;">{{ expandedFaq === i ? '▴' : '▾' }}</text>
+                <text style="font-size:28rpx;font-weight:700;color:#1F2937;flex:1;margin-right:16rpx;">{{ faq.q }}</text>
+                <text style="font-size:24rpx;color:#9CA3AF;">{{ expandedFaq === i ? '▴' : '▾' }}</text>
               </view>
               <text v-if="expandedFaq === i" class="list-card__sub" style="line-height:1.7;margin-top:12rpx;">{{ faq.a }}</text>
             </view>
           </view>
 
           <text class="subpage-section-title">我的反馈</text>
-          <view v-if="ticketsLoading" class="empty-block">
-            <text class="empty-block__text">加载中…</text>
-          </view>
+          <LoadingSkeleton v-if="ticketsLoading" variant="list" :count="3" padding="8rpx 0" />
           <view v-else-if="!tickets.length" class="empty-block empty-block--card" style="margin-bottom:20rpx;">
             <text class="empty-block__title">暂无反馈记录</text>
             <text class="empty-block__hint">有问题可通过下方入口提交</text>
@@ -46,7 +44,7 @@
               </view>
             </view>
             <text class="list-card__sub" style="margin-bottom:8rpx;">{{ ticketCategoryLabel(t.category) }} · {{ t.created_at || '' }}</text>
-            <text style="font-size:26rpx;color:#2D1F18;line-height:1.6;display:block;">{{ t.content }}</text>
+            <text style="font-size:26rpx;color:#1F2937;line-height:1.6;display:block;">{{ t.content }}</text>
             <text
               v-if="t.platform_note"
               style="font-size:24rpx;color:#1565C0;line-height:1.6;display:block;margin-top:12rpx;padding:16rpx;background:#E3F2FD;border-radius:16rpx;"
@@ -74,8 +72,8 @@
                 class="pill"
                 style="padding:12rpx 20rpx;"
                 :style="{
-                  backgroundColor: newTicket.category === c.id ? '#3B9EEB18' : '#F5F0EC',
-                  color: newTicket.category === c.id ? '#3B9EEB' : '#8D6E63',
+                  backgroundColor: newTicket.category === c.id ? '#3B9EEB18' : '#F5F7FA',
+                  color: newTicket.category === c.id ? '#3B9EEB' : '#6B7280',
                   marginRight: idx === 0 ? '12rpx' : '0',
                 }"
                 @click="newTicket.category = c.id"
@@ -102,6 +100,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { createTicket, fetchTickets } from '../../api/parent.js'

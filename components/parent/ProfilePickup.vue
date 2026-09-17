@@ -18,9 +18,7 @@
             <text class="empty-block__title">请先绑定宝贝</text>
             <text class="empty-block__hint">绑定后可为孩子添加接送人</text>
           </view>
-          <view v-else-if="pickupLoading" class="empty-block">
-            <text class="empty-block__text">加载中…</text>
-          </view>
+          <LoadingSkeleton v-else-if="pickupLoading" variant="list" :count="3" padding="8rpx 0" />
           <view v-else-if="!pickupPersons.length" class="empty-block empty-block--card">
             <text class="empty-block__title">暂无接送人</text>
             <text class="empty-block__hint">添加后可用于接送核对</text>
@@ -72,6 +70,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { createPickupPerson, deletePickupPerson, fetchPickupPersons } from '../../api/parent.js'

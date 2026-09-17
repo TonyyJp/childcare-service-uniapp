@@ -23,6 +23,12 @@
         },
         "plugins" : {}
     },
+    "h5" : {
+        "router" : {
+            "mode" : "history",
+            "base" : "/"
+        }
+    },
     "app-plus" : {
         "usingComponents" : true,
         "nvueStyleCompiler" : "uni-compiler",

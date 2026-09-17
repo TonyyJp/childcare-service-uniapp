@@ -28,6 +28,16 @@ export function phoneBind({ login_ticket, phone, sms_code }) {
   return http.post('/mp/phone/bind', { login_ticket, phone, sms_code }, { auth: false })
 }
 
+/**
+ * POST /mp/dev/login（仅调试环境）
+ * H5 预览无法走微信授权，用此接口按角色直接换取真实 token。
+ * 返回结构与 /mp/phone/login 一致：{ token, current_role, identities }
+ * @param {{ role: 'teacher'|'parent'|'institution', phone?: string }} payload
+ */
+export function devLogin(payload) {
+  return http.post('/mp/dev/login', payload, { auth: false })
+}
+
 /** GET /mp/me */
 export function fetchMe() {
   return http.get('/mp/me')
@@ -132,6 +142,16 @@ export async function loginWithWxPhone(phoneCode, targetRole) {
     phone_code: phoneCode,
     appid: MP_APPID || undefined,
   })
+  return applySession(data, targetRole)
+}
+
+/**
+ * 调试直登（H5 预览）：不走微信授权，按角色向后端换取真实 token。
+ * @param {'teacher'|'parent'|'institution'} targetRole
+ * @param {string} [phone] 可选，指定测试账号手机号
+ */
+export async function loginWithDev(targetRole, phone) {
+  const data = await devLogin({ role: targetRole, phone })
   return applySession(data, targetRole)
 }
 
