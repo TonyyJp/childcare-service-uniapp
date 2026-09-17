@@ -15,6 +15,9 @@
 
       <view v-if="!pendingRole" class="card-list">
         <text class="section-label">请选择您的身份</text>
+        <!-- #ifdef H5 -->
+        <text v-if="DEBUG_MODE" class="dev-tip">开发预览模式：点击身份卡片直接登录进入</text>
+        <!-- #endif -->
         <view
           v-for="role in roles"
           :key="role.id"
@@ -74,10 +77,19 @@ import {
   enterAsRole,
   fetchMe,
   hasOrgAffiliation,
+  loginWithDev,
   loginWithWxPhone,
   resolveBoundRole,
 } from '../../api/mp.js'
 import MpIcon from '../../components/MpIcon.vue'
+
+// H5 预览环境标记（条件编译）：仅 H5 端为 true
+// #ifdef H5
+const IS_H5 = true
+// #endif
+// #ifndef H5
+const IS_H5 = false
+// #endif
 
 const booting = ref(true)
 const loading = ref(false)
@@ -234,6 +246,23 @@ async function selectRole(id) {
     return
   }
 
+  // H5 预览 + 调试模式：无法走微信授权，直接调 dev 登录换取真实 token 进入
+  if (IS_H5 && DEBUG_MODE) {
+    loading.value = true
+    uni.showLoading({ title: '开发直登中', mask: true })
+    try {
+      await loginWithDev(id)
+      loggedIn.value = true
+      goHome(id)
+    } catch (err) {
+      uni.showToast({ title: err.message || '直登失败（需后端开放 /mp/dev/login）', icon: 'none', duration: 3000 })
+    } finally {
+      uni.hideLoading()
+      loading.value = false
+    }
+    return
+  }
+
   pendingRole.value = id
 }
 
@@ -354,6 +383,17 @@ async function onGetPhoneNumber(e) {
   font-weight: 700;
   color: #8D6E63;
   letter-spacing: 4rpx;
+  margin-bottom: 8rpx;
+}
+
+.dev-tip {
+  font-size: 22rpx;
+  color: #FF7043;
+  background: #FFF3E0;
+  border: 2rpx dashed #FFCCBC;
+  border-radius: 16rpx;
+  padding: 16rpx 20rpx;
+  line-height: 1.5;
   margin-bottom: 8rpx;
 }
 
