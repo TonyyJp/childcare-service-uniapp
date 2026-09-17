@@ -1,5 +1,5 @@
 <template>
-  <view class="feed-page" style="height:100%;min-height:100vh;background:#f0f7ff;">
+  <view class="feed-page" style="height:100%;min-height:100vh;background:#f5f7fa;">
     <!-- 与我有关 -->
     <template v-if="mode === 'bell'">
       <view class="safe-nav-header feed-nav">
@@ -57,7 +57,7 @@
             <view class="moment-card__head">
               <view class="moment-card__avatar">
                 <text v-if="detail.cover_emoji" class="moment-card__emoji">{{ detail.cover_emoji }}</text>
-                <MpIcon v-else name="camera" :size="32" color="#7B1FA2" />
+                <MpIcon v-else name="camera" :size="32" color="#3B9EEB" />
               </view>
               <view class="moment-card__who">
                 <text class="moment-card__name">{{ detail.publisher || '老师' }}</text>
@@ -86,14 +86,14 @@
                 <MpIcon
                   name="heart"
                   :size="28"
-                  :color="detail.liked ? '#E53935' : '#8D6E63'"
+                  :color="detail.liked ? '#E53935' : '#9CA3AF'"
                 />
                 <text class="moment-action__text" :class="{ 'is-liked': detail.liked }">
                   {{ detail.like_count > 0 ? detail.like_count : '赞' }}
                 </text>
               </view>
               <view class="moment-action">
-                <MpIcon name="message-circle" :size="28" color="#8D6E63" />
+                <MpIcon name="message-circle" :size="28" color="#9CA3AF" />
                 <text class="moment-action__text">{{ detail.comments?.length || 0 }}</text>
               </view>
             </view>
@@ -301,10 +301,10 @@ watch(
 
 $accent: #3b9eeb;
 $accent-soft: #e3f2fd;
-$page-bg: #f0f7ff;
-$ink: #2d1f18;
-$muted: #8d6e63;
-$line: #e3f2fd;
+$page-bg: #f5f7fa;
+$ink: #1f2937;
+$muted: #6b7280;
+$line: #eff1f4;
 
 .feed-page {
   display: flex;
@@ -388,7 +388,7 @@ $line: #e3f2fd;
 .feed-empty--card {
   background: #fff;
   border-radius: 28rpx;
-  box-shadow: 0 2rpx 16rpx rgba(45, 31, 24, 0.06);
+  box-shadow: 0 2rpx 16rpx rgba(31, 41, 55, 0.06);
   margin-bottom: 20rpx;
 }
 
@@ -420,7 +420,7 @@ $line: #e3f2fd;
   border-radius: 28rpx;
   padding: 28rpx;
   margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 16rpx rgba(45, 31, 24, 0.06);
+  box-shadow: 0 2rpx 16rpx rgba(31, 41, 55, 0.06);
 }
 
 .moment-card__head {
@@ -433,7 +433,7 @@ $line: #e3f2fd;
   width: 72rpx;
   height: 72rpx;
   border-radius: 24rpx;
-  background: #f3e5f5;
+  background: #e3f2fd;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -524,7 +524,7 @@ $line: #e3f2fd;
 
 .photo-cell {
   border-radius: 12rpx;
-  background: #eee;
+  background: #eef1f5;
 }
 
 .photo-cell--single {
