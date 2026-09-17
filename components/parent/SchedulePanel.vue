@@ -2,7 +2,7 @@
   <view class="tab-page">
     <view class="safe-nav-header" style="background:white;flex-shrink:0;border-bottom:1rpx solid #EFF1F4;">
       <view style="padding:0 40rpx 16rpx;">
-        <text style="font-size:40rpx;font-weight:800;color:#1F2937;display:block;">课程 &amp; 活动</text>
+        <text style="font-size:40rpx;font-weight:800;color:#1F2937;display:block;">课程表</text>
         <text style="font-size:22rpx;color:#6B7280;margin-top:4rpx;">{{ scheduleHeaderSub }}</text>
       </view>
       <view style="display:flex;padding:0 40rpx;border-bottom:1rpx solid #EFF1F4;">
@@ -163,7 +163,7 @@ function eventIcon(type) {
 
 const scheduleHeaderSub = computed(() => {
   const now = new Date()
-  const parts = [activeChild.value?.name, scheduleClassName.value || activeChild.value?.class, `${now.getFullYear()}年${now.getMonth() + 1}月`]
+  const parts = [activeChild.value?.name, `${now.getFullYear()}年${now.getMonth() + 1}月`]
   return parts.filter(Boolean).join(' · ')
 })
 
