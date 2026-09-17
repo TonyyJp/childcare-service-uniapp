@@ -34,7 +34,7 @@
               </view>
             </view>
             <text class="list-card__sub" style="margin-bottom:8rpx;">{{ parentLeaveTypeLabel(item.leave_type) }} · 全天时段</text>
-            <text style="font-size:26rpx;color:#2D1F18;line-height:1.6;">{{ item.reason }}</text>
+            <text style="font-size:26rpx;color:#1F2937;line-height:1.6;">{{ item.reason }}</text>
             <text v-if="item.reject_reason" style="font-size:22rpx;color:#E53935;display:block;margin-top:8rpx;">驳回：{{ item.reject_reason }}</text>
             <view
               v-if="item.status === 'pending'"
@@ -66,7 +66,7 @@
                 :key="t.id"
                 class="pill"
                 style="padding:12rpx 20rpx;"
-                :style="{ backgroundColor: newLeave.type === t.id ? '#3B9EEB18' : '#F5F0EC', color: newLeave.type === t.id ? '#3B9EEB' : '#8D6E63' }"
+                :style="{ backgroundColor: newLeave.type === t.id ? '#3B9EEB18' : '#F5F7FA', color: newLeave.type === t.id ? '#3B9EEB' : '#6B7280' }"
                 @click="newLeave.type = t.id"
               >
                 <text style="font-size:22rpx;">{{ t.label }}</text>

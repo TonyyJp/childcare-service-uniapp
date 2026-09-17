@@ -29,8 +29,8 @@
                 :style="{ marginBottom: di < satisfactionDims.length - 1 ? '28rpx' : '0' }"
               >
                 <view style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12rpx;">
-                  <text style="font-size:28rpx;font-weight:700;color:#2D1F18;">{{ d.label }}</text>
-                  <text style="font-size:22rpx;" :style="{ color: satisfactionForm[d.key] ? '#FF7043' : '#BDBDBD' }">
+                  <text style="font-size:28rpx;font-weight:700;color:#1F2937;">{{ d.label }}</text>
+                  <text style="font-size:22rpx;" :style="{ color: satisfactionForm[d.key] ? '#3B9EEB' : '#9CA3AF' }">
                     {{ starLabel(satisfactionForm[d.key]) }}
                   </text>
                 </view>
@@ -70,8 +70,8 @@
                 class="list-card"
                 style="padding:20rpx 24rpx;display:flex;justify-content:space-between;align-items:center;"
               >
-                <text style="font-size:26rpx;color:#2D1F18;">{{ h.period_label }}</text>
-                <text style="font-size:26rpx;font-weight:800;color:#FF7043;">{{ h.score_overall }} 分</text>
+                <text style="font-size:26rpx;color:#1F2937;">{{ h.period_label }}</text>
+                <text style="font-size:26rpx;font-weight:800;color:#3B9EEB;">{{ h.score_overall }} 分</text>
               </view>
             </view>
           </template>

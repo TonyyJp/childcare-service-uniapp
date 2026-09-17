@@ -62,14 +62,14 @@
         <text class="sheet-title">人脸信息处理须知</text>
         <scroll-view scroll-y style="max-height:320rpx;margin-bottom:20rpx;">
           <text style="font-size:22rpx;color:#6D4C41;line-height:1.7;">
-            1. 目的：仅用于宝贝在园刷脸签到识别；\n2. 方式：照片经加密传输至腾讯云人脸识别服务生成特征比对，原始照片存储于平台；\n3. 保存：授权期间持续保留，撤回后云端人脸特征与本机照片即时删除；\n4. 依据《个人信息保护法》，人脸信息属敏感个人信息，本次采集需您单独同意，授权完全自愿。
+            1. 目的：仅用于宝贝在托刷脸签到识别；\n2. 方式：照片经加密传输至腾讯云人脸识别服务生成特征比对，原始照片存储于平台；\n3. 保存：授权期间持续保留，撤回后云端人脸特征与本机照片即时删除；\n4. 依据《个人信息保护法》，人脸信息属敏感个人信息，本次采集需您单独同意，授权完全自愿。
           </text>
         </scroll-view>
         <view v-if="!consented" style="display:flex;align-items:center;gap:12rpx;margin-bottom:20rpx;" @click="consented = true">
           <view style="width:36rpx;height:36rpx;border-radius:18rpx;border:3rpx solid #3B9EEB;display:flex;align-items:center;justify-content:center;">
             <text v-if="consented" style="font-size:24rpx;color:#3B9EEB;">✓</text>
           </view>
-          <text style="font-size:22rpx;color:#2D1F18;">我已阅读并同意上述须知</text>
+          <text style="font-size:22rpx;color:#1F2937;">我已阅读并同意上述须知</text>
         </view>
         <view v-else style="padding:0 0 20rpx;">
           <camera v-if="cameraOn" device-position="back" flash="off" style="width:100%;height:480rpx;border-radius:20rpx;" @error="onCameraError" />
@@ -77,8 +77,8 @@
             <text style="font-size:24rpx;color:#3B9EEB;">开启摄像头，拍摄宝贝正脸</text>
           </view>
         </view>
-        <view class="primary-btn" :style="{ backgroundColor: canSubmit ? '#FF7043' : '#F5F0EC' }" @click="submitAuthorize">
-          <text :style="{ color: canSubmit ? 'white' : '#8D6E63', fontSize: '30rpx', fontWeight: 800 }">
+        <view class="primary-btn" :style="{ background: canSubmit ? 'linear-gradient(135deg,#3B9EEB 0%,#2F8FD8 100%)' : '#E5E7EB' }" @click="submitAuthorize">
+          <text :style="{ color: canSubmit ? 'white' : '#6B7280', fontSize: '30rpx', fontWeight: 800 }">
             {{ submitting ? '采集中…' : (consented ? '拍摄并授权' : '请先勾选同意') }}
           </text>
         </view>

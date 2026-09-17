@@ -41,9 +41,9 @@
               </view>
             </view>
             <text class="list-card__sub" style="margin-bottom:8rpx;">{{ item.student_name || activeChild.name }}</text>
-            <text v-if="lessonLine(item)" style="font-size:26rpx;color:#2D1F18;line-height:1.6;display:block;">{{ lessonLine(item) }}</text>
-            <text v-if="item.lesson_content" style="font-size:22rpx;color:#8D6E63;display:block;margin-top:6rpx;">{{ item.lesson_content }}</text>
-            <text v-if="item.remark" style="font-size:22rpx;color:#8D6E63;display:block;margin-top:6rpx;">备注：{{ item.remark }}</text>
+            <text v-if="lessonLine(item)" style="font-size:26rpx;color:#1F2937;line-height:1.6;display:block;">{{ lessonLine(item) }}</text>
+            <text v-if="item.lesson_content" style="font-size:22rpx;color:#6B7280;display:block;margin-top:6rpx;">{{ item.lesson_content }}</text>
+            <text v-if="item.remark" style="font-size:22rpx;color:#6B7280;display:block;margin-top:6rpx;">备注：{{ item.remark }}</text>
             <text v-if="item.cancel_reason" style="font-size:22rpx;color:#E53935;display:block;margin-top:8rpx;">取消原因：{{ item.cancel_reason }}</text>
             <text v-if="item.status === 'converted'" style="font-size:22rpx;color:#2E7D32;display:block;margin-top:8rpx;">
               已转正 {{ item.converted_class_name || item.class_name }}{{ item.converted_at ? ` · ${item.converted_at}` : '' }}
@@ -76,7 +76,7 @@
                 :key="c.id"
                 class="pill"
                 style="padding:12rpx 20rpx;"
-                :style="{ backgroundColor: applyForm.studentId === c.id ? '#FF704318' : '#F5F0EC', color: applyForm.studentId === c.id ? '#FF7043' : '#8D6E63' }"
+                :style="{ backgroundColor: applyForm.studentId === c.id ? '#3B9EEB18' : '#F5F7FA', color: applyForm.studentId === c.id ? '#3B9EEB' : '#6B7280' }"
                 @click="onPickChild(c.id)"
               >
                 <text style="font-size:22rpx;">{{ c.name }}</text>
@@ -86,7 +86,7 @@
           <view class="form-field">
             <text class="form-label">意向课班</text>
             <view v-if="classesLoading" style="padding:8rpx 0;">
-              <text style="font-size:22rpx;color:#8D6E63;">加载课班…</text>
+              <text style="font-size:22rpx;color:#6B7280;">加载课班…</text>
             </view>
             <view v-else-if="!trialClasses.length">
               <text style="font-size:22rpx;color:#E53935;">暂无可申请的试课课班</text>
@@ -97,7 +97,7 @@
                 :key="cls.id"
                 class="pill"
                 style="padding:12rpx 20rpx;"
-                :style="{ backgroundColor: applyForm.classId === cls.id ? '#FF704318' : '#F5F0EC', color: applyForm.classId === cls.id ? '#FF7043' : '#8D6E63' }"
+                :style="{ backgroundColor: applyForm.classId === cls.id ? '#3B9EEB18' : '#F5F7FA', color: applyForm.classId === cls.id ? '#3B9EEB' : '#6B7280' }"
                 @click="applyForm.classId = cls.id"
               >
                 <text style="font-size:22rpx;">{{ cls.name }}</text>
@@ -109,7 +109,7 @@
             <textarea class="form-input" style="height:140rpx;" :value="applyForm.remark" placeholder="过敏、方便时段等" @input="e => applyForm.remark = e.detail.value" />
           </view>
         </view>
-        <view class="primary-btn" style="background:linear-gradient(135deg,#FF7043 0%,#FF8A65 100%);" :style="{ opacity: busy ? 0.6 : 1 }" @click="submitApply">
+        <view class="primary-btn" style="background:linear-gradient(135deg,#3B9EEB 0%,#2F8FD8 100%);" :style="{ opacity: busy ? 0.6 : 1 }" @click="submitApply">
           <text style="color:white;font-size:30rpx;font-weight:800;">{{ busy ? '提交中…' : '提交申请' }}</text>
         </view>
       </view>
@@ -119,7 +119,7 @@
       <view class="sheet" @click.stop>
         <view class="sheet-handle" />
         <text class="sheet-title">取消试课</text>
-        <text style="font-size:24rpx;color:#8D6E63;display:block;margin-bottom:16rpx;">
+        <text style="font-size:24rpx;color:#6B7280;display:block;margin-bottom:16rpx;">
           {{ cancelTarget?.class_name || '试课' }} · {{ cancelTarget?.student_name || activeChild.name }}
         </text>
         <textarea class="form-input" style="height:140rpx;" :value="cancelReason" placeholder="取消原因（可选）" @input="e => cancelReason = e.detail.value" />

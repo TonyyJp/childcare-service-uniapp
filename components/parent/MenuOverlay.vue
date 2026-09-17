@@ -20,15 +20,15 @@
       <scroll-view scroll-y style="height:100%;">
         <view style="padding:32rpx 40rpx;">
           <view v-if="loading" style="padding:48rpx 0;text-align:center;">
-            <text style="font-size:26rpx;color:#8D6E63;">加载中…</text>
+            <text style="font-size:26rpx;color:#6B7280;">加载中…</text>
           </view>
 
           <view v-else-if="!meals.length" style="padding:64rpx 24rpx;text-align:center;">
             <view style="display:flex;justify-content:center;margin-bottom:16rpx;">
-              <MpIcon name="utensils" :size="56" color="#BDBDBD" />
+              <MpIcon name="utensils" :size="56" color="#9CA3AF" />
             </view>
-            <text style="font-size:28rpx;color:#2D1F18;font-weight:700;display:block;">本周食谱暂未发布</text>
-            <text style="font-size:22rpx;color:#BDBDBD;display:block;margin-top:12rpx;">机构发布后可在此查看每日餐点安排</text>
+            <text style="font-size:28rpx;color:#1F2937;font-weight:700;display:block;">本周食谱暂未发布</text>
+            <text style="font-size:22rpx;color:#9CA3AF;display:block;margin-top:12rpx;">机构发布后可在此查看每日餐点安排</text>
           </view>
 
           <view v-else>
@@ -37,13 +37,13 @@
                 <view style="width:72rpx;height:72rpx;border-radius:20rpx;display:flex;align-items:center;justify-content:center;background:#E3F2FD;flex-shrink:0;">
                   <MpIcon :name="m.icon" :size="36" color="#3B9EEB" />
                 </view>
-                <text style="font-size:28rpx;font-weight:800;color:#2D1F18;flex:1;">{{ m.label }}</text>
+                <text style="font-size:28rpx;font-weight:800;color:#1F2937;flex:1;">{{ m.label }}</text>
               </view>
               <view v-for="(dish, i) in m.dishLines" :key="i" style="display:flex;align-items:flex-start;gap:12rpx;margin-bottom:10rpx;">
                 <text style="font-size:20rpx;color:#3B9EEB;margin-top:4rpx;">•</text>
-                <text style="font-size:26rpx;color:#2D1F18;line-height:1.6;flex:1;">{{ dish }}</text>
+                <text style="font-size:26rpx;color:#1F2937;line-height:1.6;flex:1;">{{ dish }}</text>
               </view>
-              <text v-if="!m.dishLines.length" style="font-size:24rpx;color:#BDBDBD;">未填写</text>
+              <text v-if="!m.dishLines.length" style="font-size:24rpx;color:#9CA3AF;">未填写</text>
             </view>
           </view>
         </view>

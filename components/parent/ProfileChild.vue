@@ -23,7 +23,7 @@
               <MpIcon name="users" :size="56" color="#3B9EEB" />
             </view>
             <text class="empty-block__title">还没有宝贝</text>
-            <text class="empty-block__hint">向园所索取邀请码后即可添加</text>
+            <text class="empty-block__hint">向机构索取邀请码后即可添加</text>
             <view class="empty-block__btn" @click="openBindingCompose">
               <text class="empty-block__btn-text">添加宝贝</text>
             </view>
@@ -64,7 +64,7 @@
                   <view class="child-card__meta">
                     <text class="child-card__meta-item">{{ c.relationLabel }}</text>
                     <text class="child-card__meta-dot">·</text>
-                    <text class="child-card__meta-item child-card__meta-item--ellipsis">{{ c.tenant || '园所未关联' }}</text>
+                    <text class="child-card__meta-item child-card__meta-item--ellipsis">{{ c.tenant || '机构未关联' }}</text>
                   </view>
                   <view class="child-card__tags">
                     <view class="child-card__tag">
@@ -111,7 +111,7 @@
               <MpIcon name="plus" :size="28" color="#3B9EEB" />
               <text class="add-dashed__text">添加宝贝</text>
             </view>
-            <text class="add-hint">请向园所索取邀请码添加宝贝</text>
+            <text class="add-hint">请向机构索取邀请码添加宝贝</text>
           </template>
         </view>
       </scroll-view>
@@ -138,7 +138,7 @@
                   v-else
                   :name="editForm.gender ? childAvatarIcon(editForm.gender) : 'circle-user-round'"
                   :size="64"
-                  :color="editForm.gender ? childAvatarColor(editForm.gender) : '#8D6E63'"
+                  :color="editForm.gender ? childAvatarColor(editForm.gender) : '#6B7280'"
                 />
                 <view class="child-avatar-btn__badge"><text class="child-avatar-btn__badge-text">✎</text></view>
               </button>
@@ -764,8 +764,8 @@ onShow(async () => { if (props.active) await refreshPage() })
 /* —— 我的宝贝专属 —— */
 $accent: #3b9eeb;
 $accent-soft: #e3f2fd;
-$ink: #2d1f18;
-$muted: #8d6e63;
+$ink: #1f2937;
+$muted: #6b7280;
 $line: #e3f2fd;
 
 .child-card {
@@ -773,7 +773,7 @@ $line: #e3f2fd;
   border-radius: 28rpx;
   padding: 28rpx;
   margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 16rpx rgba(45, 31, 24, 0.06);
+  box-shadow: 0 2rpx 16rpx rgba(31, 41, 55, 0.06);
   border: 2rpx solid transparent;
 }
 
@@ -881,7 +881,7 @@ $line: #e3f2fd;
 .child-card__tag {
   padding: 6rpx 14rpx;
   border-radius: 12rpx;
-  background: #f0f7ff;
+  background: #f5f7fa;
 }
 
 .child-card__tag-text {
@@ -944,7 +944,7 @@ $line: #e3f2fd;
 
 .child-card__foot-hint-text {
   font-size: 22rpx;
-  color: #bdbdbd;
+  color: #9ca3af;
 }
 
 .empty-block__icon-wrap {
@@ -1028,7 +1028,7 @@ $line: #e3f2fd;
 }
 
 .form-placeholder {
-  color: #bdbdbd;
+  color: #9ca3af;
   font-size: 26rpx;
 }
 

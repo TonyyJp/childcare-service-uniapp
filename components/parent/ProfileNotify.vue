@@ -45,7 +45,7 @@
           <view class="list-card">
             <text class="list-card__title" style="margin-bottom:8rpx;">说明</text>
             <text class="list-card__sub" style="line-height:1.7;">
-              开启开关会弹出微信订阅授权；同意后园所可通过微信模板消息通知你。站内消息仍可在「站内消息」页查看。微信每次授权通常仅增加 1 次推送额度，重要场景可再次打开开关续订。
+              开启开关会弹出微信订阅授权；同意后机构可通过微信模板消息通知你。站内消息仍可在「站内消息」页查看。微信每次授权通常仅增加 1 次推送额度，重要场景可再次打开开关续订。
             </text>
           </view>
         </view>

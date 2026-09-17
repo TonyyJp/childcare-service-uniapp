@@ -25,20 +25,20 @@
         <scroll-view scroll-y class="profile-hub__scroll" :enable-flex="true">
           <view style="padding:24rpx 40rpx 48rpx;">
             <view v-for="group in profileMenuGroups" :key="group.title" style="margin-bottom:24rpx;">
-              <text style="font-size:22rpx;color:#8D6E63;font-weight:700;display:block;margin-bottom:12rpx;padding-left:8rpx;">{{ group.title }}</text>
+              <text style="font-size:22rpx;color:#6B7280;font-weight:700;display:block;margin-bottom:12rpx;padding-left:8rpx;">{{ group.title }}</text>
               <view class="card" style="overflow:hidden;">
                 <view v-for="(item, i) in group.items" :key="item.label"
                   style="display:flex;align-items:center;gap:20rpx;padding:24rpx;"
-                  :style="{ borderBottom: i < group.items.length - 1 ? '1rpx solid #F5F0EC' : 'none' }"
+                  :style="{ borderBottom: i < group.items.length - 1 ? '1rpx solid #F5F7FA' : 'none' }"
                   @click="goProfilePage(item.page)">
                   <view style="width:72rpx;height:72rpx;border-radius:20rpx;display:flex;align-items:center;justify-content:center;flex-shrink:0;" :style="{ backgroundColor: item.color + '18' }">
                     <MpIcon :name="item.icon" :size="32" :color="item.color" />
                   </view>
                   <view style="flex:1;">
-                    <text style="font-size:28rpx;font-weight:700;color:#2D1F18;display:block;">{{ item.label }}</text>
-                    <text style="font-size:22rpx;color:#8D6E63;">{{ item.sub }}</text>
+                    <text style="font-size:28rpx;font-weight:700;color:#1F2937;display:block;">{{ item.label }}</text>
+                    <text style="font-size:22rpx;color:#6B7280;">{{ item.sub }}</text>
                   </view>
-                  <text style="font-size:28rpx;color:#BDBDBD;">›</text>
+                  <text style="font-size:28rpx;color:#9CA3AF;">›</text>
                 </view>
               </view>
             </view>
@@ -84,7 +84,7 @@ const profileMenuGroups = computed(() => [
     title: '支持',
     items: [
       { icon: 'circle-help', label: '帮助与反馈', sub: '常见问题、意见反馈', page: 'help', color: '#FFA726' },
-      { icon: 'info', label: '关于智优', sub: '版本 1.0.0', page: 'about', color: '#8D6E63' },
+      { icon: 'info', label: '关于智优', sub: '版本 1.0.0', page: 'about', color: '#6B7280' },
     ],
   },
 ])
@@ -108,7 +108,7 @@ async function doLogout() {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background: #F0F7FF;
+  background: #F5F7FA;
   overflow: hidden;
   box-sizing: border-box;
 }
