@@ -67,7 +67,7 @@
             class="nav-icon"
             :name="tab.icon"
             :size="44"
-            :color="activeTab === tab.id ? accentColor : '#8D6E63'"
+            :color="activeTab === tab.id ? accentColor : '#9CA3AF'"
           />
           <view
             v-if="tab.id === 'feed' && feedCommentUnread > 0"
@@ -80,7 +80,7 @@
             style="position:absolute;top:-4rpx;right:-4rpx;width:16rpx;height:16rpx;border-radius:8rpx;background:#E53935;"
           />
         </view>
-        <text class="nav-label" :style="{ color: activeTab === tab.id ? accentColor : '#8D6E63', fontWeight: activeTab === tab.id ? '700' : '500' }">{{ tab.label }}</text>
+        <text class="nav-label" :style="{ color: activeTab === tab.id ? accentColor : '#9CA3AF', fontWeight: activeTab === tab.id ? '700' : '500' }">{{ tab.label }}</text>
         <view v-if="activeTab === tab.id" class="nav-dot" :style="{ backgroundColor: accentColor }" />
       </view>
     </view>
@@ -257,9 +257,9 @@ watch(contentAlive, (alive) => {
 })
 
 const innerWrapStyle = computed(() => {
-  if (String(innerKey.value).startsWith('feed-')) return { background: '#f0f7ff' }
+  if (String(innerKey.value).startsWith('feed-')) return { background: '#f5f7fa' }
   if (innerKey.value === 'menu' || String(innerKey.value).startsWith('profile:')) {
-    return { background: '#f0f7ff' }
+    return { background: '#f5f7fa' }
   }
   return { background: '#ffffff' }
 })

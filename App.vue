@@ -13,13 +13,13 @@ export default {
 <style>
 page {
   font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
-  background-color: #FFF8F2;
+  background-color: #F5F7FA;
 }
 
 .card {
   background: #fff;
   border-radius: 16rpx;
-  box-shadow: 0 2rpx 16rpx rgba(45,31,24,0.06);
+  box-shadow: 0 2rpx 16rpx rgba(31,41,55,0.06);
 }
 
 .pill {

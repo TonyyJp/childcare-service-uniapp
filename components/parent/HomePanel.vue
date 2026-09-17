@@ -40,7 +40,7 @@
               <text style="font-size:22rpx;font-weight:700;">{{ activeChild.checkinLabel }}</text>
             </view>
             <view v-if="activeChild.inGarden" class="pill" style="background:rgba(255,255,255,0.18);color:white;">
-              <text style="font-size:22rpx;">在园中</text>
+              <text style="font-size:22rpx;">在托中</text>
             </view>
           </view>
         </view>
@@ -65,21 +65,21 @@
       </view>
     </view>
 
-    <scroll-view scroll-y style="flex:1;height:0;background:#F0F7FF;">
+    <scroll-view scroll-y style="flex:1;height:0;background:#F5F7FA;">
       <view style="padding:24rpx 40rpx;">
         <view v-if="homeLoading" style="padding:40rpx 0;text-align:center;">
-          <text style="color:#8D6E63;font-size:26rpx;">加载中…</text>
+          <text style="color:#6B7280;font-size:26rpx;">加载中…</text>
         </view>
 
         <view v-else-if="!currentItems.length" style="padding:48rpx 24rpx;text-align:center;background:white;border-radius:20rpx;margin-bottom:20rpx;">
-          <text style="font-size:28rpx;color:#8D6E63;">暂无{{ dayTab === 'today' ? '今日' : '昨日' }}记录</text>
-          <text style="font-size:22rpx;color:#BDBDBD;display:block;margin-top:12rpx;">教师点名后，考勤会出现在这里</text>
+          <text style="font-size:28rpx;color:#6B7280;">暂无{{ dayTab === 'today' ? '今日' : '昨日' }}记录</text>
+          <text style="font-size:22rpx;color:#9CA3AF;display:block;margin-top:12rpx;">老师签到后，考勤记录会显示在这里</text>
         </view>
 
         <view v-for="item in visibleItems" :key="item.id">
           <view style="display:flex;gap:20rpx;margin-bottom:16rpx;">
             <view style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:88rpx;">
-              <text style="font-size:20rpx;color:#BDBDBD;line-height:40rpx;">{{ item.time }}</text>
+              <text style="font-size:20rpx;color:#9CA3AF;line-height:40rpx;">{{ item.time }}</text>
               <view style="width:48rpx;height:48rpx;border-radius:24rpx;display:flex;align-items:center;justify-content:center;margin-top:4rpx;" :style="{ backgroundColor: typeConfig[item.type].bg }">
                 <MpIcon :name="typeConfig[item.type].icon" :size="28" :color="typeConfig[item.type].color" />
               </view>
@@ -94,9 +94,9 @@
               <view v-else-if="item.type === 'homework'" class="card" style="padding:20rpx 24rpx;">
                 <view style="display:flex;align-items:center;gap:16rpx;margin-bottom:12rpx;">
                   <view class="pill" :style="{ backgroundColor: item.subjectColor + '18', color: item.subjectColor }"><text style="font-size:22rpx;font-weight:700;">{{ item.subject }}</text></view>
-                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;flex:1;">{{ item.hwTitle }}</text>
+                  <text style="font-size:26rpx;font-weight:700;color:#1F2937;flex:1;">{{ item.hwTitle }}</text>
                 </view>
-                <text style="font-size:24rpx;color:#8D6E63;line-height:1.6;">{{ item.hwComment }}</text>
+                <text style="font-size:24rpx;color:#6B7280;line-height:1.6;">{{ item.hwComment }}</text>
               </view>
 
               <view v-else-if="item.type === 'meal'" class="card" style="padding:20rpx 24rpx;">
@@ -105,9 +105,9 @@
                     <MpIcon :name="item.mealIcon || 'soup'" :size="36" color="#2E7D32" />
                   </view>
                   <view style="flex:1;">
-                    <text style="font-size:28rpx;font-weight:700;color:#2D1F18;display:block;margin-bottom:8rpx;">{{ item.mealName }}</text>
-                    <text style="font-size:22rpx;color:#8D6E63;">{{ item.mealItems }}</text>
-                    <text v-if="item.mealContent" style="font-size:24rpx;color:#2D1F18;line-height:1.6;display:block;margin-top:8rpx;">{{ item.mealContent }}</text>
+                    <text style="font-size:28rpx;font-weight:700;color:#1F2937;display:block;margin-bottom:8rpx;">{{ item.mealName }}</text>
+                    <text style="font-size:22rpx;color:#6B7280;">{{ item.mealItems }}</text>
+                    <text v-if="item.mealContent" style="font-size:24rpx;color:#1F2937;line-height:1.6;display:block;margin-top:8rpx;">{{ item.mealContent }}</text>
                   </view>
                 </view>
                 <scroll-view v-if="item.photos?.length" scroll-x style="white-space:nowrap;">
@@ -119,8 +119,8 @@
 
               <view v-else-if="item.type === 'notice'" class="card" style="padding:20rpx 24rpx;border-left:6rpx solid #3B9EEB;" @click="item.id === 'menu' && openMenu()">
                 <view class="pill" style="background:#E3F2FD;color:#3B9EEB;margin-bottom:12rpx;"><text style="font-size:20rpx;">{{ item.noticeSender }}</text></view>
-                <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;margin-bottom:8rpx;">{{ item.noticeTitle }}</text>
-                <text style="font-size:24rpx;color:#8D6E63;line-height:1.6;">{{ item.noticeBody }}</text>
+                <text style="font-size:26rpx;font-weight:700;color:#1F2937;display:block;margin-bottom:8rpx;">{{ item.noticeTitle }}</text>
+                <text style="font-size:24rpx;color:#6B7280;line-height:1.6;">{{ item.noticeBody }}</text>
                 <text v-if="item.id === 'menu'" style="font-size:22rpx;color:#3B9EEB;display:block;margin-top:8rpx;">点击查看完整食谱 ›</text>
               </view>
             </view>
@@ -133,7 +133,7 @@
         </view>
 
         <view style="margin-bottom:28rpx;">
-          <text style="font-size:26rpx;font-weight:800;color:#2D1F18;display:block;margin-bottom:16rpx;">快捷功能</text>
+          <text style="font-size:26rpx;font-weight:800;color:#1F2937;display:block;margin-bottom:16rpx;">快捷功能</text>
           <view style="display:grid;grid-template-columns:repeat(4,1fr);gap:16rpx;">
             <view
               v-for="f in features"
@@ -153,8 +153,8 @@
         <view style="margin-bottom:24rpx;">
           <view style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16rpx;">
             <view style="display:flex;align-items:center;gap:10rpx;">
-              <MpIcon name="building-2" :size="32" color="#2D1F18" />
-              <text style="font-size:26rpx;font-weight:800;color:#2D1F18;">机构课程</text>
+              <MpIcon name="building-2" :size="32" color="#1F2937" />
+              <text style="font-size:26rpx;font-weight:800;color:#1F2937;">机构课程</text>
             </view>
             <text
               style="font-size:22rpx;"
@@ -171,15 +171,15 @@
                 <view style="padding:20rpx;">
                   <view style="display:flex;align-items:center;gap:8rpx;margin-bottom:8rpx;flex-wrap:wrap;">
                     <view class="pill" style="background:#3B9EEB18;color:#3B9EEB;"><text style="font-size:20rpx;">{{ c.tag || '课程' }}</text></view>
-                    <text v-if="c.sessions != null && c.sessions !== ''" style="font-size:20rpx;color:#8D6E63;">{{ c.sessions }}课时</text>
+                    <text v-if="c.sessions != null && c.sessions !== ''" style="font-size:20rpx;color:#6B7280;">{{ c.sessions }}课时</text>
                   </view>
-                  <text style="font-size:26rpx;font-weight:800;color:#2D1F18;display:block;">{{ c.title }}</text>
-                  <text v-if="c.age" style="font-size:22rpx;color:#8D6E63;display:block;margin-top:4rpx;">{{ c.age }}</text>
+                  <text style="font-size:26rpx;font-weight:800;color:#1F2937;display:block;">{{ c.title }}</text>
+                  <text v-if="c.age" style="font-size:22rpx;color:#6B7280;display:block;margin-top:4rpx;">{{ c.age }}</text>
                   <text style="font-size:28rpx;font-weight:800;display:block;margin-top:8rpx;color:#3B9EEB;">{{ c.price }}</text>
                 </view>
               </view>
               <view v-if="!courses.length" style="padding:32rpx 16rpx;">
-                <text style="font-size:24rpx;color:#8D6E63;">暂无在招课程</text>
+                <text style="font-size:24rpx;color:#6B7280;">暂无在招课程</text>
               </view>
             </view>
           </scroll-view>
@@ -255,7 +255,7 @@ const timelineExpanded = ref(false)
 
 const typeConfig = {
   checkin:  { icon: 'circle-check', label: '签到',  color: '#2E7D32', bg: '#C8E6C9' },
-  checkout: { icon: 'door-open', label: '离园',  color: '#1565C0', bg: '#BBDEFB' },
+  checkout: { icon: 'door-open', label: '签退',  color: '#1565C0', bg: '#BBDEFB' },
   homework: { icon: 'clipboard-list', label: '作业',  color: '#E65100', bg: '#FFF3E0' },
   meal:     { icon: 'soup', label: '餐食',  color: '#2E7D32', bg: '#F1F8E9' },
   notice:   { icon: 'megaphone', label: '通知',  color: '#1565C0', bg: '#E3F2FD' },
@@ -325,5 +325,5 @@ onShow(() => {
   align-items: center;
   justify-content: center;
 }
-.feature-label { font-size: 22rpx; color: #5D4037; font-weight: 600; }
+.feature-label { font-size: 22rpx; color: #6B7280; font-weight: 600; }
 </style>

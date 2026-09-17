@@ -195,7 +195,7 @@ export function createParentContext() {
           id: `${prefix}-in-${idx}`,
           type: 'checkin',
           time: row.arrive_time || '--:--',
-          title: `${period}到园`,
+          title: `${period}签到`,
           checkinMethod: `${method}${row.is_late ? ' · 迟到' : ''}`,
         })
       } else if (row.status === 'waiting') {
@@ -222,7 +222,7 @@ export function createParentContext() {
           time: '--:--',
           noticeSender: period,
           noticeTitle: '缺勤',
-          noticeBody: `${period}标记为缺勤`,
+          noticeBody: `${period}标���为缺勤`,
         })
       }
       if (row.leave_time || row.status === 'left') {
@@ -230,8 +230,8 @@ export function createParentContext() {
           id: `${prefix}-out-${idx}`,
           type: 'checkout',
           time: row.leave_time || '--:--',
-          title: `${period}离园`,
-          checkinMethod: row.pickup_person?.name ? `${row.pickup_person.name}接离` : '已离园',
+          title: `${period}签退`,
+          checkinMethod: row.pickup_person?.name ? `${row.pickup_person.name}接走` : '已签退',
         })
       }
     })
@@ -524,8 +524,8 @@ export function createParentContext() {
   const NOTIFY_PREF_KEY = 'parent_notify_prefs'
   const defaultNotifyPrefs = () => ([
     { key: 'homework', label: '作业提醒', desc: '布置、批改与截止提醒', on: false, busy: false },
-    { key: 'attendance', label: '考勤提醒', desc: '到园、离园与请假结果', on: false, busy: false },
-    { key: 'notice', label: '园所通知', desc: '机构通知与活动安排', on: false, busy: false },
+    { key: 'attendance', label: '考勤提醒', desc: '签到、签退与请假结果', on: false, busy: false },
+    { key: 'notice', label: '机构通知', desc: '机构通知与活动安排', on: false, busy: false },
     { key: 'daily', label: '日常动态', desc: '班级日常发布提醒', on: false, busy: false },
   ])
   function loadNotifyPrefs() {
