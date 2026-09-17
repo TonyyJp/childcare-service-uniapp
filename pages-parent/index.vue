@@ -1,10 +1,12 @@
 <template>
   <view class="page" :style="navSafeStyle">
     <view class="content">
-      <HomePanel v-if="shellTab === 'home'" :active="shellTab === 'home'" />
-      <SchedulePanel v-else-if="shellTab === 'schedule'" :active="true" />
-      <FeedPanel v-else-if="shellTab === 'feed'" :active="true" />
-      <ProfileHub v-else-if="shellTab === 'me'" />
+      <view class="shell-anim" :key="shellTab" style="height:100%;">
+        <HomePanel v-if="shellTab === 'home'" :active="true" />
+        <SchedulePanel v-else-if="shellTab === 'schedule'" :active="true" />
+        <FeedPanel v-else-if="shellTab === 'feed'" :active="true" />
+        <ProfileHub v-else-if="shellTab === 'me'" />
+      </view>
 
       <!-- 小程序端：page-container 承接所有内页右滑 / 系统返回 -->
       <!-- #ifndef H5 -->
@@ -63,6 +65,7 @@
 
       <!-- H5 端：page-container 不受支持，改用普通全屏浮层承接内页 -->
       <!-- #ifdef H5 -->
+      <transition name="h5-slide">
       <view v-if="innerShow" class="h5-inner-overlay" :style="innerWrapStyle">
         <view class="profile-sub-wrap" :style="innerWrapStyle">
           <ProfileChild v-if="innerKey === 'profile:child'" :active="innerShow" />
@@ -105,11 +108,12 @@
           />
         </view>
       </view>
+      </transition>
       <!-- #endif -->
     </view>
 
     <view v-if="showBottomNav" class="bottom-nav">
-      <view v-for="tab in navTabs" :key="tab.id" class="nav-item" @click="activeTab = tab.id">
+      <view v-for="tab in navTabs" :key="tab.id" class="nav-item" :class="{ 'nav-item--active': activeTab === tab.id }" @click="activeTab = tab.id">
         <view style="position:relative;display:inline-flex;">
           <MpIcon
             class="nav-icon"
@@ -334,6 +338,22 @@ onShow(() => {
   overflow: hidden;
 }
 
+/* 主 tab 切换入场：淡入 + 轻微上移（CSS animation，跨端安全） */
+.shell-anim {
+  animation: shellIn 0.24s ease;
+}
+
+@keyframes shellIn {
+  from {
+    opacity: 0;
+    transform: translateY(12rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* #ifdef H5 */
 .h5-inner-overlay {
   position: fixed;
@@ -343,16 +363,20 @@ onShow(() => {
   bottom: 0;
   z-index: 50;
   overflow: hidden;
-  animation: h5InnerSlideIn 0.24s ease;
 }
 
-@keyframes h5InnerSlideIn {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
+/* H5 内页：入场 / 退场对称右滑，贴近原生二级页手感 */
+.h5-slide-enter-active {
+  transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.h5-slide-leave-active {
+  transition: transform 0.24s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.h5-slide-enter-from,
+.h5-slide-leave-to {
+  transform: translateX(100%);
 }
 /* #endif */
 </style>
