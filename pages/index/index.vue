@@ -71,7 +71,7 @@
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { getToken, clearSession, consumeForceReselect } from '../../utils/auth.js'
-import { DEBUG_MODE } from '../../config.js'
+import { DEBUG_MODE, DEBUG_LOGIN_PHONE } from '../../config.js'
 import { ensureWechatRuntime, getMpDisplayName } from '../../utils/wechatRuntime.js'
 import {
   enterAsRole,
@@ -251,7 +251,7 @@ async function selectRole(id) {
     loading.value = true
     uni.showLoading({ title: '开发直登中', mask: true })
     try {
-      await loginWithDev(id)
+      await loginWithDev(id, DEBUG_LOGIN_PHONE)
       loggedIn.value = true
       goHome(id)
     } catch (err) {
@@ -282,7 +282,7 @@ async function onGetPhoneNumber(e) {
   const phoneCode = detail.code
   if (!phoneCode) {
     uni.showToast({
-      title: '未拿到手机号凭证，请升级基础库或真机重试',
+      title: '未拿���手机号凭证，请升级基础库或真机重试',
       icon: 'none',
       duration: 2500,
     })
