@@ -6,7 +6,8 @@
       <FeedPanel v-else-if="shellTab === 'feed'" :active="true" />
       <ProfileHub v-else-if="shellTab === 'me'" />
 
-      <!-- 全页唯一 page-container：承接所有内页右滑 / 系统返回 -->
+      <!-- 小程序端：page-container 承接所有内页右滑 / 系统返回 -->
+      <!-- #ifndef H5 -->
       <page-container
         :show="innerShow"
         :position="pcProps.position"
@@ -58,6 +59,53 @@
           />
         </view>
       </page-container>
+      <!-- #endif -->
+
+      <!-- H5 端：page-container 不受支持，改用普通全屏浮层承接内页 -->
+      <!-- #ifdef H5 -->
+      <view v-if="innerShow" class="h5-inner-overlay" :style="innerWrapStyle">
+        <view class="profile-sub-wrap" :style="innerWrapStyle">
+          <ProfileChild v-if="innerKey === 'profile:child'" :active="innerShow" />
+          <ProfilePickup v-else-if="innerKey === 'profile:pickup'" :active="innerShow" />
+          <ProfileFace v-else-if="innerKey === 'profile:face'" />
+          <ProfileLeave v-else-if="innerKey === 'profile:leave'" :active="innerShow" />
+          <ProfileLessonPackage v-else-if="innerKey === 'profile:lesson-package'" :active="innerShow" />
+          <ProfileTrial v-else-if="innerKey === 'profile:trial'" :active="innerShow" />
+          <ProfileInfo v-else-if="innerKey === 'profile:info'" :active="innerShow" />
+          <ProfileNotify v-else-if="innerKey === 'profile:notify'" :active="innerShow" />
+          <ProfilePrivacy v-else-if="innerKey === 'profile:privacy'" />
+          <ProfileHelp v-else-if="innerKey === 'profile:help'" :active="innerShow" />
+          <ProfileSatisfaction v-else-if="innerKey === 'profile:satisfaction'" :active="innerShow" />
+          <ProfileAbout v-else-if="innerKey === 'profile:about'" />
+          <MessagesPanel v-else-if="innerKey === 'profile:messages'" :active="innerShow" :show-back="true" />
+
+          <HomeworkPanel v-else-if="innerKey === 'tab:homework'" :active="true" />
+          <CourseListPanel v-else-if="innerKey === 'tab:courses'" :active="true" />
+          <GrowthAlbumPanel v-else-if="innerKey === 'tab:growth-album'" :active="true" />
+          <GrowthPanel v-else-if="innerKey === 'tab:growth'" :active="true" />
+
+          <CourseDetailOverlay
+            v-else-if="innerKey === 'course-detail'"
+            :course="selectedCourse || courseSnap"
+            @close="selectedCourse = null"
+          />
+          <MenuOverlay v-else-if="innerKey === 'menu'" @close="menuVisible = false" />
+
+          <FeedSubPages
+            v-else-if="innerKey === 'feed-bell'"
+            mode="bell"
+            @close="onFeedSubClose"
+            @opened-detail="onFeedOpenedDetail"
+          />
+          <FeedSubPages
+            v-else-if="innerKey === 'feed-detail'"
+            mode="detail"
+            :post-id="feedDetailPostId || feedPostSnap"
+            @close="onFeedSubClose"
+          />
+        </view>
+      </view>
+      <!-- #endif -->
     </view>
 
     <view v-if="showBottomNav" class="bottom-nav">
@@ -285,4 +333,26 @@ onShow(() => {
   position: relative;
   overflow: hidden;
 }
+
+/* #ifdef H5 */
+.h5-inner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  overflow: hidden;
+  animation: h5InnerSlideIn 0.24s ease;
+}
+
+@keyframes h5InnerSlideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+/* #endif */
 </style>
