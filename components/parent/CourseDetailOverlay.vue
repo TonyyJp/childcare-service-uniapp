@@ -46,24 +46,76 @@
               <text style="font-size:26rpx;color:#2D1F18;line-height:1.7;white-space:pre-wrap;flex:1;">{{ o.content }}</text>
             </view>
           </view>
-          <view class="primary-btn" style="margin-top:32rpx;background:linear-gradient(135deg,#3B9EEB 0%,#3B9EEBCC 100%);" :style="{ opacity: busy ? 0.6 : 1 }" @click="consult">
+          <view v-if="showTrialApply" class="primary-btn" style="margin-top:32rpx;background:linear-gradient(135deg,#FF7043 0%,#FF8A65 100%);" :style="{ opacity: busy ? 0.6 : 1 }" @click="openTrialApply">
+            <text style="color:white;font-size:30rpx;font-weight:800;">申请试课</text>
+          </view>
+          <view class="primary-btn" :style="{ marginTop: showTrialApply ? '20rpx' : '32rpx', background: 'linear-gradient(135deg,#3B9EEB 0%,#3B9EEBCC 100%)', opacity: busy ? 0.6 : 1 }" @click="consult">
             <text style="color:white;font-size:30rpx;font-weight:800;">立即咨询报名</text>
           </view>
         </view>
       </scroll-view>
+    </view>
+
+    <view v-if="showApplySheet" class="overlay" style="z-index:80;" @click="showApplySheet = false">
+    <view class="sheet" @click.stop>
+      <view class="sheet-handle" />
+      <text class="sheet-title">申请试课</text>
+      <text style="font-size:24rpx;color:#8D6E63;display:block;margin-bottom:20rpx;">
+        {{ course?.title || '兴趣课' }} · 课次由机构确认后通知
+      </text>
+      <view style="background:#F0F7FF;border-radius:24rpx;padding:24rpx 24rpx 8rpx;margin-bottom:20rpx;">
+        <view style="margin-bottom:20rpx;">
+          <text style="font-size:24rpx;font-weight:700;color:#8D6E63;display:block;margin-bottom:8rpx;">试课宝贝</text>
+          <view style="display:flex;gap:12rpx;flex-wrap:wrap;">
+            <view
+              v-for="c in childOptions"
+              :key="c.id"
+              class="pill"
+              style="padding:12rpx 20rpx;"
+              :style="{ backgroundColor: applyForm.studentId === c.id ? '#FF704318' : '#F5F0EC', color: applyForm.studentId === c.id ? '#FF7043' : '#8D6E63' }"
+              @click="applyForm.studentId = c.id"
+            >
+              <text style="font-size:22rpx;">{{ c.name }}</text>
+            </view>
+          </view>
+          <text v-if="!childOptions.length" style="font-size:22rpx;color:#E53935;">请先绑定宝贝</text>
+        </view>
+        <view style="margin-bottom:20rpx;">
+          <text style="font-size:24rpx;font-weight:700;color:#8D6E63;display:block;margin-bottom:8rpx;">备注（可选）</text>
+          <textarea
+            class="form-input"
+            style="height:140rpx;"
+            :value="applyForm.remark"
+            placeholder="过敏、方便时段等"
+            @input="e => applyForm.remark = e.detail.value"
+          />
+        </view>
+      </view>
+      <view class="primary-btn" style="background:linear-gradient(135deg,#FF7043 0%,#FF8A65 100%);" :style="{ opacity: busy ? 0.6 : 1 }" @click="submitTrialApply">
+        <text style="color:white;font-size:30rpx;font-weight:800;">{{ busy ? '提交中…' : '提交申请' }}</text>
+      </view>
+    </view>
     </view>
   </view>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue'
-import { createTicket } from '../../api/parent.js'
+import { createTicket, createTrialBooking } from '../../api/parent.js'
 import { PARENT_CTX_KEY } from './parentContext.js'
 
 const props = defineProps({ course: Object })
 const emit = defineEmits(['close'])
 const ctx = inject(PARENT_CTX_KEY)
 const busy = ref(false)
+const showApplySheet = ref(false)
+const applyForm = ref({ studentId: null, remark: '' })
+
+const childOptions = computed(() => ctx.childOptions.value || [])
+const showTrialApply = computed(() => {
+  const c = props.course
+  return !!(c && c.trial_apply_enabled && c.trial_class_id)
+})
 
 /**
  * rich-text 不继承外层 CSS，需给 img 写内联样式才能限宽。
@@ -111,6 +163,45 @@ async function consult() {
     })
     emit('close')
     uni.showToast({ title: '已提交咨询', icon: 'success' })
+  } catch (e) {
+    uni.showToast({ title: e.message || '提交失败', icon: 'none' })
+  } finally {
+    busy.value = false
+  }
+}
+
+function openTrialApply() {
+  if (!showTrialApply.value || busy.value) return
+  if (!childOptions.value.length) {
+    uni.showToast({ title: '请先绑定宝贝', icon: 'none' })
+    return
+  }
+  applyForm.value = {
+    studentId: ctx.activeChildId.value || childOptions.value[0]?.id || null,
+    remark: '',
+  }
+  showApplySheet.value = true
+}
+
+async function submitTrialApply() {
+  const c = props.course
+  if (!c || busy.value) return
+  const studentId = applyForm.value.studentId
+  if (!studentId) {
+    uni.showToast({ title: '请选择宝贝', icon: 'none' })
+    return
+  }
+  busy.value = true
+  try {
+    await createTrialBooking({
+      student_id: studentId,
+      class_id: c.trial_class_id,
+      remark: (applyForm.value.remark || '').trim() || undefined,
+      contact_name: ctx.parentName.value || undefined,
+      contact_phone: ctx.parentPhone.value || undefined,
+    })
+    showApplySheet.value = false
+    uni.showToast({ title: '已提交试课申请', icon: 'success' })
   } catch (e) {
     uni.showToast({ title: e.message || '提交失败', icon: 'none' })
   } finally {

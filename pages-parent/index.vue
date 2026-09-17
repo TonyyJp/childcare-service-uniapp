@@ -1,49 +1,63 @@
 <template>
   <view class="page" :style="navSafeStyle">
     <view class="content">
-      <HomePanel v-if="activeTab === 'home'" :active="activeTab === 'home'" />
-      <HomeworkPanel v-else-if="activeTab === 'homework'" :active="true" />
-      <CourseListPanel v-else-if="activeTab === 'courses'" :active="true" />
-      <GrowthAlbumPanel v-else-if="activeTab === 'growth-album'" :active="true" />
-      <SchedulePanel v-else-if="activeTab === 'schedule'" :active="true" />
-      <GrowthPanel v-else-if="activeTab === 'growth'" :active="true" />
-      <FeedPanel v-else-if="activeTab === 'feed'" :active="true" />
-      <template v-else-if="activeTab === 'me'">
-        <!-- 子页叠在 Hub 上；page-container 接管右滑/系统返回，避免直接退出小程序 -->
-        <ProfileHub />
-        <page-container
-          :show="profileSubShow"
-          position="right"
-          :overlay="true"
-          :round="false"
-          :close-on-slide-down="false"
-          custom-style="width:100%;height:100%;"
-          @beforeleave="onProfileSubBeforeLeave"
-          @afterleave="onProfileSubAfterLeave"
-        >
-          <view class="profile-sub-wrap">
-            <ProfileChild v-if="profileSubKey === 'child'" :active="profileSubShow" />
-            <ProfilePickup v-else-if="profileSubKey === 'pickup'" :active="profileSubShow" />
-            <ProfileFace v-else-if="profileSubKey === 'face'" />
-            <ProfileLeave v-else-if="profileSubKey === 'leave'" :active="profileSubShow" />
-            <ProfileInfo v-else-if="profileSubKey === 'info'" :active="profileSubShow" />
-            <ProfileNotify v-else-if="profileSubKey === 'notify'" :active="profileSubShow" />
-            <ProfilePrivacy v-else-if="profileSubKey === 'privacy'" />
-            <ProfileHelp v-else-if="profileSubKey === 'help'" :active="profileSubShow" />
-            <ProfileSatisfaction v-else-if="profileSubKey === 'satisfaction'" :active="profileSubShow" />
-            <ProfileAbout v-else-if="profileSubKey === 'about'" />
-            <MessagesPanel v-else-if="profileSubKey === 'messages'" :active="profileSubShow" :show-back="true" />
-          </view>
-        </page-container>
-      </template>
+      <HomePanel v-if="shellTab === 'home'" :active="shellTab === 'home'" />
+      <SchedulePanel v-else-if="shellTab === 'schedule'" :active="true" />
+      <FeedPanel v-else-if="shellTab === 'feed'" :active="true" />
+      <ProfileHub v-else-if="shellTab === 'me'" />
 
-      <CourseDetailOverlay
-        v-if="selectedCourse"
-        :course="selectedCourse"
-        @close="selectedCourse = null"
-      />
+      <!-- 全页唯一 page-container：承接所有内页右滑 / 系统返回 -->
+      <page-container
+        :show="innerShow"
+        :position="pcProps.position"
+        :overlay="pcProps.overlay"
+        :round="pcProps.round"
+        :close-on-slide-down="pcProps.closeOnSlideDown"
+        :custom-style="pcProps.customStyle"
+        @beforeleave="onInnerBeforeLeave"
+        @afterleave="onInnerAfterLeave"
+      >
+        <view class="profile-sub-wrap" :style="innerWrapStyle">
+          <ProfileChild v-if="innerKey === 'profile:child'" :active="innerShow" />
+          <ProfilePickup v-else-if="innerKey === 'profile:pickup'" :active="innerShow" />
+          <ProfileFace v-else-if="innerKey === 'profile:face'" />
+          <ProfileLeave v-else-if="innerKey === 'profile:leave'" :active="innerShow" />
+          <ProfileLessonPackage v-else-if="innerKey === 'profile:lesson-package'" :active="innerShow" />
+          <ProfileTrial v-else-if="innerKey === 'profile:trial'" :active="innerShow" />
+          <ProfileInfo v-else-if="innerKey === 'profile:info'" :active="innerShow" />
+          <ProfileNotify v-else-if="innerKey === 'profile:notify'" :active="innerShow" />
+          <ProfilePrivacy v-else-if="innerKey === 'profile:privacy'" />
+          <ProfileHelp v-else-if="innerKey === 'profile:help'" :active="innerShow" />
+          <ProfileSatisfaction v-else-if="innerKey === 'profile:satisfaction'" :active="innerShow" />
+          <ProfileAbout v-else-if="innerKey === 'profile:about'" />
+          <MessagesPanel v-else-if="innerKey === 'profile:messages'" :active="innerShow" :show-back="true" />
 
-      <MenuOverlay v-if="menuVisible" @close="menuVisible = false" />
+          <HomeworkPanel v-else-if="innerKey === 'tab:homework'" :active="true" />
+          <CourseListPanel v-else-if="innerKey === 'tab:courses'" :active="true" />
+          <GrowthAlbumPanel v-else-if="innerKey === 'tab:growth-album'" :active="true" />
+          <GrowthPanel v-else-if="innerKey === 'tab:growth'" :active="true" />
+
+          <CourseDetailOverlay
+            v-else-if="innerKey === 'course-detail'"
+            :course="selectedCourse || courseSnap"
+            @close="selectedCourse = null"
+          />
+          <MenuOverlay v-else-if="innerKey === 'menu'" @close="menuVisible = false" />
+
+          <FeedSubPages
+            v-else-if="innerKey === 'feed-bell'"
+            mode="bell"
+            @close="onFeedSubClose"
+            @opened-detail="onFeedOpenedDetail"
+          />
+          <FeedSubPages
+            v-else-if="innerKey === 'feed-detail'"
+            mode="detail"
+            :post-id="feedDetailPostId || feedPostSnap"
+            @close="onFeedSubClose"
+          />
+        </view>
+      </page-container>
     </view>
 
     <view v-if="showBottomNav" class="bottom-nav">
@@ -76,7 +90,8 @@
 <script setup>
 import { computed, provide, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
-import { navSafeCssVars } from '../utils/safeArea.js'
+import { navSafeCssVars } from './utils/safeArea.js'
+import { MP_PAGE_CONTAINER_PROPS, createPageContainerBridge } from './utils/mpPageContainer.js'
 import { createParentContext, PARENT_CTX_KEY } from '../components/parent/parentContext.js'
 import HomePanel from '../components/parent/HomePanel.vue'
 import HomeworkPanel from '../components/parent/HomeworkPanel.vue'
@@ -88,11 +103,14 @@ import FeedPanel from '../components/parent/FeedPanel.vue'
 import MessagesPanel from '../components/parent/MessagesPanel.vue'
 import CourseDetailOverlay from '../components/parent/CourseDetailOverlay.vue'
 import MenuOverlay from '../components/parent/MenuOverlay.vue'
+import FeedSubPages from '../components/parent/FeedSubPages.vue'
 import ProfileHub from '../components/parent/ProfileHub.vue'
 import ProfileChild from '../components/parent/ProfileChild.vue'
 import ProfilePickup from '../components/parent/ProfilePickup.vue'
 import ProfileFace from '../components/parent/ProfileFace.vue'
 import ProfileLeave from '../components/parent/ProfileLeave.vue'
+import ProfileLessonPackage from '../components/parent/ProfileLessonPackage.vue'
+import ProfileTrial from '../components/parent/ProfileTrial.vue'
 import ProfileInfo from '../components/parent/ProfileInfo.vue'
 import ProfileNotify from '../components/parent/ProfileNotify.vue'
 import ProfilePrivacy from '../components/parent/ProfilePrivacy.vue'
@@ -111,10 +129,20 @@ const {
   profilePage,
   selectedCourse,
   menuVisible,
+  feedDetailVisible,
+  feedBellVisible,
+  feedDetailPostId,
+  closeFeedDetail,
+  closeFeedBell,
+  openFeedDetail,
   feedDailyUnread,
   feedCommentUnread,
   refreshUnreadCount,
 } = ctx
+
+const MAIN_TABS = ['home', 'schedule', 'feed', 'me']
+const INNER_TABS = ['homework', 'courses', 'growth-album', 'growth']
+const pcProps = MP_PAGE_CONTAINER_PROPS
 
 const navTabs = [
   { id: 'home', label: '首页', icon: 'home' },
@@ -123,30 +151,118 @@ const navTabs = [
   { id: 'me', label: '我的', icon: 'user' },
 ]
 
-const mainTabs = new Set(['home', 'schedule', 'feed', 'me'])
+const shellTab = computed(() => {
+  if (MAIN_TABS.includes(activeTab.value)) return activeTab.value
+  return 'home'
+})
+
 const showBottomNav = computed(() => {
   if (selectedCourse.value || menuVisible.value) return false
-  if (!mainTabs.has(activeTab.value)) return false
+  if (feedDetailVisible.value || feedBellVisible.value) return false
+  if (!MAIN_TABS.includes(activeTab.value)) return false
   if (activeTab.value === 'me' && profilePage.value !== 'main') return false
   return true
 })
 
-/** 子页内容 key：关闭动画期间仍保留，避免内容瞬间消失 */
-const profileSubKey = ref('main')
-const profileSubShow = computed(() => profilePage.value !== 'main')
+function resolveInnerKey() {
+  if (feedBellVisible.value) return 'feed-bell'
+  if (feedDetailVisible.value) return 'feed-detail'
+  if (selectedCourse.value) return 'course-detail'
+  if (menuVisible.value) return 'menu'
+  if (activeTab.value === 'me' && profilePage.value && profilePage.value !== 'main') {
+    return `profile:${profilePage.value}`
+  }
+  if (INNER_TABS.includes(activeTab.value)) return `tab:${activeTab.value}`
+  return ''
+}
 
-watch(profilePage, (page) => {
-  if (page && page !== 'main') profileSubKey.value = page
+function isInnerOpen() {
+  return !!resolveInnerKey()
+}
+
+function popInnerOnce() {
+  if (feedBellVisible.value) {
+    closeFeedBell()
+    return isInnerOpen()
+  }
+  if (feedDetailVisible.value) {
+    closeFeedDetail()
+    return isInnerOpen()
+  }
+  if (selectedCourse.value) {
+    selectedCourse.value = null
+    return isInnerOpen()
+  }
+  if (menuVisible.value) {
+    menuVisible.value = false
+    return false
+  }
+  if (activeTab.value === 'me' && profilePage.value !== 'main') {
+    profilePage.value = 'main'
+    return false
+  }
+  if (INNER_TABS.includes(activeTab.value)) {
+    activeTab.value = 'home'
+    return false
+  }
+  return false
+}
+
+function onFeedSubClose(which) {
+  if (which === 'bell') closeFeedBell()
+  else closeFeedDetail()
+}
+
+function onFeedOpenedDetail(postId) {
+  closeFeedBell()
+  openFeedDetail(postId)
+}
+
+const innerKey = ref('')
+const courseSnap = ref(null)
+const feedPostSnap = ref(null)
+const pc = createPageContainerBridge({
+  isOpen: isInnerOpen,
+  onBack: popInnerOnce,
+})
+const {
+  show: innerShow,
+  contentAlive,
+  onBeforeLeave: onInnerBeforeLeave,
+  onAfterLeave: onInnerAfterLeave,
+} = pc
+
+watch(
+  [activeTab, profilePage, selectedCourse, menuVisible, feedDetailVisible, feedBellVisible],
+  () => {
+    const key = resolveInnerKey()
+    if (key) innerKey.value = key
+  },
+  { immediate: true },
+)
+
+watch(selectedCourse, (c) => {
+  if (c) courseSnap.value = c
+})
+watch(feedDetailPostId, (id) => {
+  if (id) feedPostSnap.value = id
 })
 
-function onProfileSubBeforeLeave() {
-  // 右滑 / 安卓返回键：同步状态，由 page-container 收起而非退出小程序
-  if (profilePage.value !== 'main') profilePage.value = 'main'
-}
+watch(contentAlive, (alive) => {
+  if (!alive) {
+    innerKey.value = ''
+    courseSnap.value = null
+    feedPostSnap.value = null
+  }
+})
 
-function onProfileSubAfterLeave() {
-  profileSubKey.value = 'main'
-}
+const innerWrapStyle = computed(() => {
+  if (String(innerKey.value).startsWith('feed-')) return { background: '#f0f7ff' }
+  if (innerKey.value === 'menu' || String(innerKey.value).startsWith('profile:')) {
+    return { background: '#f0f7ff' }
+  }
+  return { background: '#ffffff' }
+})
 
 watch(activeTab, (tab) => {
   if (tab === 'me' && !profilePage.value) profilePage.value = 'main'
@@ -165,7 +281,6 @@ onShow(() => {
   width: 100%;
   height: 100%;
   min-height: 100vh;
-  background: #f0f7ff;
   box-sizing: border-box;
   position: relative;
   overflow: hidden;

@@ -1,9 +1,17 @@
 <template>
   <view>
-    <view v-if="showAnnouncementList" class="overlay-page" style="z-index:60;background:#FAF5FF;">
+    <!-- 全屏列表：embedded 时由页面 page-container 承载；否则自管叠层 -->
+    <view
+      v-if="!popupOnly && (embedded || showAnnouncementList)"
+      class="overlay-page"
+      :style="embedded ? 'position:relative;z-index:0;background:#FAF5FF;' : 'z-index:60;background:#FAF5FF;'"
+    >
       <view class="safe-nav-header" style="background:white;flex-shrink:0;border-bottom:1rpx solid #E1BEE7;">
         <view style="display:flex;align-items:center;gap:20rpx;padding:0 40rpx 24rpx;">
-          <view style="width:64rpx;height:64rpx;border-radius:24rpx;background:#FAF5FF;display:flex;align-items:center;justify-content:center;" @click="showAnnouncementList = false; announcementDetail = null">
+          <view
+            style="width:64rpx;height:64rpx;border-radius:24rpx;background:#FAF5FF;display:flex;align-items:center;justify-content:center;"
+            @click="closeList"
+          >
             <text style="font-size:40rpx;color:#2D1F18;line-height:1;">‹</text>
           </view>
           <text style="font-size:32rpx;font-weight:800;color:#2D1F18;flex:1;text-align:center;">平台公告</text>
@@ -11,7 +19,6 @@
         </view>
       </view>
 
-      <!-- 详情页 -->
       <scroll-view v-if="announcementDetail !== null" scroll-y style="flex:1;height:0;">
         <view style="padding:32rpx 40rpx;">
           <view v-for="ann in platformAnnouncements" :key="ann.id">
@@ -25,7 +32,6 @@
         </view>
       </scroll-view>
 
-      <!-- 列表页 -->
       <scroll-view v-else scroll-y style="flex:1;height:0;">
         <view style="padding:20rpx 40rpx;">
           <view v-if="announcementsLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">加载中…</text></view>
@@ -48,9 +54,11 @@
       </scroll-view>
     </view>
 
-    <view v-if="showAnnouncement && popupAnnouncements.length" style="position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;padding:40rpx;z-index:80;">
+    <view
+      v-if="!embedded && showAnnouncement && popupAnnouncements.length"
+      style="position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;padding:40rpx;z-index:80;"
+    >
       <view style="width:100%;background:white;border-radius:48rpx;overflow:hidden;max-height:80vh;display:flex;flex-direction:column;">
-        <!-- 弹窗头部 -->
         <view style="padding:40rpx;flex-shrink:0;background:linear-gradient(135deg,#AB47BC 0%,#CE93D8 100%);">
           <view style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8rpx;">
             <view class="pill" style="background:rgba(255,255,255,0.25);"><text style="font-size:20rpx;color:white;font-weight:700;">{{ popupAnnouncements[announcementStep]?.tag }}</text></view>
@@ -59,17 +67,14 @@
           <text style="font-size:30rpx;font-weight:800;color:white;display:block;line-height:1.4;margin-top:16rpx;">{{ popupAnnouncements[announcementStep]?.title }}</text>
           <text style="font-size:22rpx;color:rgba(255,255,255,0.7);display:block;margin-top:8rpx;">{{ popupAnnouncements[announcementStep]?.date }}</text>
         </view>
-        <!-- 进度点 -->
         <view style="display:flex;justify-content:center;gap:12rpx;padding:24rpx 0 0;flex-shrink:0;">
           <view v-for="(_, i) in popupAnnouncements" :key="i" style="height:12rpx;border-radius:6rpx;transition:width 0.2s;" :style="{ width: i === announcementStep ? '40rpx' : '12rpx', backgroundColor: i <= announcementStep ? '#AB47BC' : '#E0E0E0' }" />
         </view>
-        <!-- 内容 -->
         <scroll-view scroll-y style="flex:1;height:0;min-height:200rpx;">
           <view style="padding:24rpx 40rpx;">
             <text style="font-size:26rpx;color:#2D1F18;line-height:2;">{{ popupAnnouncements[announcementStep]?.content }}</text>
           </view>
         </scroll-view>
-        <!-- 操作按钮 -->
         <view style="display:flex;gap:20rpx;padding:24rpx 40rpx 48rpx;flex-shrink:0;">
           <view v-if="announcementStep > 0" style="flex:1;padding:28rpx;border-radius:24rpx;background:#F5F0EC;display:flex;align-items:center;justify-content:center;" @click="announcementStep--">
             <text style="font-size:26rpx;font-weight:700;color:#8D6E63;">上一条</text>
@@ -87,8 +92,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { fetchPlatformNotices } from '../../api/institution.js'
+
+const props = defineProps({
+  /** 由页面 page-container 承载列表时为 true */
+  embedded: { type: Boolean, default: false },
+  /** 仅负责启动弹窗，不渲染列表 */
+  popupOnly: { type: Boolean, default: false },
+})
+const emit = defineEmits(['close'])
 
 const platformAnnouncements = ref([])
 const popupAnnouncements = ref([])
@@ -157,18 +170,47 @@ async function loadPlatformAnnouncements({ openPopup = false } = {}) {
   }
 }
 
+function closeList() {
+  announcementDetail.value = null
+  showAnnouncementList.value = false
+  if (props.embedded) emit('close')
+}
+
+/** @returns {boolean} true=仍留在公告内页（如从详情回到列表） */
+function onSwipeBack() {
+  if (announcementDetail.value !== null) {
+    announcementDetail.value = null
+    return true
+  }
+  closeList()
+  return false
+}
+
 function openAnnouncementList() {
   announcementDetail.value = null
   showAnnouncementList.value = true
   loadPlatformAnnouncements()
 }
 
+watch(
+  () => props.embedded,
+  (v) => {
+    if (v) {
+      announcementDetail.value = null
+      showAnnouncementList.value = true
+      loadPlatformAnnouncements()
+    }
+  },
+  { immediate: true },
+)
+
 onMounted(() => {
-  loadPlatformAnnouncements({ openPopup: true })
+  if (props.popupOnly || !props.embedded) {
+    loadPlatformAnnouncements({ openPopup: true })
+  }
 })
 
-defineExpose({ openAnnouncementList })
-
+defineExpose({ openAnnouncementList, onSwipeBack })
 </script>
 
 <style lang="scss" scoped>

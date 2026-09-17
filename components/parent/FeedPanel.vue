@@ -2,13 +2,15 @@
   <view class="feed-page">
     <view class="safe-nav-header feed-nav">
       <text class="feed-nav__title">动态</text>
-      <view class="feed-nav__row">
-        <view class="feed-nav__side" />
-        <view class="feed-nav__bell" @click="openBell">
-          <MpIcon name="message-circle" :size="36" color="#3B9EEB" />
-          <view v-if="feedCommentUnread > 0" class="feed-nav__badge">
-            <text class="feed-nav__badge-text">{{ feedCommentUnread > 99 ? '99+' : feedCommentUnread }}</text>
-          </view>
+      <view class="feed-nav__title-spacer" />
+    </view>
+
+    <view class="feed-toolbar">
+      <view class="feed-toolbar__spacer" />
+      <view class="feed-nav__bell" @click="openBell">
+        <MpIcon name="message-circle" :size="36" color="#3B9EEB" />
+        <view v-if="feedCommentUnread > 0" class="feed-nav__badge">
+          <text class="feed-nav__badge-text">{{ feedCommentUnread > 99 ? '99+' : feedCommentUnread }}</text>
         </view>
       </view>
     </view>
@@ -135,161 +137,8 @@
         <view v-else-if="posts.length && !hasMore" class="feed-more">
           <text class="feed-more__text">没有更多了</text>
         </view>
-      </view>
-    </scroll-view>
-
-    <!-- 帖详情 + 评论 -->
-    <view v-if="detailVisible" class="overlay-page" style="z-index:70;">
-      <view class="feed-page">
-        <view class="safe-nav-header feed-nav">
-          <text class="feed-nav__title">动态详情</text>
-          <view class="feed-nav__row">
-            <view class="feed-nav__back" @click="closeDetail">
-              <text class="feed-nav__back-icon">‹</text>
-            </view>
-            <view class="feed-nav__side" />
-          </view>
         </view>
-        <scroll-view scroll-y class="feed-scroll">
-          <view v-if="detailLoading" class="feed-empty">
-            <text class="feed-empty__text">加载中…</text>
-          </view>
-          <view v-else-if="detail" class="feed-pad">
-            <view class="moment-card">
-              <view class="moment-card__head">
-                <view class="moment-card__avatar">
-                  <text v-if="detail.cover_emoji" class="moment-card__emoji">{{ detail.cover_emoji }}</text>
-                  <MpIcon v-else name="camera" :size="32" color="#7B1FA2" />
-                </view>
-                <view class="moment-card__who">
-                  <text class="moment-card__name">{{ detail.publisher || '老师' }}</text>
-                  <text class="moment-card__time">{{ detail.published_at }}{{ detail.topic ? ` · ${detail.topic}` : '' }}</text>
-                </view>
-              </view>
-              <text class="moment-card__content">{{ detail.content }}</text>
-              <view
-                v-if="detail.photos?.length"
-                class="photo-grid"
-                :class="photoGridClass(detail.photos.length)"
-                style="margin-top:16rpx;"
-              >
-                <image
-                  v-for="(p, pi) in detail.photos.slice(0, 9)"
-                  :key="pi"
-                  :src="p"
-                  mode="aspectFill"
-                  class="photo-cell"
-                  :class="{ 'photo-cell--single': detail.photos.length === 1 }"
-                  @click="previewPhotos(detail.photos, pi)"
-                />
-              </view>
-              <view class="moment-card__actions" style="border-top:none;margin-top:8rpx;padding-top:8rpx;">
-                <view class="moment-action" @click="toggleLike(detail, true)">
-                  <MpIcon
-                    name="heart"
-                    :size="28"
-                    :color="detail.liked ? '#E53935' : '#8D6E63'"
-                  />
-                  <text class="moment-action__text" :class="{ 'is-liked': detail.liked }">
-                    {{ detail.like_count > 0 ? detail.like_count : '赞' }}
-                  </text>
-                </view>
-                <view class="moment-action">
-                  <MpIcon name="message-circle" :size="28" color="#8D6E63" />
-                  <text class="moment-action__text">{{ detail.comments?.length || 0 }}</text>
-                </view>
-              </view>
-            </view>
-
-            <text class="feed-section-title">评论 {{ detail.comments?.length || 0 }}</text>
-            <view v-if="!detail.comments?.length" class="feed-empty feed-empty--card" style="padding:40rpx 24rpx;">
-              <text class="feed-empty__hint">还没有评论，来抢沙发吧</text>
-            </view>
-            <view v-for="c in detail.comments || []" :key="c.id" class="comment-card">
-              <view class="comment-card__main">
-                <view class="comment-card__body">
-                  <text class="comment-card__author">{{ c.author }}</text>
-                  <text v-if="c.author_role === 'staff'" class="comment-card__role">老师</text>
-                  <text class="comment-card__content">{{ c.content }}</text>
-                  <text class="comment-card__time">{{ c.created_at }}</text>
-                </view>
-                <text class="comment-card__reply" @click="startReply(c)">回复</text>
-              </view>
-              <view v-if="c.replies?.length" class="comment-card__replies">
-                <view v-for="r in c.replies" :key="r.id" class="comment-card__reply-item">
-                  <text class="comment-card__author">{{ r.author }}</text>
-                  <text v-if="r.author_role === 'staff'" class="comment-card__role">老师</text>
-                  <text class="comment-card__content">{{ r.content }}</text>
-                  <text class="comment-card__time">{{ r.created_at }}</text>
-                </view>
-              </view>
-            </view>
-          </view>
-        </scroll-view>
-        <view class="comment-bar">
-          <view v-if="replyTo" class="comment-bar__hint">
-            <text class="comment-bar__hint-text">回复 {{ replyTo.author }}</text>
-            <text class="comment-bar__cancel" @click="replyTo = null">取消</text>
-          </view>
-          <view class="comment-bar__row">
-            <input
-              v-model="commentText"
-              class="comment-input"
-              :placeholder="replyTo ? `回复 ${replyTo.author}` : '写评论…'"
-              confirm-type="send"
-              maxlength="500"
-              @confirm="submitComment"
-            />
-            <view
-              class="comment-send"
-              :style="{ opacity: submitting || !commentText.trim() ? 0.5 : 1 }"
-              @click="submitComment"
-            >
-              <text class="comment-send__text">发送</text>
-            </view>
-          </view>
-        </view>
-      </view>
-    </view>
-
-    <!-- 与我有关 -->
-    <view v-if="bellVisible" class="overlay-page" style="z-index:80;">
-      <view class="feed-page">
-        <view class="safe-nav-header feed-nav">
-          <text class="feed-nav__title">与我有关</text>
-          <view class="feed-nav__row">
-            <view class="feed-nav__back" @click="bellVisible = false">
-              <text class="feed-nav__back-icon">‹</text>
-            </view>
-            <view class="feed-nav__side" />
-          </view>
-        </view>
-        <scroll-view scroll-y class="feed-scroll">
-          <view class="feed-pad">
-            <view v-if="bellLoading" class="feed-empty">
-              <text class="feed-empty__text">加载中…</text>
-            </view>
-            <view v-else-if="!interactions.length" class="feed-empty feed-empty--card">
-              <text class="feed-empty__title">暂无互动消息</text>
-              <text class="feed-empty__hint">有人回复你时会出现在这里</text>
-            </view>
-            <view
-              v-for="item in interactions"
-              :key="item.id"
-              class="moment-card"
-              @click="openFromInteraction(item)"
-            >
-              <view class="moment-card__foot" style="margin-top:0;padding-top:0;border-top:none;">
-                <text class="moment-card__name" style="font-size:26rpx;">{{ item.author }}{{ item.author_role === 'staff' ? '老师' : '' }} 回复了你</text>
-                <text class="moment-card__time">{{ item.created_at }}</text>
-              </view>
-              <text class="moment-card__time" style="display:block;margin:8rpx 0;">来自：{{ item.topic }}</text>
-              <text class="moment-card__content" style="margin-bottom:0;">{{ item.content }}</text>
-            </view>
-          </view>
-        </scroll-view>
-      </view>
-    </view>
+      </scroll-view>
   </view>
 </template>
 
@@ -298,8 +147,6 @@ import { inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import {
   createDailyComment,
-  fetchDailyInteractions,
-  fetchDailyPost,
   fetchDailyPosts,
   readMessages,
   toggleDailyLike,
@@ -322,22 +169,10 @@ const refreshing = ref(false)
 const page = ref(1)
 const hasMore = ref(false)
 
-const detailVisible = ref(false)
-const detailLoading = ref(false)
-const detail = ref(null)
-const detailPostId = ref(null)
-const commentText = ref('')
-const replyTo = ref(null)
-const submitting = ref(false)
-
 const listCommentPostId = ref(null)
 const listCommentText = ref('')
 const listSubmitting = ref(false)
 const likingIds = ref(new Set())
-
-const bellVisible = ref(false)
-const bellLoading = ref(false)
-const interactions = ref([])
 
 function needMore(text) {
   return (text || '').length > CONTENT_LIMIT
@@ -365,15 +200,6 @@ function previewPhotos(urls, index) {
 async function markDailyRead() {
   try {
     await readMessages({ type: 'daily' })
-    await refreshUnreadCount()
-  } catch {
-    // ignore
-  }
-}
-
-async function markCommentRead() {
-  try {
-    await readMessages({ type: 'daily_comment' })
     await refreshUnreadCount()
   } catch {
     // ignore
@@ -443,7 +269,6 @@ async function submitListComment() {
     })
     listCommentText.value = ''
     listCommentPostId.value = null
-    // 自己可见，刷新列表与详情计数
     const idx = posts.value.findIndex((p) => p.id === postId)
     if (idx >= 0) {
       const data = await fetchDailyPosts(activeChildId.value, 1)
@@ -464,30 +289,22 @@ async function submitListComment() {
   }
 }
 
-async function toggleLike(post, isDetail = false) {
+async function toggleLike(post) {
   if (!post?.id || !activeChildId.value || likingIds.value.has(post.id)) return
   const next = new Set(likingIds.value)
   next.add(post.id)
   likingIds.value = next
   const prevLiked = !!post.liked
   const prevCount = Number(post.like_count || 0)
-  // 乐观更新
   post.liked = !prevLiked
   post.like_count = Math.max(0, prevCount + (prevLiked ? -1 : 1))
-  syncLikeToList(post.id, post.liked, post.like_count)
   try {
     const data = await toggleDailyLike(post.id, activeChildId.value)
     post.liked = !!data?.liked
     post.like_count = Number(data?.like_count || 0)
-    syncLikeToList(post.id, post.liked, post.like_count)
-    if (isDetail && detail.value?.id === post.id) {
-      detail.value.liked = post.liked
-      detail.value.like_count = post.like_count
-    }
   } catch (e) {
     post.liked = prevLiked
     post.like_count = prevCount
-    syncLikeToList(post.id, prevLiked, prevCount)
     uni.showToast({ title: e.message || '操作失败', icon: 'none' })
   } finally {
     const done = new Set(likingIds.value)
@@ -496,96 +313,13 @@ async function toggleLike(post, isDetail = false) {
   }
 }
 
-function syncLikeToList(id, liked, likeCount) {
-  const row = posts.value.find((p) => p.id === id)
-  if (row) {
-    row.liked = liked
-    row.like_count = likeCount
-  }
-}
-
-async function openDetail(id) {
+function openDetail(id) {
   listCommentPostId.value = null
-  detailPostId.value = id
-  detailVisible.value = true
-  detailLoading.value = true
-  detail.value = null
-  replyTo.value = null
-  commentText.value = ''
-  try {
-    detail.value = await fetchDailyPost(id, activeChildId.value)
-  } catch (e) {
-    uni.showToast({ title: e.message || '加载失败', icon: 'none' })
-    detailVisible.value = false
-  } finally {
-    detailLoading.value = false
-  }
+  ctx.openFeedDetail(id)
 }
 
-function closeDetail() {
-  detailVisible.value = false
-  detail.value = null
-  detailPostId.value = null
-  replyTo.value = null
-  commentText.value = ''
-}
-
-function startReply(c) {
-  replyTo.value = c
-}
-
-async function submitComment() {
-  const text = commentText.value.trim()
-  if (!text || submitting.value || !detailPostId.value || !activeChildId.value) return
-  submitting.value = true
-  try {
-    await createDailyComment(detailPostId.value, {
-      student_id: activeChildId.value,
-      content: text,
-      parent_id: replyTo.value?.id || undefined,
-    })
-    commentText.value = ''
-    replyTo.value = null
-    await openDetail(detailPostId.value)
-    // 局部刷新列表项
-    const idx = posts.value.findIndex((p) => p.id === detailPostId.value)
-    if (idx >= 0 && detail.value) {
-      posts.value[idx] = {
-        ...posts.value[idx],
-        comment_count: detail.value.comment_count,
-        latest_comments: (detail.value.comments || []).slice(-2).map((c) => ({
-          id: c.id,
-          author: c.author,
-          content: c.content,
-        })),
-        liked: detail.value.liked,
-        like_count: detail.value.like_count,
-      }
-    }
-  } catch (e) {
-    uni.showToast({ title: e.message || '发送失败', icon: 'none' })
-  } finally {
-    submitting.value = false
-  }
-}
-
-async function openBell() {
-  bellVisible.value = true
-  bellLoading.value = true
-  try {
-    const data = await fetchDailyInteractions()
-    interactions.value = data?.list || []
-    await markCommentRead()
-  } catch (e) {
-    uni.showToast({ title: e.message || '加载失败', icon: 'none' })
-  } finally {
-    bellLoading.value = false
-  }
-}
-
-async function openFromInteraction(item) {
-  bellVisible.value = false
-  await openDetail(item.daily_post_id)
+function openBell() {
+  ctx.openFeedBell()
 }
 
 async function onEnter() {
@@ -597,6 +331,12 @@ async function onEnter() {
 
 watch(() => props.active, (v) => { if (v) onEnter() }, { immediate: true })
 watch(activeChildId, () => { if (props.active) onEnter() })
+watch(
+  () => ctx.feedDetailVisible.value,
+  (v, prev) => {
+    if (prev && !v && props.active) loadPosts(true)
+  },
+)
 
 onShow(() => {
   if (props.active) onEnter()
@@ -624,11 +364,10 @@ $line: #e3f2fd;
   position: relative;
   flex-shrink: 0;
   background: #fff;
-  padding-bottom: 20rpx;
+  padding-bottom: 8rpx;
   padding-left: 40rpx !important;
   padding-right: 40rpx !important;
-  border-bottom: 1rpx solid $line;
-  box-shadow: 0 4rpx 24rpx rgba(59, 158, 235, 0.06);
+  box-shadow: none;
 }
 
 .feed-nav__title {
@@ -644,6 +383,23 @@ $line: #e3f2fd;
   color: $ink;
   pointer-events: none;
   z-index: 0;
+}
+
+.feed-nav__title-spacer {
+  height: 64rpx;
+}
+
+.feed-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 12rpx 40rpx 16rpx;
+  background: #fff;
+  border-bottom: 1rpx solid $line;
+}
+
+.feed-toolbar__spacer {
+  flex: 1;
 }
 
 .feed-nav__row {

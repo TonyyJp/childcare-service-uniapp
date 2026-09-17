@@ -63,6 +63,12 @@
               <view style="display:flex;align-items:center;gap:12rpx;flex-wrap:wrap;">
                 <text style="font-size:28rpx;font-weight:700;display:block;" :style="{ color: isLessonPast(c) ? '#9E9E9E' : '#2D1F18' }">{{ c.class_name || c.room }}</text>
                 <view
+                  v-if="isInterestLesson(c)"
+                  style="padding:4rpx 12rpx;border-radius:999rpx;background:#FFF3E0;"
+                >
+                  <text style="font-size:18rpx;font-weight:700;color:#E65100;">兴趣课</text>
+                </view>
+                <view
                   v-if="isLessonPast(c)"
                   style="padding:4rpx 12rpx;border-radius:999rpx;background:#EEEEEE;"
                 >
@@ -70,6 +76,13 @@
                 </view>
               </view>
               <text style="font-size:22rpx;" :style="{ color: isLessonPast(c) ? '#BDBDBD' : '#8D6E63' }">👩‍🏫 {{ c.teacher }}</text>
+              <view
+                v-if="isInterestLesson(c)"
+                style="margin-top:12rpx;display:inline-flex;padding:8rpx 20rpx;border-radius:12rpx;background:#FF7043;"
+                @click.stop="openLessonAttend(c)"
+              >
+                <text style="font-size:22rpx;font-weight:700;color:white;">课次点名</text>
+              </view>
             </view>
             <text style="font-size:30rpx;" :style="{ color: isLessonPast(c) ? '#E0E0E0' : '#BDBDBD' }">›</text>
           </view>
@@ -82,8 +95,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { fetchDashboard, fetchSchedules } from '../../api/teacher.js'
+import { dateForWeekdayIndex } from '../../utils/lessonAttend.js'
 
-const emit = defineEmits(['back', 'detail'])
+const emit = defineEmits(['back', 'detail', 'lesson-attend'])
 
 const weekDays = ['一', '二', '三', '四', '五', '六', '日']
 const todayIndex = (new Date().getDay() + 6) % 7
@@ -186,6 +200,28 @@ function openCourseDetail(c) {
     name: c.class_name || c.room,
   }
   emit('detail', cls)
+}
+
+function isInterestLesson(c) {
+  const cls = scheduleClasses.value.find(x => x.id === c.class_id)
+  const biz = cls?.biz_type || c.biz_type || 'interest'
+  return biz === 'interest'
+}
+
+function openLessonAttend(c) {
+  if (!isInterestLesson(c)) {
+    uni.showToast({ title: '托管班请使用时段签到', icon: 'none' })
+    return
+  }
+  const cls = scheduleClasses.value.find(x => x.id === c.class_id)
+  emit('lesson-attend', {
+    classId: c.class_id,
+    className: c.class_name || cls?.name || c.room,
+    scheduleId: c.id,
+    startTime: c.time || c.start_time || '',
+    date: dateForWeekdayIndex(scheduleDay.value),
+    weekdayIndex: scheduleDay.value,
+  })
 }
 
 onMounted(async () => {

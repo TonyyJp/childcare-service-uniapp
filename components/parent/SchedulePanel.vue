@@ -23,16 +23,19 @@
           <view v-if="scheduleLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">加载中…</text></view>
           <view v-else-if="!dayLessons.length" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">{{ activeChild?.needsBind ? '绑定宝贝后可查看课程表' : '当日暂无课程' }}</text></view>
           <view v-for="lesson in dayLessons" :key="lesson.id" style="display:flex;gap:20rpx;margin-bottom:12rpx;">
-            <view style="width:88rpx;flex-shrink:0;padding-top:16rpx;">
-              <text style="font-size:22rpx;color:#BDBDBD;display:block;text-align:right;">{{ lesson.time }}</text>
+            <view style="width:100rpx;flex-shrink:0;padding-top:16rpx;">
+              <text style="font-size:26rpx;font-weight:800;color:#3B9EEB;display:block;text-align:right;">{{ lesson.time }}</text>
+              <text v-if="lesson.end_time" style="font-size:20rpx;color:#8D6E63;display:block;text-align:right;margin-top:4rpx;">至 {{ lesson.end_time }}</text>
             </view>
             <view class="card" style="flex:1;padding:20rpx 24rpx;display:flex;align-items:center;gap:16rpx;">
-              <view style="width:64rpx;height:64rpx;border-radius:20rpx;display:flex;align-items:center;justify-content:center;flex-shrink:0;" :style="{ backgroundColor: lesson.color + '18' }">
+              <view style="width:64rpx;height:64rpx;border-radius:20rpx;display:flex;align-items:center;justify-content:center;flex-shrink:0;" :style="{ backgroundColor: (lesson.color || '#3B9EEB') + '18' }">
                 <MpIcon name="calendar" :size="30" :color="lesson.color || '#3B9EEB'" />
               </view>
-              <view style="flex:1;">
-                <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">{{ lesson.subject }}</text>
-                <text style="font-size:22rpx;color:#8D6E63;">{{ lesson.teacher ? lesson.teacher + ' · ' : '' }}{{ lesson.duration }}</text>
+              <view style="flex:1;min-width:0;">
+                <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">{{ lesson.class_name || lesson.subject }}</text>
+                <text style="font-size:22rpx;color:#8D6E63;">
+                  {{ [lesson.period?.name, lesson.teacher && lesson.teacher !== '—' ? lesson.teacher : '', lesson.duration].filter(Boolean).join(' · ') }}
+                </text>
               </view>
             </view>
           </view>

@@ -8,7 +8,7 @@
         <view style="flex:1;min-width:0;">
           <text style="font-size:36rpx;font-weight:800;color:#2D1F18;display:block;">机构课程</text>
           <text style="font-size:22rpx;color:#8D6E63;margin-top:4rpx;">
-            {{ homeTitle ? `${homeTitle} · ` : '' }}{{ courses.length }}门在招
+            {{ courses.length }}门在招
           </text>
         </view>
       </view>
@@ -61,7 +61,6 @@ import { PARENT_CTX_KEY } from './parentContext.js'
 const props = defineProps({ active: { type: Boolean, default: false } })
 const ctx = inject(PARENT_CTX_KEY)
 const activeTab = ctx.activeTab
-const homeTitle = ctx.homeTitle
 const courses = ctx.courses
 const selectedCourse = ctx.selectedCourse
 const activeChildId = ctx.activeChildId

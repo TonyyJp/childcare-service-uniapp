@@ -29,7 +29,7 @@
               <text v-else class="avatar-text">{{ parentAvatar }}</text>
             </view>
           </view>
-          <text style="font-size:24rpx;color:rgba(255,255,255,0.8);display:block;margin-top:4rpx;">{{ activeChild.class }} · {{ activeChild.tenant }}</text>
+          <text v-if="childHeaderSub" style="font-size:24rpx;color:rgba(255,255,255,0.8);display:block;margin-top:4rpx;">{{ childHeaderSub }}</text>
           <view style="display:flex;margin-top:16rpx;flex-wrap:wrap;">
             <view
               class="pill"
@@ -160,7 +160,7 @@
               style="font-size:22rpx;"
               :style="{ color: accentColor }"
               @click="activeTab = 'courses'"
-            >{{ homeTitle ? `${homeTitle} · ` : '' }}{{ courses.length }}门在招 ›</text>
+            >{{ courses.length }}门在招 ›</text>
           </view>
           <scroll-view scroll-x style="margin:0 -40rpx;padding:0 40rpx;">
             <view style="display:flex;gap:24rpx;">
@@ -169,11 +169,12 @@
                   <image v-if="c.coverUrl" :src="c.coverUrl" mode="aspectFill" style="width:100%;height:100%;" />
                 </view>
                 <view style="padding:20rpx;">
-                  <view style="display:flex;align-items:center;gap:8rpx;margin-bottom:8rpx;">
-                    <view class="pill" style="background:#3B9EEB18;color:#3B9EEB;"><text style="font-size:20rpx;">{{ c.tag }}</text></view>
+                  <view style="display:flex;align-items:center;gap:8rpx;margin-bottom:8rpx;flex-wrap:wrap;">
+                    <view class="pill" style="background:#3B9EEB18;color:#3B9EEB;"><text style="font-size:20rpx;">{{ c.tag || '课程' }}</text></view>
+                    <text v-if="c.sessions != null && c.sessions !== ''" style="font-size:20rpx;color:#8D6E63;">{{ c.sessions }}课时</text>
                   </view>
                   <text style="font-size:26rpx;font-weight:800;color:#2D1F18;display:block;">{{ c.title }}</text>
-                  <text style="font-size:22rpx;color:#8D6E63;display:block;margin-top:4rpx;">{{ c.teacher }} · {{ c.age }}</text>
+                  <text v-if="c.age" style="font-size:22rpx;color:#8D6E63;display:block;margin-top:4rpx;">{{ c.age }}</text>
                   <text style="font-size:28rpx;font-weight:800;display:block;margin-top:8rpx;color:#3B9EEB;">{{ c.price }}</text>
                 </view>
               </view>
@@ -206,6 +207,7 @@ const activeTab = ctx.activeTab
 const homeLoading = ctx.homeLoading
 const homeTitle = ctx.homeTitle
 const homeDateLabel = ctx.homeDateLabel
+const childHeaderSub = ctx.childHeaderSub
 const activeChild = ctx.activeChild
 const activeChildId = ctx.activeChildId
 const childOptions = ctx.childOptions

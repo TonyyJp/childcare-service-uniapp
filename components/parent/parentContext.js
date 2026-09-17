@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue'
+import { fetchDicts } from '../../api/common.js'
 import {
   fetchCourses,
   fetchCurrentMenu,
@@ -21,6 +22,18 @@ const MEAL_META = {
   lunch: { name: '午餐', icon: 'utensils' },
   dinner: { name: '晚餐', icon: 'moon' },
   snack: { name: '加餐', icon: 'apple' },
+}
+const HW_STATUS_COMMENT = {
+  graded: '已批改，可前往作业查看详情',
+  pending: '待提交',
+  submitted: '已提交，等待批改',
+  overdue: '已逾期',
+}
+
+function dictLabel(options, value) {
+  if (value == null || value === '') return ''
+  const hit = (options || []).find(o => String(o.value) === String(value))
+  return hit?.label || ''
 }
 
 export function maskPhone(phone) {
@@ -65,6 +78,28 @@ export function createParentContext() {
   const profilePage = ref('main')
   const selectedCourse = ref(null)
   const menuVisible = ref(false)
+  /** 动态 Tab 内全屏子页（详情 / 与我有关），供页面级 page-container 拦截右滑 */
+  const feedDetailVisible = ref(false)
+  const feedBellVisible = ref(false)
+  const feedDetailPostId = ref(null)
+
+  function openFeedDetail(id) {
+    feedDetailPostId.value = id
+    feedDetailVisible.value = true
+  }
+
+  function closeFeedDetail() {
+    feedDetailVisible.value = false
+    feedDetailPostId.value = null
+  }
+
+  function openFeedBell() {
+    feedBellVisible.value = true
+  }
+
+  function closeFeedBell() {
+    feedBellVisible.value = false
+  }
 
   const homeLoading = ref(false)
   const parentName = ref('家长')
@@ -85,9 +120,15 @@ export function createParentContext() {
   /** 已加入机构 → 机构名；否则 → 后台配置的小程序显示名 */
   const homeTitle = computed(() => {
     const fromChild = (activeChild.value?.tenant || '').trim()
-    if (fromChild && fromChild !== '—') return fromChild
+    if (fromChild) return fromChild
     if (membershipTenantName.value) return membershipTenantName.value
     return brandName.value
+  })
+  const childHeaderSub = computed(() => {
+    const parts = [activeChild.value?.class, activeChild.value?.tenant]
+      .map(s => (s || '').trim())
+      .filter(Boolean)
+    return parts.join(' · ')
   })
   const childOptions = ref([])
   const activeChildId = ref(null)
@@ -97,8 +138,8 @@ export function createParentContext() {
     emoji: childAvatarIcon('unknown'),
     avatarColor: childAvatarColor('unknown'),
     avatarUrl: '',
-    class: '—',
-    tenant: '—',
+    class: '',
+    tenant: '',
     checkinLabel: '暂无签到',
     inGarden: false,
     needsBind: false,
@@ -107,6 +148,42 @@ export function createParentContext() {
   const yesterdayItems = ref([])
   const homeworkEntryHint = ref('查看已发布作业')
   const courses = ref([])
+  const gradeDict = ref([])
+  const schoolClassDict = ref([])
+
+  async function ensureSchoolDicts() {
+    if (gradeDict.value.length && schoolClassDict.value.length) return
+    try {
+      const [grade, schoolClass] = await Promise.all([
+        fetchDicts('grade_level'),
+        fetchDicts('school_class'),
+      ])
+      gradeDict.value = (grade?.list || []).map(d => ({ label: d.label, value: d.value }))
+      schoolClassDict.value = (schoolClass?.list || []).map(d => ({ label: d.label, value: d.value }))
+    } catch {
+      /* 字典失败时仍可用在班课班名 */
+    }
+  }
+
+  function formatSchoolClassLabel(student) {
+    const grade = dictLabel(gradeDict.value, student?.grade_level)
+    const clazz = dictLabel(schoolClassDict.value, student?.class_name)
+    return [grade, clazz].filter(Boolean).join('')
+  }
+
+  function buildCheckinLabel(attendance) {
+    const list = attendance || []
+    const arrived = list.find(a => a.arrive_time || ['arrived', 'left'].includes(a.status))
+    if (arrived?.arrive_time) return `✓ ${arrived.arrive_time} 已签到`
+    if (arrived && ['arrived', 'left'].includes(arrived.status)) return '✓ 已签到'
+    const waiting = list.find(a => a.status === 'waiting')
+    if (waiting) return `${waiting.period_name || ''}待签到`.trim() || '待签到'
+    const onLeave = list.find(a => a.status === 'leave')
+    if (onLeave) return `${onLeave.period_name || ''}请假中`.trim() || '请假中'
+    const absent = list.find(a => a.status === 'absent')
+    if (absent) return `${absent.period_name || ''}缺勤`.trim() || '缺勤'
+    return '今日暂无签到'
+  }
 
   function buildAttendanceItems(list, prefix) {
     const items = []
@@ -172,9 +249,7 @@ export function createParentContext() {
         subject: hw.subject || '作业',
         subjectColor: '#3B9EEB',
         hwTitle: hw.title || '最新作业',
-        hwComment: hw.my_status === 'graded'
-          ? '已批改，可前往作业查看详情'
-          : (hw.my_status === 'pending' ? '待提交' : `状态：${hw.my_status || '已发布'}`),
+        hwComment: HW_STATUS_COMMENT[hw.my_status] || '已发布',
       })
       homeworkEntryHint.value = hw.title ? `最新：${hw.title}` : '查看已发布作业'
     } else if (home?.date === homeDate.value || !homeDate.value) {
@@ -215,11 +290,17 @@ export function createParentContext() {
   }
 
   function applyChildHeader(binding, home) {
-    const student = binding?.student || home?.student || {}
+    const student = {
+      ...(binding?.student || {}),
+      ...(home?.student || {}),
+    }
     const attendance = home?.attendance_today || []
     const arrived = attendance.find(a => a.arrive_time || ['arrived', 'left'].includes(a.status))
-    const className = binding?.class?.name || binding?.clazz?.name || student.class_name || '—'
-    const tenantName = binding?.tenant?.name || '—'
+    const enrolled = (student.enrolled_classes || []).filter(Boolean)
+    const className = enrolled.length
+      ? enrolled.join('、')
+      : (formatSchoolClassLabel(student) || '')
+    const tenantName = (binding?.tenant?.name || membershipTenantName.value || '').trim()
     const gender = student.gender || 'unknown'
     activeChild.value = {
       name: student.name || '宝贝',
@@ -229,7 +310,7 @@ export function createParentContext() {
       avatarUrl: mediaUrl(student.avatar || ''),
       class: className,
       tenant: tenantName,
-      checkinLabel: arrived?.arrive_time ? `✓ ${arrived.arrive_time} 已签到` : '今日暂无签到',
+      checkinLabel: buildCheckinLabel(attendance),
       inGarden: !!(arrived && arrived.status === 'arrived'),
       needsBind: false,
     }
@@ -256,6 +337,7 @@ export function createParentContext() {
     const binding = childOptions.value.find(c => c.id === activeChildId.value)?.binding
     if (!activeChildId.value) return
 
+    await ensureSchoolDicts()
     const home = await fetchHome(activeChildId.value)
     homeDate.value = home?.date || ''
     applyChildHeader(binding, home)
@@ -325,7 +407,7 @@ export function createParentContext() {
           emoji: childAvatarIcon(gender),
           avatarColor: childAvatarColor(gender),
           avatarUrl: mediaUrl(i.student.avatar || ''),
-          tenant: i.tenant?.name || '—',
+          tenant: i.tenant?.name || '',
           binding: i,
         }
       })
@@ -340,8 +422,8 @@ export function createParentContext() {
           emoji: childAvatarIcon('unknown'),
           avatarColor: childAvatarColor('unknown'),
           avatarUrl: '',
-          class: '—',
-          tenant: membershipTenantName.value || '—',
+          class: '',
+          tenant: membershipTenantName.value || '',
           checkinLabel: '去绑定',
           inGarden: false,
           needsBind: true,
@@ -558,6 +640,13 @@ export function createParentContext() {
     profilePage,
     selectedCourse,
     menuVisible,
+    feedDetailVisible,
+    feedBellVisible,
+    feedDetailPostId,
+    openFeedDetail,
+    closeFeedDetail,
+    openFeedBell,
+    closeFeedBell,
     unreadCount,
     unreadByType,
     feedDailyUnread,
@@ -573,6 +662,7 @@ export function createParentContext() {
     homeDate,
     homeDateLabel,
     homeTitle,
+    childHeaderSub,
     brandName,
     membershipTenants,
     membershipTenantId,

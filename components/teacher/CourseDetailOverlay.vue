@@ -16,6 +16,19 @@
         <view class="card" style="padding:24rpx;margin-bottom:24rpx;">
           <text style="font-size:26rpx;font-weight:700;color:#8D6E63;display:block;margin-bottom:12rpx;">课班名称</text>
           <text style="font-size:32rpx;font-weight:800;color:#2D1F18;display:block;">{{ className }}</text>
+          <view v-if="isInterest" style="margin-top:20rpx;">
+            <view
+              class="action-btn"
+              style="background:#FF7043;display:inline-flex;padding:16rpx 28rpx;"
+              @click="$emit('lesson-attend')"
+            >
+              <text style="color:white;font-size:26rpx;font-weight:700;">课次点名</text>
+            </view>
+            <text style="font-size:22rpx;color:#8D6E63;display:block;margin-top:12rpx;">兴趣课到课将自动消 1 课时</text>
+          </view>
+          <view v-else style="margin-top:16rpx;">
+            <text style="font-size:22rpx;color:#8D6E63;">托管班请使用「签到」时段点名，不消课时</text>
+          </view>
         </view>
         <view class="card" style="padding:24rpx;">
           <text style="font-size:26rpx;font-weight:700;color:#8D6E63;display:block;margin-bottom:16rpx;">课程大纲</text>
@@ -39,13 +52,14 @@
 <script setup>
 import { computed, inject } from 'vue'
 
-defineEmits(['back'])
+defineEmits(['back', 'lesson-attend'])
 
 const courseDetail = inject('teacherCourseDetail', null)
 const detail = computed(() => (courseDetail && courseDetail.value) || {})
 /** 课班名（实际开班名称） */
 const className = computed(() => detail.value.name || detail.value.class_name || '课班')
 const outlines = computed(() => detail.value.outlines || [])
+const isInterest = computed(() => (detail.value.biz_type || 'interest') === 'interest')
 </script>
 
 <style lang="scss">

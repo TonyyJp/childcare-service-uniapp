@@ -243,3 +243,47 @@ export function authorizeFace(payload) {
 export function revokeFace(studentId) {
   return http.post('/parent/face/revoke', { student_id: studentId })
 }
+
+/** GET /parent/lesson-packages — 课时余额 */
+export function fetchLessonPackages(studentId) {
+  const data = {}
+  if (studentId) data.student_id = studentId
+  return http.get('/parent/lesson-packages', data)
+}
+
+/** GET /parent/lesson-consume-logs — 消课流水 */
+export function fetchLessonConsumeLogs({ studentId, classId, packageId, page, perPage } = {}) {
+  const data = {}
+  if (studentId) data.student_id = studentId
+  if (classId) data.class_id = classId
+  if (packageId) data.package_id = packageId
+  if (page) data.page = page
+  if (perPage) data.per_page = perPage
+  return http.get('/parent/lesson-consume-logs', data)
+}
+
+/** GET /parent/trial-bookings?student_id= */
+export function fetchTrialBookings(studentId) {
+  const data = {}
+  if (studentId) data.student_id = studentId
+  return http.get('/parent/trial-bookings', data)
+}
+
+/** GET /parent/trial-bookings/classes?student_id= */
+export function fetchTrialClasses(studentId) {
+  const data = {}
+  if (studentId) data.student_id = studentId
+  return http.get('/parent/trial-bookings/classes', data)
+}
+
+/** POST /parent/trial-bookings */
+export function createTrialBooking(payload) {
+  return http.post('/parent/trial-bookings', payload)
+}
+
+/** POST /parent/trial-bookings/{id}/cancel */
+export function cancelTrialBooking(id, reason) {
+  const data = {}
+  if (reason) data.reason = reason
+  return http.post(`/parent/trial-bookings/${id}/cancel`, data)
+}

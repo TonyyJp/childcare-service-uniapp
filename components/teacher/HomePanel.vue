@@ -88,6 +88,14 @@
               <text style="color:white;font-size:24rpx;font-weight:700;">点名 ›</text>
             </view>
             <view
+              v-else-if="cls.bizType === 'interest'"
+              class="action-btn"
+              style="background:#FF7043;"
+              @click="$emit('navigate', { tab: 'schedule', interestAttend: true, classId: cls.id, className: cls.name })"
+            >
+              <text style="color:white;font-size:24rpx;font-weight:700;">课次点名 ›</text>
+            </view>
+            <view
               v-else
               class="action-btn"
               style="background:#FFB300;"

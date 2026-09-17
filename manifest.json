@@ -12,6 +12,10 @@
             "urlCheck" : false
         },
         "usingComponents" : true,
+        "optimization" : {
+            "subPackages" : true
+        },
+        "lazyCodeLoading" : "requiredComponents",
         "permission" : {
             "scope.userLocation" : {
                 "desc" : "用于定位园所位置"

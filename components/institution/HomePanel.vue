@@ -28,6 +28,18 @@
                 <text style="font-size:20rpx;color:rgba(255,255,255,0.75);display:block;">{{ s.label }}</text>
               </view>
             </view>
+            <view v-if="lessonKpis.length" style="display:flex;margin-top:12rpx;">
+              <view
+                v-for="(s, idx) in lessonKpis"
+                :key="s.label"
+                style="flex:1;background:rgba(255,255,255,0.15);border-radius:16rpx;padding:16rpx;text-align:center;box-sizing:border-box;"
+                :style="{ marginRight: idx < lessonKpis.length - 1 ? '12rpx' : '0' }"
+                @click="onLessonKpiClick(s)"
+              >
+                <text style="font-size:36rpx;font-weight:800;display:block;" :style="{ color: s.warn ? '#FFE082' : 'white' }">{{ s.val }}</text>
+                <text style="font-size:20rpx;color:rgba(255,255,255,0.75);display:block;">{{ s.label }}</text>
+              </view>
+            </view>
           </view>
         </view>
 
@@ -98,64 +110,84 @@
             <!-- 报表 / 配置 / 活动 / 报名 -->
             <view style="margin-bottom:32rpx;">
               <view style="display:flex;margin-bottom:16rpx;">
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('report')">
+                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('trial')">
+                  <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">🎧</text>
+                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">试课预约</text>
+                  <text style="font-size:20rpx;color:#8D6E63;">{{ pendingTrialLabel }}</text>
+                </view>
+                <view class="card" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('lesson-attend')">
+                  <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">🎯</text>
+                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">兴趣点名</text>
+                  <text style="font-size:20rpx;color:#8D6E63;">代点名消课</text>
+                </view>
+              </view>
+              <view style="display:flex;margin-bottom:16rpx;">
+                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('lesson-consume')">
+                  <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">📉</text>
+                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">近7日课消</text>
+                  <text style="font-size:20rpx;color:#8D6E63;">只读汇总</text>
+                </view>
+                <view class="card" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('report')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">📈</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">运营报表</text>
                   <text style="font-size:20rpx;color:#8D6E63;">数据分析</text>
                 </view>
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('bindings')">
+              </view>
+              <view style="display:flex;margin-bottom:16rpx;">
+                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('bindings')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">🔗</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">绑定审核</text>
                   <text style="font-size:20rpx;color:#8D6E63;">家长申请</text>
                 </view>
-              </view>
-              <view style="display:flex;margin-bottom:16rpx;">
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('events')">
+                <view class="card" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('events')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">🎉</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">活动日历</text>
                   <text style="font-size:20rpx;color:#8D6E63;">发布园所活动</text>
                 </view>
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('enrollments')">
+              </view>
+              <view style="display:flex;margin-bottom:16rpx;">
+                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('enrollments')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">🎟️</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">课程报名</text>
                   <text style="font-size:20rpx;color:#8D6E63;">录入与消课</text>
                 </view>
-              </view>
-              <view style="display:flex;margin-bottom:16rpx;">
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('leaves')">
+                <view class="card" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('leaves')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">📝</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">请假审批</text>
                   <text style="font-size:20rpx;color:#8D6E63;">代教师审核</text>
                 </view>
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('meals')">
+              </view>
+              <view style="display:flex;margin-bottom:16rpx;">
+                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('meals')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">🍱</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">营养餐</text>
                   <text style="font-size:20rpx;color:#8D6E63;">代打卡上传</text>
                 </view>
-              </view>
-              <view style="display:flex;margin-bottom:16rpx;">
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('homework')">
+                <view class="card" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('homework')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">📋</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">作业批改</text>
                   <text style="font-size:20rpx;color:#8D6E63;">待批提交</text>
                 </view>
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('attendance')">
+              </view>
+              <view style="display:flex;margin-bottom:16rpx;">
+                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('attendance')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">✅</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">考勤签到</text>
                   <text style="font-size:20rpx;color:#8D6E63;">全园点名</text>
                 </view>
-              </view>
-              <view style="display:flex;margin-bottom:16rpx;">
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('daily')">
+                <view class="card" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('daily')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">📷</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">日常代发</text>
                   <text style="font-size:20rpx;color:#8D6E63;">草稿·发布</text>
                 </view>
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('config')">
+              </view>
+              <view style="display:flex;margin-bottom:16rpx;">
+                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('config')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">⚙️</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">系统配置</text>
                   <text style="font-size:20rpx;color:#8D6E63;">功能设置</text>
                 </view>
+                <view style="flex:1;" />
               </view>
             </view>
           </view>
@@ -164,7 +196,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { fetchDashboard } from '../../api/institution.js'
 import { DEBUG_MODE } from '../../config.js'
 import { clearRoleSelection } from '../../utils/auth.js'
@@ -195,6 +227,12 @@ const summary = ref([
   { label: '缺勤预警', val: '—', warn: false },
   { label: '待收费', val: '—', warn: false },
 ])
+const lessonKpis = ref([])
+const pendingTrialCount = ref(0)
+const pendingTrialLabel = computed(() => {
+  const n = Number(pendingTrialCount.value) || 0
+  return n > 0 ? `${n} 条待确认` : '确认·代录·转正'
+})
 const alerts = ref([{ type: 'ok', title: '加载中', desc: '正在拉取今日概览…' }])
 const shortcuts = ref([
   { tab: 'teachers', icon: '👩‍🏫', label: '师资', sub: '—', color: '#AB47BC' },
@@ -208,11 +246,61 @@ function onAlertClick(a) {
   if (a?.tab) navigate(a.tab)
 }
 
+function onLessonKpiClick(s) {
+  if (s.key === 'consume') navigate('lesson-consume')
+  if (s.key === 'warning') navigate('students')
+  if (s.key === 'trial') navigate('trial')
+}
+
+function pickNum(...vals) {
+  for (const v of vals) {
+    if (v === 0 || v === '0') return 0
+    if (v != null && v !== '') return v
+  }
+  return null
+}
+
+function buildLessonKpis(data) {
+  const consume = pickNum(
+    data?.lesson_consume?.today_consume,
+    data?.today_consume_count,
+    data?.lesson_consume_today,
+    data?.kpis?.today_consume_count,
+  )
+  const warn = pickNum(
+    data?.lesson_consume?.low_balance_count,
+    data?.balance_warning_count,
+    data?.lesson_balance_warnings,
+    data?.kpis?.balance_warning_count,
+  )
+  const items = []
+  if (consume != null) {
+    items.push({ key: 'consume', label: '今日消课', val: String(consume), warn: false })
+  }
+  if (warn != null) {
+    items.push({ key: 'warning', label: '余额预警', val: String(warn), warn: Number(warn) > 0 })
+  }
+  const pendingTrial = pickNum(data?.pending_trial_count)
+  if (pendingTrial != null) {
+    items.push({ key: 'trial', label: '待确认试课', val: String(pendingTrial), warn: Number(pendingTrial) > 0 })
+  }
+  // 字段缺失时仍给一行占位，便于联调感知入口
+  if (!items.length) {
+    items.push(
+      { key: 'consume', label: '今日消课', val: '—', warn: false },
+      { key: 'warning', label: '余额预警', val: '—', warn: false },
+    )
+  }
+  return items
+}
+
 async function loadDashboard() {
   try {
     const data = await fetchDashboard()
     tenantName.value = data?.tenant_name || '机构'
     summary.value = data?.summary || summary.value
+    lessonKpis.value = buildLessonKpis(data || {})
+    pendingTrialCount.value = Number(data?.pending_trial_count) || 0
     alerts.value = Array.isArray(data?.alerts) ? data.alerts : []
     shortcuts.value = data?.shortcuts || shortcuts.value
     classOverview.value = (data?.class_overview || []).map(c => ({
@@ -220,6 +308,7 @@ async function loadDashboard() {
       total: Number(c.total) || 0,
     }))
   } catch (e) {
+    lessonKpis.value = buildLessonKpis({})
     uni.showToast({ title: e.message || '总览加载失败', icon: 'none' })
   }
 }

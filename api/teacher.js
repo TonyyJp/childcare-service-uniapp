@@ -254,3 +254,18 @@ export function fetchUnreadCount() {
 export function faceSearch(payload) {
   return http.post('/teacher/attendance/face-search', payload)
 }
+
+/** GET /teacher/lesson-attendances — 兴趣课次名单（含 remain_lessons） */
+export function fetchLessonAttendances({ classId, date, lessonDate, lessonSort } = {}) {
+  const data = {}
+  if (classId) data.class_id = classId
+  const d = lessonDate || date
+  if (d) data.lesson_date = d
+  if (lessonSort != null) data.lesson_sort = lessonSort
+  return http.get('/teacher/lesson-attendances', data)
+}
+
+/** PUT /teacher/lesson-attendances/{id} — present 触发消课 */
+export function updateLessonAttendanceStatus(id, status) {
+  return http.put(`/teacher/lesson-attendances/${id}`, { status })
+}

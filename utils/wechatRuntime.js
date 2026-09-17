@@ -11,6 +11,10 @@ let runtime = {
     attendance: '',
     notice: '',
     daily: '',
+    trial_confirm: '',
+    trial_remind: '',
+    trial_cancel: '',
+    trial_convert: '',
   },
 }
 
@@ -71,6 +75,10 @@ export function ensureWechatRuntime(force = false) {
             attendance: data.templates?.attendance || '',
             notice: data.templates?.notice || '',
             daily: data.templates?.daily || '',
+            trial_confirm: data.templates?.trial_confirm || '',
+            trial_remind: data.templates?.trial_remind || '',
+            trial_cancel: data.templates?.trial_cancel || '',
+            trial_convert: data.templates?.trial_convert || '',
           },
         }
         resolve(runtime)

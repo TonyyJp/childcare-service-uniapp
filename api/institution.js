@@ -232,3 +232,70 @@ export function publishDailyPost(id) {
 export function withdrawDailyPost(id) {
   return http.post(`/institution/daily-posts/${id}/withdraw`)
 }
+
+/** GET /institution/lesson-attendances — 兴趣课次名单（代点名） */
+export function fetchLessonAttendances({ classId, date, lessonDate, lessonSort } = {}) {
+  const data = {}
+  if (classId) data.class_id = classId
+  const d = lessonDate || date
+  if (d) data.lesson_date = d
+  if (lessonSort != null) data.lesson_sort = lessonSort
+  return http.get('/institution/lesson-attendances', data)
+}
+
+/** PUT /institution/lesson-attendances/{id} */
+export function updateLessonAttendanceStatus(id, status) {
+  return http.put(`/institution/lesson-attendances/${id}`, { status })
+}
+
+/** GET /institution/classes?biz_type=interest — 兴趣课班列表 */
+export function fetchInterestClasses() {
+  return http.get('/institution/classes', { biz_type: 'interest' })
+}
+
+/** POST /institution/lesson-packages — 简化发放课包 */
+export function createLessonPackage(payload) {
+  return http.post('/institution/lesson-packages', payload)
+}
+
+/** GET /institution/lesson-consume/summary?days=7 — 近 N 日课消汇总 */
+export function fetchLessonConsumeSummary(days = 7) {
+  return http.get('/institution/lesson-consume/summary', { days })
+}
+
+/** GET /institution/trial-bookings */
+export function fetchTrialBookings(params = {}) {
+  const data = {}
+  if (params.status) data.status = params.status
+  if (params.studentId) data.student_id = params.studentId
+  if (params.classId) data.class_id = params.classId
+  return http.get('/institution/trial-bookings', data)
+}
+
+/**
+ * GET /institution/trial-bookings/lessons?class_id=
+ * 排课次列表（与 org 课班 lesson_plan 对齐）。后端若未挂此路由，调用方会回退 class.lesson_plan。
+ */
+export function fetchTrialBookingLessons(classId) {
+  return http.get('/institution/trial-bookings/lessons', { class_id: classId })
+}
+
+/** POST /institution/trial-bookings — 代录（已有学生，source=staff_mp） */
+export function createTrialBooking(payload) {
+  return http.post('/institution/trial-bookings', payload)
+}
+
+/** POST /institution/trial-bookings/{id}/schedule */
+export function scheduleTrialBooking(id, payload) {
+  return http.post(`/institution/trial-bookings/${id}/schedule`, payload)
+}
+
+/** POST /institution/trial-bookings/{id}/cancel */
+export function cancelTrialBooking(id, reason) {
+  return http.post(`/institution/trial-bookings/${id}/cancel`, { reason })
+}
+
+/** POST /institution/trial-bookings/{id}/convert */
+export function convertTrialBooking(id, payload) {
+  return http.post(`/institution/trial-bookings/${id}/convert`, payload)
+}

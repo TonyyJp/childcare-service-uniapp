@@ -68,6 +68,8 @@ const profileMenuGroups = computed(() => [
       { icon: 'car', label: '接送人', sub: '授权接送人员', page: 'pickup', color: '#26A69A' },
       { icon: 'smile', label: '人脸授权', sub: '刷脸签到采集与撤回', page: 'face', color: '#5C6BC0' },
       { icon: 'file-text', label: '请假申请', sub: '提交与查看审批进度', page: 'leave', color: '#7B1FA2' },
+      { icon: 'wallet', label: '课时余额', sub: '兴趣课剩余课时与流水', page: 'lesson-package', color: '#FF8A65' },
+      { icon: 'calendar', label: '试课预约', sub: '申请进度与上课时间', page: 'trial', color: '#FF7043' },
       { icon: 'star', label: '服务评价', sub: '本月满意度打分', page: 'satisfaction', color: '#FF7043' },
     ],
   },
