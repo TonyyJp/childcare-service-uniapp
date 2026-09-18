@@ -1,11 +1,13 @@
 <template>
   <view class="tab-page">
-    <view class="gradient-header" style="background:linear-gradient(135deg,#FF7043 0%,#FF8A65 100%);">
+    <view class="gradient-header" style="background:linear-gradient(135deg,#FF7043 0%,#FF9068 100%);">
       <view class="header-row">
         <!-- TEMP_IDENTITY_RESELECT_BACK（DEBUG_MODE） -->
         <view
           v-if="debugMode"
-          class="back-btn"
+          class="back-btn tap-feedback"
+          hover-class="mp-tap"
+          :hover-stay-time="80"
           @click="goIdentitySelect"
         ><text class="back-icon">‹</text></view>
         <view v-else class="header-side" />
@@ -14,16 +16,22 @@
       </view>
       <view style="padding:0 40rpx 40rpx;">
         <view style="display:flex;align-items:center;">
-          <text style="font-size:48rpx;font-weight:800;color:white;flex:1;min-width:0;">{{ teacherName }}，您好 👋</text>
+          <text style="font-size:46rpx;font-weight:800;color:white;flex:1;min-width:0;">{{ teacherName }}，您好 👋</text>
           <view class="avatar-btn" style="flex-shrink:0;margin-left:20rpx;"><text class="avatar-text">{{ teacherAvatar }}</text></view>
         </view>
-        <text style="font-size:24rpx;color:rgba(255,255,255,0.8);display:block;margin-top:8rpx;">{{ todayLabel }} · {{ primaryClassName }}</text>
-        <view style="display:flex;margin-top:24rpx;">
-          <view v-for="(s, idx) in homeSummary" :key="s.label" style="flex:1;background:rgba(255,255,255,0.2);border-radius:20rpx;padding:20rpx;text-align:center;box-sizing:border-box;"
-            :style="{ marginRight: idx < homeSummary.length - 1 ? '16rpx' : '0' }"
-            @click="onHomeSummaryClick(s)">
-            <text style="font-size:44rpx;font-weight:800;color:white;display:block;" :style="{ color: s.warn ? '#FFE082' : 'white' }">{{ s.val }}</text>
-            <text style="font-size:22rpx;color:rgba(255,255,255,0.75);display:block;">{{ s.label }}</text>
+        <text style="font-size:24rpx;color:rgba(255,255,255,0.82);display:block;margin-top:10rpx;">{{ todayLabel }} · {{ primaryClassName }}</text>
+        <view class="home-summary">
+          <view
+            v-for="(s, idx) in homeSummary"
+            :key="s.label"
+            class="home-summary-cell tap-feedback"
+            hover-class="mp-tap-soft"
+            :hover-stay-time="80"
+            :style="{ borderRight: idx < homeSummary.length - 1 ? '1rpx solid rgba(255,255,255,0.24)' : 'none' }"
+            @click="onHomeSummaryClick(s)"
+          >
+            <text class="home-summary-val" :style="{ color: s.warn ? '#FFE082' : '#fff' }">{{ s.val }}</text>
+            <text class="home-summary-label">{{ s.label }}</text>
           </view>
         </view>
       </view>
@@ -31,10 +39,20 @@
 
     <scroll-view scroll-y style="flex:1;height:0;">
       <view style="padding:32rpx 40rpx 0;">
-        <text style="font-size:26rpx;font-weight:800;color:#2D1F18;display:block;margin-bottom:20rpx;">快捷功能</text>
+        <view class="section-head">
+          <view class="section-bar" />
+          <text class="section-title">快捷功能</text>
+        </view>
         <view style="display:grid;grid-template-columns:repeat(4,1fr);gap:20rpx;">
-          <view v-for="f in features" :key="f.label" class="feature-item" :style="{ backgroundColor: f.color + '18' }" @click="$emit('navigate', f.nav)">
-            <view class="feature-icon-wrap" :style="{ backgroundColor: f.color + '28' }">
+          <view
+            v-for="f in features"
+            :key="f.label"
+            class="feature-item tap-feedback"
+            hover-class="mp-tap"
+            :hover-stay-time="80"
+            @click="$emit('navigate', f.nav)"
+          >
+            <view class="feature-icon-wrap" :style="{ backgroundColor: f.color + '1F' }">
               <text class="feature-icon">{{ f.icon }}</text>
             </view>
             <text class="feature-label">{{ f.label }}</text>
@@ -43,15 +61,19 @@
       </view>
 
       <view v-if="unfinishedCheckins.length" style="padding:32rpx 40rpx 0;">
-        <view style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20rpx;">
-          <text style="font-size:26rpx;font-weight:800;color:#2D1F18;">未完成点名</text>
-          <text style="font-size:22rpx;color:#E65100;font-weight:700;" @click="goUnfinishedCheckin()">去处理 ›</text>
+        <view class="section-head" style="justify-content:space-between;">
+          <view style="display:flex;align-items:center;gap:12rpx;">
+            <view class="section-bar" style="background:#E65100;" />
+            <text class="section-title">未完成点名</text>
+          </view>
+          <text class="section-action tap-feedback" hover-class="mp-tap-soft" :hover-stay-time="80" @click="goUnfinishedCheckin()">去处理 ›</text>
         </view>
         <view
           v-for="item in unfinishedCheckins"
           :key="`${item.class_id}-${item.period_id}`"
-          class="card"
-          style="padding:24rpx;margin-bottom:16rpx;display:flex;align-items:center;gap:16rpx;"
+          class="card todo-card tap-feedback"
+          hover-class="mp-tap-soft"
+          :hover-stay-time="80"
           @click="goUnfinishedCheckin(item)"
         >
           <view style="flex:1;min-width:0;">
@@ -65,56 +87,67 @@
       </view>
 
       <view style="padding:32rpx 40rpx 24rpx;">
-        <text style="font-size:26rpx;font-weight:800;color:#2D1F18;display:block;margin-bottom:20rpx;">我的班级</text>
+        <view class="section-head">
+          <view class="section-bar" />
+          <text class="section-title">我的班级</text>
+        </view>
         <LoadingSkeleton v-if="homeLoading" variant="list" :count="3" padding="8rpx 0" />
-        <view v-for="cls in classes" :key="cls.id" class="card" style="padding:24rpx;margin-bottom:20rpx;">
-          <view style="display:flex;align-items:center;gap:16rpx;margin-bottom:16rpx;">
-            <view style="width:16rpx;height:40rpx;border-radius:8rpx;" :style="{ backgroundColor: cls.color }" />
-            <view style="flex:1;min-width:0;">
-              <view style="display:flex;align-items:center;gap:10rpx;flex-wrap:wrap;">
-                <text style="font-size:30rpx;font-weight:800;color:#2D1F18;">{{ cls.name }}</text>
-                <view class="pill" :style="{ backgroundColor: cls.tagBg, color: cls.tagColor }">
-                  <text style="font-size:20rpx;font-weight:700;">{{ cls.tag }}</text>
+        <template v-else>
+          <view v-for="cls in classes" :key="cls.id" class="card class-card">
+            <view style="display:flex;align-items:center;gap:16rpx;margin-bottom:16rpx;">
+              <view style="width:16rpx;height:40rpx;border-radius:8rpx;flex-shrink:0;" :style="{ backgroundColor: cls.color }" />
+              <view style="flex:1;min-width:0;">
+                <view style="display:flex;align-items:center;gap:10rpx;flex-wrap:wrap;">
+                  <text style="font-size:30rpx;font-weight:800;color:#2D1F18;">{{ cls.name }}</text>
+                  <view class="pill" :style="{ backgroundColor: cls.tagBg, color: cls.tagColor }">
+                    <text style="font-size:20rpx;font-weight:700;">{{ cls.tag }}</text>
+                  </view>
                 </view>
+                <text v-if="cls.timeLabel" style="font-size:22rpx;color:#8D6E63;display:block;margin-top:4rpx;">{{ cls.timeLabel }}</text>
               </view>
-              <text v-if="cls.timeLabel" style="font-size:22rpx;color:#8D6E63;display:block;margin-top:4rpx;">{{ cls.timeLabel }}</text>
+              <view class="pill" style="background:#C8E6C9;color:#2E7D32;" v-if="cls.done"><text style="font-size:22rpx;">✓ 已点名</text></view>
+              <view
+                v-if="cls.canCheckin"
+                class="action-btn tap-feedback"
+                hover-class="mp-tap"
+                :hover-stay-time="80"
+                :style="{ backgroundColor: cls.color }"
+                @click="goCheckinForClass(cls)"
+              >
+                <text style="color:white;font-size:24rpx;font-weight:700;">点名 ›</text>
+              </view>
+              <view
+                v-else-if="cls.bizType === 'interest'"
+                class="action-btn tap-feedback"
+                hover-class="mp-tap"
+                :hover-stay-time="80"
+                style="background:#FF7043;"
+                @click="$emit('navigate', { tab: 'schedule', interestAttend: true, classId: cls.id, className: cls.name })"
+              >
+                <text style="color:white;font-size:24rpx;font-weight:700;">课次点名 ›</text>
+              </view>
+              <view
+                v-else
+                class="action-btn tap-feedback"
+                hover-class="mp-tap"
+                :hover-stay-time="80"
+                style="background:#FFB300;"
+                @click="$emit('navigate', { tab: 'schedule' })"
+              >
+                <text style="color:white;font-size:24rpx;font-weight:700;">课表 ›</text>
+              </view>
             </view>
-            <view class="pill" style="background:#C8E6C9;color:#2E7D32;" v-if="cls.done"><text style="font-size:22rpx;">✓ 已点名</text></view>
-            <view
-              v-if="cls.canCheckin"
-              class="action-btn"
-              :style="{ backgroundColor: cls.color }"
-              @click="goCheckinForClass(cls)"
-            >
-              <text style="color:white;font-size:24rpx;font-weight:700;">点名 ›</text>
-            </view>
-            <view
-              v-else-if="cls.bizType === 'interest'"
-              class="action-btn"
-              style="background:#FF7043;"
-              @click="$emit('navigate', { tab: 'schedule', interestAttend: true, classId: cls.id, className: cls.name })"
-            >
-              <text style="color:white;font-size:24rpx;font-weight:700;">课次点名 ›</text>
-            </view>
-            <view
-              v-else
-              class="action-btn"
-              style="background:#FFB300;"
-              @click="$emit('navigate', { tab: 'schedule' })"
-            >
-              <text style="color:white;font-size:24rpx;font-weight:700;">课表 ›</text>
+            <view style="display:flex;gap:12rpx;">
+              <view v-for="s in classStats(cls)" :key="s.label" class="class-stat">
+                <text style="font-size:28rpx;font-weight:800;display:block;" :style="{ color: s.color }">{{ s.val }}</text>
+                <text style="font-size:20rpx;color:#8D6E63;">{{ s.label }}</text>
+              </view>
             </view>
           </view>
-          <view style="display:flex;gap:12rpx;">
-            <view v-for="s in classStats(cls)" :key="s.label" style="flex:1;text-align:center;background:#FFF8F5;border-radius:12rpx;padding:12rpx 0;">
-              <text style="font-size:28rpx;font-weight:800;display:block;" :style="{ color: s.color }">{{ s.val }}</text>
-              <text style="font-size:20rpx;color:#8D6E63;">{{ s.label }}</text>
-            </view>
+          <view v-if="!classes.length" style="padding:40rpx 0;text-align:center;">
+            <text style="color:#8D6E63;font-size:26rpx;">暂无所带班级</text>
           </view>
-        </view>
-        <view v-if="!classes.length && !homeLoading" style="padding:40rpx 0;text-align:center;">
-          <text style="color:#8D6E63;font-size:26rpx;">暂无所带班级</text>
-        </view>
+        </template>
       </view>
     </scroll-view>
   </view>
@@ -293,8 +326,35 @@ onMounted(loadTeacherHome)
 <style lang="scss">
 @import '../../styles/mp-common.scss';
 
-.feature-item { display: flex; flex-direction: column; align-items: center; gap: 12rpx; padding: 20rpx 12rpx; border-radius: 20rpx; }
+.home-summary {
+  display: flex;
+  margin-top: 28rpx;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 24rpx;
+  padding: 24rpx 0;
+}
+.home-summary-cell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  box-sizing: border-box;
+}
+.home-summary-val { font-size: 44rpx; font-weight: 800; line-height: 1; }
+.home-summary-label { font-size: 22rpx; color: rgba(255, 255, 255, 0.8); }
+
+.section-head { display: flex; align-items: center; gap: 12rpx; margin-bottom: 20rpx; }
+.section-bar { width: 8rpx; height: 28rpx; border-radius: 4rpx; background: #FF7043; flex-shrink: 0; }
+.section-title { font-size: 28rpx; font-weight: 800; color: #2D1F18; }
+.section-action { font-size: 22rpx; color: #E65100; font-weight: 700; }
+
+.feature-item { display: flex; flex-direction: column; align-items: center; gap: 12rpx; padding: 24rpx 12rpx; border-radius: 24rpx; background: #FFFFFF; box-shadow: 0 2rpx 12rpx rgba(45, 31, 24, 0.05); }
 .feature-icon-wrap { width: 80rpx; height: 80rpx; border-radius: 24rpx; display: flex; align-items: center; justify-content: center; }
-.feature-icon { font-size: 36rpx; }
+.feature-icon { font-size: 38rpx; }
 .feature-label { font-size: 22rpx; font-weight: 700; color: #2D1F18; text-align: center; }
+
+.todo-card { padding: 24rpx; margin-bottom: 16rpx; display: flex; align-items: center; gap: 16rpx; }
+.class-card { padding: 24rpx; margin-bottom: 20rpx; }
+.class-stat { flex: 1; text-align: center; background: #FFF8F5; border-radius: 12rpx; padding: 14rpx 0; }
 </style>

@@ -314,3 +314,19 @@ textarea.form-input {
   display: block;
   margin-bottom: 32rpx;
 }
+
+/* ── 通用点按反馈（opt-in 工具类；由微信小程序 hover-class 触发）──────
+   仅新增，不修改任何既有样式，故不影响家长端 / 机构端现有观感。
+   用法：给可点击元素加 class="tap-feedback" 与 hover-class="mp-tap"。 */
+.tap-feedback {
+  transition: transform 0.16s ease, opacity 0.16s ease;
+}
+
+.mp-tap {
+  opacity: 0.7;
+  transform: scale(0.97);
+}
+
+.mp-tap-soft {
+  opacity: 0.82;
+}
