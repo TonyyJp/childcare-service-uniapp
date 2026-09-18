@@ -1,6 +1,6 @@
 <template>
   <view class="tab-page">
-    <view class="gradient-header" style="background:linear-gradient(135deg,#FF7043 0%,#FF8A65 100%);">
+    <view class="gradient-header" style="background:linear-gradient(135deg,#FF7043 0%,#FF9068 100%);">
       <view class="safe-nav-bar" style="padding-bottom:32rpx;">
         <text style="font-size:44rpx;font-weight:800;color:white;display:block;">日常动态</text>
         <text style="font-size:24rpx;color:rgba(255,255,255,0.8);display:block;margin-top:8rpx;">今日已发布 {{ publishedCount }} 条</text>

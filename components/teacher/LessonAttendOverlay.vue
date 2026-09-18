@@ -1,6 +1,6 @@
 <template>
   <view class="overlay-page">
-    <view class="gradient-header" style="background:linear-gradient(135deg,#FF7043 0%,#FF8A65 100%);">
+    <view class="gradient-header" style="background:linear-gradient(135deg,#FF7043 0%,#FF9068 100%);">
       <view style="padding:0 40rpx 32rpx;">
         <view style="display:flex;align-items:center;margin-bottom:16rpx;">
           <view class="back-btn" style="margin-right:20rpx;" @click="$emit('back')">
