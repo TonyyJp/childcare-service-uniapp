@@ -1,24 +1,22 @@
 <template>
   <view v-if="course" class="overlay-page" style="background:linear-gradient(135deg,#3B9EEB 0%,#3B9EEBBB 100%);">
     <view class="safe-nav-header" style="padding-left:40rpx;padding-bottom:40rpx;flex-shrink:0;">
-      <view class="safe-nav-bar" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32rpx;padding-left:0 !important;">
+      <view class="safe-nav-bar" style="width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:32rpx;padding-left:0 !important;">
         <view class="back-btn" @click="$emit('close')"><text class="back-icon">‹</text></view>
         <text style="color:white;font-size:28rpx;font-weight:700;">课程详情</text>
         <view style="width:64rpx;" />
       </view>
-      <view style="display:flex;align-items:flex-end;gap:24rpx;">
-        <view style="width:120rpx;height:120rpx;border-radius:36rpx;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
-          <image v-if="course.coverUrl" :src="course.coverUrl" mode="aspectFill" style="width:100%;height:100%;" />
-          <MpIcon v-else name="book-open" :size="48" color="rgba(255,255,255,0.9)" />
-        </view>
-        <view style="flex:1;padding-bottom:8rpx;">
-          <text style="font-size:36rpx;font-weight:800;color:white;display:block;line-height:1.3;">{{ course.title }}</text>
-          <text style="font-size:22rpx;color:rgba(255,255,255,0.8);display:block;margin-top:8rpx;">{{ course.teacher }} · {{ course.age }}</text>
-          <view style="display:flex;gap:12rpx;margin-top:16rpx;flex-wrap:wrap;">
-            <view class="pill" style="background:rgba(255,255,255,0.28);color:white;"><text style="font-size:20rpx;">{{ course.tag }}</text></view>
-            <view class="pill" style="background:rgba(255,255,255,0.2);color:white;"><text style="font-size:20rpx;">共{{ course.sessions }}节</text></view>
-            <view class="pill" style="background:rgba(255,255,255,0.3);color:white;"><text style="font-size:20rpx;font-weight:800;">{{ course.price }}</text></view>
-          </view>
+      <view style="width:100%;height:360rpx;border-radius:28rpx;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:28rpx;">
+        <image v-if="course.coverUrl" :src="course.coverUrl" mode="aspectFill" style="width:100%;height:100%;" />
+        <MpIcon v-else name="book-open" :size="88" color="rgba(255,255,255,0.9)" />
+      </view>
+      <view style="width:100%;padding-right:40rpx;box-sizing:border-box;">
+        <text style="font-size:38rpx;font-weight:800;color:white;display:block;line-height:1.3;">{{ course.title }}</text>
+        <text style="font-size:22rpx;color:rgba(255,255,255,0.85);display:block;margin-top:10rpx;">{{ course.teacher }} · {{ course.age }}</text>
+        <view style="display:flex;gap:12rpx;margin-top:18rpx;flex-wrap:wrap;">
+          <view class="pill" style="background:rgba(255,255,255,0.28);color:white;"><text style="font-size:20rpx;">{{ course.tag }}</text></view>
+          <view class="pill" style="background:rgba(255,255,255,0.2);color:white;"><text style="font-size:20rpx;">共{{ course.sessions }}节</text></view>
+          <view class="pill" style="background:rgba(255,255,255,0.3);color:white;"><text style="font-size:20rpx;font-weight:800;">{{ course.price }}</text></view>
         </view>
       </view>
     </view>
