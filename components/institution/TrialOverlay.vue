@@ -2,16 +2,18 @@
   <view class="overlay-page">
     <view class="gradient-header" style="background:linear-gradient(135deg,#AB47BC 0%,#CE93D8 100%);">
       <view style="padding:0 40rpx 24rpx;">
-        <view style="display:flex;align-items:center;margin-bottom:16rpx;">
-          <view class="back-btn" @click="navigate('home')"><text class="back-icon">‹</text></view>
-          <view style="flex:1;margin-left:20rpx;min-width:0;">
-            <text style="font-size:40rpx;font-weight:800;color:white;display:block;">试课预约</text>
-            <text style="font-size:24rpx;color:rgba(255,255,255,0.8);">待确认 {{ pendingCount }} 条</text>
+          <view style="display:flex;align-items:center;margin-bottom:16rpx;">
+            <view class="back-btn" @click="navigate('home')"><text class="back-icon">‹</text></view>
+            <view style="flex:1;margin-left:20rpx;min-width:0;">
+              <text style="font-size:40rpx;font-weight:800;color:white;display:block;">试课预约</text>
+              <text style="font-size:24rpx;color:rgba(255,255,255,0.8);">待确认 {{ pendingCount }} 条</text>
+            </view>
           </view>
-          <view style="background:rgba(255,255,255,0.25);border-radius:20rpx;padding:14rpx 24rpx;" @click="openCreate">
-            <text style="color:white;font-size:24rpx;font-weight:700;">+ 代录</text>
+          <view style="display:flex;justify-content:flex-end;margin-bottom:16rpx;">
+            <view style="background:rgba(255,255,255,0.25);border-radius:20rpx;padding:12rpx 28rpx;" hover-class="mp-tap-soft" :hover-stay-time="80" @click="openCreate">
+              <text style="color:white;font-size:24rpx;font-weight:700;">+ 代录</text>
+            </view>
           </view>
-        </view>
         <scroll-view scroll-x style="white-space:nowrap;">
           <view
             v-for="f in filters"
@@ -28,9 +30,7 @@
     </view>
     <scroll-view scroll-y style="flex:1;height:0;">
       <view style="padding:24rpx 40rpx;">
-        <view v-if="loading" style="padding:48rpx 0;text-align:center;">
-          <text style="font-size:26rpx;color:#8D6E63;">加载中…</text>
-        </view>
+        <LoadingSkeleton v-if="loading" variant="list" :count="3" padding="8rpx 0" />
         <view v-else-if="errorMsg" style="padding:48rpx 24rpx;text-align:center;">
           <text style="font-size:28rpx;font-weight:700;color:#2D1F18;display:block;margin-bottom:12rpx;">暂时无法加载</text>
           <text style="font-size:24rpx;color:#8D6E63;display:block;margin-bottom:24rpx;">{{ errorMsg }}</text>
@@ -273,6 +273,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { computed, ref, watch } from 'vue'
 import {
   cancelTrialBooking,

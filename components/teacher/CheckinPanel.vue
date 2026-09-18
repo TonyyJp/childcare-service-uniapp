@@ -1,6 +1,6 @@
 <template>
   <view class="tab-page">
-    <view class="gradient-header" style="background:linear-gradient(135deg,#FF7043 0%,#FF8A65 100%);">
+    <view class="gradient-header" style="background:linear-gradient(135deg,#FF7043 0%,#FF9068 100%);">
       <view style="padding:0 40rpx 32rpx;">
         <text style="font-size:44rpx;font-weight:800;color:white;display:block;">签到管理</text>
         <text style="font-size:24rpx;color:rgba(255,255,255,0.8);display:block;margin-top:8rpx;">
@@ -106,9 +106,7 @@
 
     <scroll-view v-else scroll-y style="flex:1;height:0;">
       <view style="padding:0 40rpx;">
-        <view v-if="checkinLoading" style="padding:60rpx 0;text-align:center;">
-          <text style="color:#8D6E63;">加载点名名单…</text>
-        </view>
+        <LoadingSkeleton v-if="checkinLoading" variant="list" :count="5" thumb padding="8rpx 0" />
         <view v-else-if="!checkinList.length" style="padding:60rpx 0;text-align:center;">
           <text style="color:#8D6E63;">{{ emptyHint }}</text>
         </view>

@@ -1,6 +1,6 @@
 <template>
   <view class="tab-page">
-    <view class="gradient-header" style="background:linear-gradient(135deg,#FF7043 0%,#FF8A65 100%);">
+    <view class="gradient-header" style="background:linear-gradient(135deg,#FF7043 0%,#FF9068 100%);">
       <view class="safe-nav-bar" style="padding-bottom:32rpx;">
         <text style="font-size:44rpx;font-weight:800;color:white;display:block;">日常动态</text>
         <text style="font-size:24rpx;color:rgba(255,255,255,0.8);display:block;margin-top:8rpx;">今日已发布 {{ publishedCount }} 条</text>
@@ -13,9 +13,7 @@
         <view class="primary-btn" style="margin-bottom:24rpx;" @click="openCompose">
           <text style="color:white;font-size:30rpx;font-weight:800;">发动态</text>
         </view>
-        <view v-if="dailyLoading" style="padding:48rpx 0;text-align:center;">
-          <text style="font-size:26rpx;color:#8D6E63;">加载中…</text>
-        </view>
+        <LoadingSkeleton v-if="dailyLoading" variant="feed" :count="3" padding="8rpx 0" />
         <view v-else-if="!dailyRecords.length" style="padding:48rpx 0;text-align:center;">
           <text style="font-size:26rpx;color:#8D6E63;">暂无动态，点击上方发动态</text>
         </view>
@@ -158,6 +156,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, computed, inject, onMounted } from 'vue'
 import {
   aiGenerateDailyPost,

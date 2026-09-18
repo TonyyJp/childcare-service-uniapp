@@ -13,7 +13,7 @@
         </view>
         <scroll-view scroll-y style="flex:1;height:0;">
           <view style="padding:24rpx 40rpx;">
-            <view v-if="orgHwLoading" style="padding:48rpx;text-align:center;"><text style="color:#8D6E63;">加载中…</text></view>
+            <LoadingSkeleton v-if="orgHwLoading" variant="list" :count="3" padding="8rpx 0" />
             <view v-else-if="!orgSubmissions.length" style="padding:48rpx;text-align:center;"><text style="color:#8D6E63;">暂无待批作业</text></view>
             <view v-for="s in orgSubmissions" :key="s.id" class="card" style="padding:24rpx;margin-bottom:16rpx;">
               <text style="font-size:28rpx;font-weight:800;color:#2D1F18;display:block;">{{ s.student?.name }} · {{ s.homework?.title }}</text>
@@ -31,6 +31,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, watch } from 'vue'
 import { fetchSubmissions, reviewSubmission } from '../../api/institution.js'
 

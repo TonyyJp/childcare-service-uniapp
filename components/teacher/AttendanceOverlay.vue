@@ -1,6 +1,6 @@
 <template>
   <view class="overlay-page">
-    <view class="gradient-header" style="background:linear-gradient(135deg,#FF7043 0%,#FF8A65 100%);">
+    <view class="gradient-header" style="background:linear-gradient(135deg,#FF7043 0%,#FF9068 100%);">
       <view style="padding:0 40rpx 32rpx;">
         <view style="display:flex;align-items:center;margin-bottom:16rpx;">
           <view class="back-btn" style="margin-right:20rpx;" @click="$emit('back')"><text class="back-icon">‹</text></view>
@@ -8,8 +8,10 @@
             <text style="font-size:40rpx;font-weight:800;color:white;display:block;">学生考勤</text>
             <text style="font-size:24rpx;color:rgba(255,255,255,0.8);">{{ checkinClassName || '请选择班级' }} · {{ checkinPeriodName || '请选择时段' }}</text>
           </view>
-          <view style="padding:12rpx 20rpx;border-radius:16rpx;background:rgba(255,255,255,0.25);" @click="$emit('go-checkin')">
-            <text style="font-size:24rpx;font-weight:700;color:white;">去签到</text>
+        </view>
+        <view style="display:flex;justify-content:flex-end;margin-bottom:16rpx;">
+          <view style="padding:12rpx 28rpx;border-radius:20rpx;background:rgba(255,255,255,0.25);" hover-class="mp-tap-soft" :hover-stay-time="80" @click="$emit('go-checkin')">
+            <text style="font-size:24rpx;font-weight:700;color:white;">去签到 ›</text>
           </view>
         </view>
         <scroll-view v-if="checkinClassOptions.length" scroll-x style="margin-bottom:12rpx;white-space:nowrap;">
@@ -45,9 +47,7 @@
     </view>
     <scroll-view scroll-y style="flex:1;height:0;">
       <view style="padding:24rpx 40rpx;">
-        <view v-if="checkinLoading" style="padding:48rpx 0;text-align:center;">
-          <text style="font-size:26rpx;color:#8D6E63;">加载考勤…</text>
-        </view>
+        <LoadingSkeleton v-if="checkinLoading" variant="list" :count="5" thumb padding="8rpx 0" />
         <view v-else-if="!attStudents.length" style="padding:48rpx 0;text-align:center;">
           <text style="font-size:26rpx;color:#8D6E63;">{{ emptyHint }}</text>
         </view>

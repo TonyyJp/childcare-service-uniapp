@@ -1,19 +1,19 @@
 <template>
       <view class="tab-page">
         <view class="gradient-header" style="background:linear-gradient(135deg,#AB47BC 0%,#CE93D8 100%);">
-          <view class="safe-nav-bar" style="display:flex;align-items:center;justify-content:space-between;padding-bottom:32rpx;">
-            <view>
-              <text style="font-size:44rpx;font-weight:800;color:white;display:block;">通知管理</text>
-              <text style="font-size:24rpx;color:rgba(255,255,255,0.8);">已发 {{ sentNotices.length }} 条</text>
-            </view>
-            <view style="background:rgba(255,255,255,0.25);border-radius:20rpx;padding:16rpx 28rpx;" @click="showCompose = true">
+          <view class="safe-nav-bar" style="padding-bottom:20rpx;">
+            <text style="font-size:44rpx;font-weight:800;color:white;display:block;">通知管理</text>
+            <text style="font-size:24rpx;color:rgba(255,255,255,0.8);">已发 {{ sentNotices.length }} 条</text>
+          </view>
+          <view style="display:flex;justify-content:flex-end;padding:0 40rpx 8rpx;">
+            <view hover-class="tap-dim" style="background:rgba(255,255,255,0.25);border-radius:20rpx;padding:16rpx 28rpx;" @click="showCompose = true">
               <text style="color:white;font-size:26rpx;font-weight:700;">+ 发通知</text>
             </view>
           </view>
         </view>
         <scroll-view scroll-y style="flex:1;height:0;">
           <view style="padding:24rpx 40rpx;">
-            <view v-if="noticesLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">加载中…</text></view>
+            <LoadingSkeleton v-if="noticesLoading" variant="list" :count="3" padding="8rpx 0" />
             <view v-else-if="!notices.length" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">暂无通知</text></view>
             <view v-for="n in notices" :key="n.id" class="card" style="margin-bottom:20rpx;overflow:hidden;">
               <view v-if="n.type === 'urgent'" style="height:6rpx;background:#E53935;" />
@@ -88,6 +88,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, computed, watch } from 'vue'
 import { createNotice, fetchNotices } from '../../api/institution.js'
 

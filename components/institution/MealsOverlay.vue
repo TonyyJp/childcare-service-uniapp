@@ -30,7 +30,7 @@
             <view style="padding:24rpx;border-radius:20rpx;background:linear-gradient(135deg,#66BB6A,#A5D6A7);text-align:center;margin-bottom:24rpx;" @click="uploadOrgMeal">
               <text style="color:white;font-size:28rpx;font-weight:800;">{{ orgMealUploading ? '上传中…' : '拍照/选图上传' }}</text>
             </view>
-            <view v-if="orgMealsLoading" style="padding:32rpx;text-align:center;"><text style="color:#8D6E63;">加载中…</text></view>
+            <LoadingSkeleton v-if="orgMealsLoading" variant="list" :count="2" padding="8rpx 0" />
             <view v-for="m in orgMeals" :key="m.id" class="card" style="padding:20rpx;margin-bottom:16rpx;">
               <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">{{ m.class_name }} · {{ mealTypeName(m.meal_type) }}</text>
               <text style="font-size:22rpx;color:#8D6E63;display:block;margin-top:6rpx;">{{ m.photos?.length || 0 }} 张 · {{ m.staff_name || '—' }}</text>
@@ -41,6 +41,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, watch } from 'vue'
 import { createMeal, fetchMeals } from '../../api/institution.js'
 import { uploadFile } from '../../utils/request.js'

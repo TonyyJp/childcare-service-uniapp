@@ -19,7 +19,7 @@
         </view>
         <scroll-view scroll-y style="flex:1;height:0;">
           <view style="padding:24rpx 40rpx;">
-            <view v-if="reportLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">加载中…</text></view>
+            <LoadingSkeleton v-if="reportLoading" variant="list" :count="3" padding="8rpx 0" />
             <template v-else>
             <view style="display:flex;flex-wrap:wrap;margin-bottom:24rpx;">
               <view v-for="(k, idx) in reportKpis" :key="k.key || k.label" class="card" style="width:48%;box-sizing:border-box;padding:24rpx;margin-bottom:16rpx;"
@@ -60,6 +60,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, computed, watch } from 'vue'
 import { fetchReports } from '../../api/institution.js'
 

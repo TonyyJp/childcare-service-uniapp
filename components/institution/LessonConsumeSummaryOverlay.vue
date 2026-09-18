@@ -13,9 +13,7 @@
     </view>
     <scroll-view scroll-y style="flex:1;height:0;">
       <view style="padding:24rpx 40rpx;">
-        <view v-if="loading" style="padding:48rpx 0;text-align:center;">
-          <text style="font-size:26rpx;color:#8D6E63;">加载中…</text>
-        </view>
+        <LoadingSkeleton v-if="loading" variant="list" :count="3" padding="8rpx 0" />
         <view v-else-if="errorMsg" class="card" style="padding:32rpx;text-align:center;">
           <text style="font-size:28rpx;font-weight:700;color:#2D1F18;display:block;margin-bottom:12rpx;">暂时无法加载</text>
           <text style="font-size:24rpx;color:#8D6E63;display:block;margin-bottom:20rpx;">{{ errorMsg }}</text>
@@ -54,6 +52,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { computed, ref, watch } from 'vue'
 import { fetchLessonConsumeSummary } from '../../api/institution.js'
 

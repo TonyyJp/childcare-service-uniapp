@@ -37,9 +37,7 @@
             <view class="primary-btn" style="margin-bottom:24rpx;" @click="openCompose">
               <text style="color:white;font-size:30rpx;font-weight:800;">发动态</text>
             </view>
-            <view v-if="dailyLoading" style="padding:48rpx 0;text-align:center;">
-              <text style="font-size:26rpx;color:#8D6E63;">加载中…</text>
-            </view>
+        <LoadingSkeleton v-if="dailyLoading" variant="feed" :count="3" padding="8rpx 0" />
             <view v-else-if="!dailyRecords.length" style="padding:48rpx 0;text-align:center;">
               <text style="font-size:26rpx;color:#8D6E63;">暂无动态，点击上方发动态</text>
             </view>
@@ -182,6 +180,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, computed, watch } from 'vue'
 import {
   aiGenerateDailyPost,
@@ -279,7 +278,7 @@ async function loadDailyPosts() {
 }
 
 /** 平滑打字机：网络增量先入队，按固定节奏渲染（约 30ms 一拍，积压越多步长越大）。
- *  分块到达常为阵发（实测每 ~130ms 一批），直接渲染视觉上像整段填充。 */
+ *  分块到达常为���发（实测每 ~130ms 一批），直接渲染视觉上像整段填充。 */
 function createTypewriter(apply) {
   let queue = ''
   let timer = null

@@ -15,7 +15,7 @@
           <view style="padding:24rpx 40rpx;">
             <view v-for="section in configSections" :key="section.title" class="card" style="padding:24rpx;margin-bottom:24rpx;">
               <text style="font-size:28rpx;font-weight:800;color:#2D1F18;display:block;margin-bottom:20rpx;">{{ section.icon }} {{ section.title }}</text>
-              <view v-if="configLoading" style="padding:24rpx 0;text-align:center;"><text style="font-size:24rpx;color:#8D6E63;">加载中…</text></view>
+              <LoadingSkeleton v-if="configLoading" variant="list" :count="2" padding="8rpx 0" />
               <view v-for="item in section.items" :key="item.key" style="display:flex;align-items:center;padding:20rpx 0;border-bottom:1rpx solid #F5F0EC;">
                 <view style="flex:1;">
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">{{ item.label }}</text>
@@ -38,6 +38,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, watch } from 'vue'
 import { fetchSettings, updateSettings } from '../../api/institution.js'
 

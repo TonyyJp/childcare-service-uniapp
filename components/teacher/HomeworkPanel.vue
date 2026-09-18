@@ -1,6 +1,6 @@
 <template>
   <view class="tab-page">
-    <view class="gradient-header" style="background:linear-gradient(135deg,#FF7043 0%,#FF8A65 100%);">
+    <view class="gradient-header" style="background:linear-gradient(135deg,#FF7043 0%,#FF9068 100%);">
       <view class="safe-nav-bar" style="padding-bottom:16rpx;">
         <text style="font-size:44rpx;font-weight:800;color:white;display:block;">作业中心</text>
         <text style="font-size:24rpx;color:rgba(255,255,255,0.8);display:block;margin-top:8rpx;">{{ headerHint }}</text>
@@ -14,9 +14,7 @@
 
     <scroll-view scroll-y style="flex:1;height:0;">
       <view style="padding:24rpx 40rpx;">
-        <view v-if="hwLoading" style="padding:48rpx 0;text-align:center;">
-          <text style="font-size:26rpx;color:#8D6E63;">加载中…</text>
-        </view>
+        <LoadingSkeleton v-if="hwLoading" variant="list" :count="3" padding="8rpx 0" />
 
         <!-- 作业登记：正式布置 -->
         <view v-else-if="hwTab === '作业登记'">
@@ -196,6 +194,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, computed, inject, onMounted } from 'vue'
 import {
   createHomework,

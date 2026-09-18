@@ -20,6 +20,7 @@
         <view v-else-if="!hwRecords.length" style="padding:48rpx 0;text-align:center;">
           <text style="font-size:26rpx;color:#8D6E63;">暂无作业</text>
         </view>
+        <template v-else>
         <view v-for="rec in hwRecords" :key="rec.id" class="card" style="margin-bottom:24rpx;overflow:hidden;" @click="openHwDetail(rec)">
           <view style="height:8rpx;" :style="{ background: `linear-gradient(90deg, ${rec.color} 0%, ${rec.color}80 100%)` }" />
           <view style="padding:24rpx;">
@@ -39,6 +40,7 @@
             <text style="font-size:22rpx;color:#BDBDBD;">点按查看详情{{ rec.myStatus === 'pending' ? '并提交' : '' }}</text>
           </view>
         </view>
+        </template>
       </view>
     </scroll-view>
 
