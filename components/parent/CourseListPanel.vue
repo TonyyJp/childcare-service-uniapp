@@ -1,7 +1,7 @@
 <template>
   <view class="tab-page" style="background:#F5F7FA;">
     <view class="safe-nav-header" style="background:white;flex-shrink:0;border-bottom:1rpx solid #EFF1F4;padding-bottom:20rpx;">
-      <view style="display:flex;align-items:center;gap:20rpx;padding:0 40rpx;">
+      <view style="display:flex;align-items:center;gap:20rpx;padding:0 40rpx;width:100%;box-sizing:border-box;">
         <view class="back-btn" style="background:#F5F7FA;" @click="activeTab = 'home'">
           <text style="font-size:40rpx;color:#1F2937;line-height:1;">‹</text>
         </view>
@@ -15,36 +15,47 @@
     </view>
 
     <scroll-view scroll-y style="flex:1;height:0;">
-      <view style="padding:24rpx 40rpx;">
+      <view style="padding:24rpx 40rpx 40rpx;">
         <LoadingSkeleton v-if="loading" variant="list" :count="4" cover padding="0" />
-        <view v-else-if="!courses.length" style="padding:64rpx 0;text-align:center;">
-          <text style="font-size:26rpx;color:#6B7280;">暂无在招课程</text>
-        </view>
-        <view
-          v-for="c in courses"
-          :key="c.id"
-          class="card"
-          style="margin-bottom:20rpx;overflow:hidden;"
-          @click="openCourseDetail(c)"
-        >
-          <view style="height:320rpx;overflow:hidden;background:linear-gradient(135deg,#3B9EEB22 0%,#3B9EEB10 100%);">
-            <image v-if="c.coverUrl" :src="c.coverUrl" mode="aspectFill" style="width:100%;height:100%;" />
+        <view v-else-if="!courses.length" style="padding:96rpx 0;display:flex;flex-direction:column;align-items:center;gap:16rpx;">
+          <view style="width:120rpx;height:120rpx;border-radius:40rpx;background:#3B9EEB12;display:flex;align-items:center;justify-content:center;">
+            <MpIcon name="book-open" :size="56" color="#3B9EEB" />
           </view>
-          <view style="padding:24rpx;">
-            <view style="display:flex;align-items:center;gap:12rpx;margin-bottom:12rpx;flex-wrap:wrap;">
-              <view class="pill" style="background:#3B9EEB18;color:#3B9EEB;">
-                <text style="font-size:20rpx;">{{ c.tag || '课程' }}</text>
+          <text style="font-size:28rpx;font-weight:700;color:#1F2937;">暂无在招课程</text>
+          <text style="font-size:23rpx;color:#9CA3AF;">机构上新后会在这里展示</text>
+        </view>
+        <template v-else>
+          <view
+            v-for="c in courses"
+            :key="c.id"
+            class="card tap-feedback"
+            hover-class="tap-feedback-active"
+            style="margin-bottom:24rpx;overflow:hidden;padding:0;"
+            @click="openCourseDetail(c)"
+          >
+            <view style="position:relative;height:300rpx;overflow:hidden;background:linear-gradient(135deg,#3B9EEB22 0%,#3B9EEB08 100%);">
+              <image v-if="c.coverUrl" :src="c.coverUrl" mode="aspectFill" style="width:100%;height:100%;" />
+              <view v-else style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                <MpIcon name="book-open" :size="72" color="#3B9EEB55" />
               </view>
-              <text v-if="c.sessions != null && c.sessions !== ''" style="font-size:22rpx;color:#6B7280;">{{ c.sessions }}课时</text>
             </view>
-            <text style="font-size:30rpx;font-weight:800;color:#1F2937;display:block;">{{ c.title }}</text>
-            <text v-if="c.age" style="font-size:24rpx;color:#6B7280;display:block;margin-top:8rpx;">{{ c.age }}</text>
-            <view style="display:flex;align-items:center;justify-content:space-between;margin-top:16rpx;">
-              <text style="font-size:32rpx;font-weight:800;color:#3B9EEB;">{{ c.price }}</text>
-              <text style="font-size:22rpx;color:#3B9EEB;">查看详情 ›</text>
+            <view style="padding:24rpx;">
+              <text style="font-size:31rpx;font-weight:800;color:#1F2937;display:block;line-height:1.35;">{{ c.title }}</text>
+              <view style="display:flex;align-items:center;gap:12rpx;margin-top:10rpx;">
+                <text v-if="c.age" style="font-size:23rpx;color:#6B7280;">{{ c.age }}</text>
+                <text v-if="c.age && c.sessions != null && c.sessions !== ''" style="font-size:20rpx;color:#D1D5DB;">·</text>
+                <text v-if="c.sessions != null && c.sessions !== ''" style="font-size:23rpx;color:#6B7280;">{{ c.sessions }}课时</text>
+              </view>
+              <view style="display:flex;align-items:center;justify-content:space-between;margin-top:18rpx;padding-top:18rpx;border-top:1rpx solid #F1F3F6;">
+                <text style="font-size:34rpx;font-weight:800;color:#3B9EEB;">{{ c.price }}</text>
+                <view style="display:flex;align-items:center;gap:4rpx;padding:8rpx 18rpx;border-radius:999rpx;background:#3B9EEB14;">
+                  <text style="font-size:23rpx;font-weight:700;color:#3B9EEB;">查看详情</text>
+                  <text style="font-size:23rpx;color:#3B9EEB;">›</text>
+                </view>
+              </view>
             </view>
           </view>
-        </view>
+        </template>
       </view>
     </scroll-view>
   </view>
@@ -52,6 +63,7 @@
 
 <script setup>
 import LoadingSkeleton from '../LoadingSkeleton.vue'
+import MpIcon from '../MpIcon.vue'
 import { inject, ref, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { fetchCourse } from '../../api/parent.js'
