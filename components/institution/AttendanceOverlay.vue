@@ -61,7 +61,7 @@ function navigate(tab) {
   emit('navigate', tab)
 }
 
-watch(() => props.pageShowCount, () => { loadOrgAttendance() }, { immediate: true })
+
 
 const orgAttClasses = ref([])
 const orgAttPeriods = ref([])
@@ -119,6 +119,7 @@ async function orgCheckin(row) {
   }
 }
 
+watch(() => props.pageShowCount, () => { loadOrgAttendance() }, { immediate: true })
 </script>
 
 <style lang="scss" scoped>

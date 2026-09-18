@@ -44,7 +44,7 @@ function navigate(tab) {
   emit('navigate', tab)
 }
 
-watch(() => props.pageShowCount, () => { loadOrgHomework() }, { immediate: true })
+
 
 const orgSubmissions = ref([])
 const orgHwLoading = ref(false)
@@ -84,6 +84,7 @@ async function reviewOrgSubmission(row, grade) {
   }
 }
 
+watch(() => props.pageShowCount, () => { loadOrgHomework() }, { immediate: true })
 </script>
 
 <style lang="scss" scoped>

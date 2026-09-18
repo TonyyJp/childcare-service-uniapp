@@ -55,7 +55,7 @@ function navigate(tab) {
   emit('navigate', tab)
 }
 
-watch(() => props.pageShowCount, () => { loadOrgMeals() }, { immediate: true })
+
 
 const orgMealTypes = [
   { type: 'breakfast', name: '早餐', emoji: '🌅' },
@@ -126,6 +126,7 @@ function uploadOrgMeal() {
   })
 }
 
+watch(() => props.pageShowCount, () => { loadOrgMeals() }, { immediate: true })
 </script>
 
 <style lang="scss" scoped>

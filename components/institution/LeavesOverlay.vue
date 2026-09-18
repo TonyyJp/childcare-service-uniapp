@@ -78,7 +78,7 @@ function navigate(tab) {
   emit('navigate', tab)
 }
 
-watch(() => props.pageShowCount, () => { loadOrgLeaves() }, { immediate: true })
+
 
 const leaveFilters = [
   { value: 'pending', label: '待审核' },
@@ -163,6 +163,7 @@ async function confirmRejectLeave() {
   }
 }
 
+watch(() => props.pageShowCount, () => { loadOrgLeaves() }, { immediate: true })
 </script>
 
 <style lang="scss" scoped>

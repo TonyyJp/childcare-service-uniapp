@@ -52,7 +52,7 @@ function navigate(tab) {
   emit('navigate', tab)
 }
 
-watch(() => props.pageShowCount, () => { loadTeachers() }, { immediate: true })
+
 
 const teachers = ref([])
 const teachersLoading = ref(false)
@@ -69,6 +69,7 @@ async function loadTeachers() {
   }
 }
 
+watch(() => props.pageShowCount, () => { loadTeachers() }, { immediate: true })
 </script>
 
 <style lang="scss" scoped>

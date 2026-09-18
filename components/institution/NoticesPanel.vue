@@ -101,8 +101,6 @@ function navigate(tab) {
   emit('navigate', tab)
 }
 
-watch(() => props.pageShowCount, () => { loadNotices() }, { immediate: true })
-
 const typeCfg = {
   notice:   { label: '通知', icon: '📢', color: '#1565C0', bg: '#E3F2FD' },
   activity: { label: '活动', icon: '🏅', color: '#E65100', bg: '#FFF3E0' },
@@ -122,7 +120,7 @@ const showCompose = ref(false)
 const noticeTypes = [
   { id: 'notice',   label: '普通通知', icon: '📢' },
   { id: 'activity', label: '活动通知', icon: '🏅' },
-  { id: 'urgent',   label: '紧急通知', icon: '⚠️' },
+  { id: 'urgent',   label: '紧急通知', icon: '⚠��' },
   { id: 'holiday',  label: '假期通知', icon: '🎉' },
 ]
 const targets = ref([{ id: null, name: '全园' }])
@@ -154,6 +152,8 @@ async function loadNotices() {
     noticesLoading.value = false
   }
 }
+
+watch(() => props.pageShowCount, () => { loadNotices() }, { immediate: true })
 
 async function sendNotice() {
   if (!newNotice.value.title.trim() || !newNotice.value.body.trim()) {

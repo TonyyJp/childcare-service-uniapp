@@ -86,8 +86,6 @@ function navigate(tab) {
   emit('navigate', tab)
 }
 
-watch(() => props.pageShowCount, () => { loadCourses() }, { immediate: true })
-
 const courseFilters = ['全部', '已上架', '草稿', '已下架']
 const courseFilter = ref('全部')
 const courseLoading = ref(false)
@@ -136,6 +134,8 @@ async function toggleCourseStatus(id, status) {
     courseBusy.value = false
   }
 }
+
+watch(() => props.pageShowCount, () => { loadCourses() }, { immediate: true })
 </script>
 
 <style lang="scss" scoped>

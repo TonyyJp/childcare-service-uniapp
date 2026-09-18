@@ -51,7 +51,7 @@ function navigate(tab) {
   emit('navigate', tab)
 }
 
-watch(() => props.pageShowCount, () => { loadSettings() }, { immediate: true })
+
 
 const configLoading = ref(false)
 const configBusy = ref(false)
@@ -135,6 +135,7 @@ async function onConfigTimeChange(item, value) {
     item.value = prev
   }
 }
+watch(() => props.pageShowCount, () => { loadSettings() }, { immediate: true })
 </script>
 
 <style lang="scss" scoped>
