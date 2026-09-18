@@ -24,7 +24,7 @@
         </view>
         <scroll-view scroll-y style="flex:1;height:0;">
           <view style="padding:24rpx 40rpx;">
-            <view v-if="enrollmentsLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">加载中…</text></view>
+            <LoadingSkeleton v-if="enrollmentsLoading" variant="list" :count="3" padding="8rpx 0" />
             <view v-else-if="!filteredEnrollments.length" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">暂无报名记录</text></view>
             <view v-for="row in filteredEnrollments" :key="row.id" class="card" style="padding:24rpx;margin-bottom:16rpx;">
               <view style="display:flex;justify-content:space-between;align-items:flex-start;gap:12rpx;margin-bottom:12rpx;">
@@ -107,6 +107,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, computed, watch } from 'vue'
 import {
   consumeEnrollment,

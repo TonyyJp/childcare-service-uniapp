@@ -30,9 +30,7 @@
 
     <scroll-view scroll-y style="flex:1;height:0;">
       <view style="padding:24rpx 40rpx;">
-        <view v-if="courseLoading" style="padding:48rpx 0;text-align:center;">
-          <text style="font-size:26rpx;color:#8D6E63;">加载中…</text>
-        </view>
+        <LoadingSkeleton v-if="courseLoading" variant="list" :count="3" padding="8rpx 0" />
         <view v-else-if="!filteredCourses.length" style="padding:48rpx 0;text-align:center;">
           <text style="font-size:26rpx;color:#8D6E63;">暂无课程</text>
         </view>
@@ -75,6 +73,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, computed, watch } from 'vue'
 import {
   fetchCourses,

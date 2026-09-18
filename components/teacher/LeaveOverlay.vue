@@ -20,7 +20,7 @@
     </view>
     <scroll-view scroll-y style="flex:1;height:0;">
       <view style="padding:24rpx 40rpx;">
-        <view v-if="leaveLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">加载中…</text></view>
+        <LoadingSkeleton v-if="leaveLoading" variant="list" :count="3" padding="8rpx 0" />
         <view v-else-if="!leaveList.length" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">暂无请假记录</text></view>
         <view v-for="item in leaveList" :key="item.id" class="card" style="padding:24rpx;margin-bottom:20rpx;">
           <view style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12rpx;">
@@ -57,6 +57,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, onMounted } from 'vue'
 import { auditLeave, fetchLeaves } from '../../api/teacher.js'
 

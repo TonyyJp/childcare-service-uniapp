@@ -66,6 +66,7 @@
 
       <view style="padding:32rpx 40rpx 24rpx;">
         <text style="font-size:26rpx;font-weight:800;color:#2D1F18;display:block;margin-bottom:20rpx;">我的班级</text>
+        <LoadingSkeleton v-if="homeLoading" variant="list" :count="3" padding="8rpx 0" />
         <view v-for="cls in classes" :key="cls.id" class="card" style="padding:24rpx;margin-bottom:20rpx;">
           <view style="display:flex;align-items:center;gap:16rpx;margin-bottom:16rpx;">
             <view style="width:16rpx;height:40rpx;border-radius:8rpx;" :style="{ backgroundColor: cls.color }" />
@@ -120,6 +121,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, computed, inject, onMounted } from 'vue'
 import { fetchDashboard, fetchProfile, fetchUnreadCount } from '../../api/teacher.js'
 import { ensureWechatRuntime, getMpDisplayName } from '../../utils/wechatRuntime.js'
@@ -148,7 +150,7 @@ const primaryClassName = ref('—')
 const unreadCount = ref(0)
 const homeSummary = ref([
   { label: '应到', val: '—', warn: false },
-  { label: '已到', val: '—', warn: false },
+  { label: '已到', val: '��', warn: false },
   { label: '未完成', val: '—', warn: true },
   { label: '待审批', val: '—', warn: false },
 ])

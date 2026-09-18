@@ -28,9 +28,7 @@
     </view>
     <scroll-view scroll-y style="flex:1;height:0;">
       <view style="padding:24rpx 40rpx;">
-        <view v-if="mealLoading" style="padding:48rpx 0;text-align:center;">
-          <text style="font-size:26rpx;color:#8D6E63;">加载中…</text>
-        </view>
+        <LoadingSkeleton v-if="mealLoading" variant="list" :count="2" padding="8rpx 0" />
         <view v-else>
           <view class="card" style="padding:24rpx;margin-bottom:20rpx;">
             <view style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8rpx;">
@@ -73,6 +71,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, computed, inject, onMounted } from 'vue'
 import { createMeal, fetchDashboard, fetchMeals, publishMeal } from '../../api/teacher.js'
 import { mediaUrl } from '../../config.js'

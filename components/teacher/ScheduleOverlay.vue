@@ -43,7 +43,7 @@
     </view>
     <scroll-view scroll-y style="flex:1;height:0;">
       <view style="padding:24rpx 40rpx;">
-        <view v-if="scheduleLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">加载中…</text></view>
+        <LoadingSkeleton v-if="scheduleLoading" variant="timeline" :count="4" padding="8rpx 0" />
         <view v-else-if="!dayScheduleItems.length" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">当日暂无排课</text></view>
         <view
           v-for="c in dayScheduleItems"
@@ -93,6 +93,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, computed, onMounted } from 'vue'
 import { fetchDashboard, fetchSchedules } from '../../api/teacher.js'
 import { dateForWeekdayIndex } from '../../utils/lessonAttend.js'

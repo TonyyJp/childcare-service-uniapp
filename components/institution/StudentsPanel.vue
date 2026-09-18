@@ -20,7 +20,7 @@
                 <text style="font-size:24rpx;font-weight:700;">{{ f.name }}</text>
               </view>
             </view>
-            <view v-if="studentsLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">加载中…</text></view>
+            <LoadingSkeleton v-if="studentsLoading" variant="list" :count="4" thumb padding="8rpx 0" />
             <view v-else-if="!filteredStudents.length" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">暂无学生</text></view>
             <view v-for="s in filteredStudents" :key="s.id || s.name" class="card" style="padding:20rpx 24rpx;margin-bottom:16rpx;">
               <view style="display:flex;align-items:center;gap:20rpx;">
@@ -95,6 +95,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, computed, watch } from 'vue'
 import {
   createLessonPackage,

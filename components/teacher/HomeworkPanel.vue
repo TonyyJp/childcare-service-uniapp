@@ -14,9 +14,7 @@
 
     <scroll-view scroll-y style="flex:1;height:0;">
       <view style="padding:24rpx 40rpx;">
-        <view v-if="hwLoading" style="padding:48rpx 0;text-align:center;">
-          <text style="font-size:26rpx;color:#8D6E63;">加载中…</text>
-        </view>
+        <LoadingSkeleton v-if="hwLoading" variant="list" :count="3" padding="8rpx 0" />
 
         <!-- 作业登记：正式布置 -->
         <view v-else-if="hwTab === '作业登记'">
@@ -196,6 +194,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, computed, inject, onMounted } from 'vue'
 import {
   createHomework,

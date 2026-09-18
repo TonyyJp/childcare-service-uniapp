@@ -8,7 +8,7 @@
         </view>
         <scroll-view scroll-y style="flex:1;height:0;">
           <view style="padding:24rpx 40rpx;">
-            <view v-if="teachersLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">加载中…</text></view>
+            <LoadingSkeleton v-if="teachersLoading" variant="list" :count="4" thumb padding="8rpx 0" />
             <view v-else-if="!teachers.length" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">暂无教师</text></view>
             <view v-for="t in teachers" :key="t.id || t.name" class="card" style="padding:24rpx;margin-bottom:20rpx;">
               <view style="display:flex;align-items:center;gap:20rpx;margin-bottom:16rpx;">
@@ -39,6 +39,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, watch } from 'vue'
 import { fetchStaffs } from '../../api/institution.js'
 

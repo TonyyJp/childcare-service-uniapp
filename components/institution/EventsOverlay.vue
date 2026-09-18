@@ -16,7 +16,7 @@
         </view>
         <scroll-view scroll-y style="flex:1;height:0;">
           <view style="padding:24rpx 40rpx;">
-            <view v-if="eventsLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">加载中…</text></view>
+            <LoadingSkeleton v-if="eventsLoading" variant="list" :count="3" padding="8rpx 0" />
             <view v-else-if="!orgEvents.length" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">暂无活动，点右上角新建</text></view>
             <view v-for="ev in orgEvents" :key="ev.id" class="card" style="padding:24rpx;margin-bottom:16rpx;display:flex;gap:20rpx;align-items:flex-start;">
               <view style="width:88rpx;height:88rpx;border-radius:24rpx;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;"
@@ -98,6 +98,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, watch } from 'vue'
 import { createEvent, fetchEvents } from '../../api/institution.js'
 

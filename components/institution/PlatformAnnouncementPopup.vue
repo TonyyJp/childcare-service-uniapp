@@ -34,7 +34,7 @@
 
       <scroll-view v-else scroll-y style="flex:1;height:0;">
         <view style="padding:20rpx 40rpx;">
-          <view v-if="announcementsLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">加载中…</text></view>
+          <LoadingSkeleton v-if="announcementsLoading" variant="list" :count="3" padding="8rpx 0" />
           <view v-else-if="!platformAnnouncements.length" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">暂无平台公告</text></view>
           <view v-for="ann in platformAnnouncements" :key="ann.id" class="card" style="padding:24rpx;margin-bottom:16rpx;" @click="announcementDetail = ann.id">
             <view style="display:flex;align-items:flex-start;gap:20rpx;">
@@ -92,6 +92,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, onMounted, watch } from 'vue'
 import { fetchPlatformNotices } from '../../api/institution.js'
 
@@ -114,7 +115,7 @@ const announcementDetail = ref(null)
 function announcementMeta(title, popup) {
   if (/政策|法规/.test(title || '')) return { tag: '政策法规', tagColor: '#E53935' }
   if (/安全|检查/.test(title || '')) return { tag: '安全检查', tagColor: '#FF7043' }
-  if (popup) return { tag: '重要', tagColor: '#AB47BC' }
+  if (popup) return { tag: '重��', tagColor: '#AB47BC' }
   return { tag: '平台公告', tagColor: '#AB47BC' }
 }
 

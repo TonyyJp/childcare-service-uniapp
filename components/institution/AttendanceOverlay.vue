@@ -27,7 +27,7 @@
         </view>
         <scroll-view scroll-y style="flex:1;height:0;">
           <view style="padding:24rpx 40rpx;">
-            <view v-if="orgAttLoading" style="padding:48rpx;text-align:center;"><text style="color:#8D6E63;">加载中…</text></view>
+            <LoadingSkeleton v-if="orgAttLoading" variant="list" :count="5" thumb padding="8rpx 0" />
             <view v-for="row in orgAttList" :key="row.id" class="card" style="padding:20rpx;margin-bottom:12rpx;display:flex;align-items:center;">
               <view style="flex:1;">
                 <text style="font-size:28rpx;font-weight:700;color:#2D1F18;">{{ row.student?.name || '学员' }}</text>
@@ -43,6 +43,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, watch } from 'vue'
 import {
   checkinStudents,

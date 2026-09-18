@@ -45,9 +45,7 @@
     </view>
     <scroll-view scroll-y style="flex:1;height:0;">
       <view style="padding:24rpx 40rpx;">
-        <view v-if="checkinLoading" style="padding:48rpx 0;text-align:center;">
-          <text style="font-size:26rpx;color:#8D6E63;">加载考勤…</text>
-        </view>
+        <LoadingSkeleton v-if="checkinLoading" variant="list" :count="5" thumb padding="8rpx 0" />
         <view v-else-if="!attStudents.length" style="padding:48rpx 0;text-align:center;">
           <text style="font-size:26rpx;color:#8D6E63;">{{ emptyHint }}</text>
         </view>

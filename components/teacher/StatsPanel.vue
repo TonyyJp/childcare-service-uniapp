@@ -16,7 +16,7 @@
     </view>
     <scroll-view scroll-y style="flex:1;height:0;">
       <view style="padding:24rpx 40rpx;">
-        <view v-if="statsLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">加载中…</text></view>
+        <LoadingSkeleton v-if="statsLoading" variant="list" :count="3" padding="8rpx 0" />
         <template v-else>
           <view style="display:grid;grid-template-columns:1fr 1fr;gap:20rpx;margin-bottom:24rpx;">
             <view v-for="k in kpis" :key="k.key || k.label" class="card" style="padding:24rpx;">
@@ -63,6 +63,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, computed, onMounted } from 'vue'
 import { fetchAnalytics, fetchDashboard } from '../../api/teacher.js'
 

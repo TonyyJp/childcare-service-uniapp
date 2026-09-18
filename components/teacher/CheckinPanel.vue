@@ -106,9 +106,7 @@
 
     <scroll-view v-else scroll-y style="flex:1;height:0;">
       <view style="padding:0 40rpx;">
-        <view v-if="checkinLoading" style="padding:60rpx 0;text-align:center;">
-          <text style="color:#8D6E63;">加载点名名单…</text>
-        </view>
+        <LoadingSkeleton v-if="checkinLoading" variant="list" :count="5" thumb padding="8rpx 0" />
         <view v-else-if="!checkinList.length" style="padding:60rpx 0;text-align:center;">
           <text style="color:#8D6E63;">{{ emptyHint }}</text>
         </view>

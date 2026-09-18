@@ -26,7 +26,7 @@
               <text style="font-size:24rpx;font-weight:700;">{{ c.name }}</text>
             </view>
           </scroll-view>
-          <view v-if="growthLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">加载中…</text></view>
+          <LoadingSkeleton v-if="growthLoading" variant="list" :count="3" padding="8rpx 0" />
           <view v-else-if="!growthRecords.length" style="padding:32rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">暂无里程碑</text></view>
           <view v-for="g in growthRecords" :key="g.id" class="card" style="padding:24rpx;margin-bottom:20rpx;">
             <view style="display:flex;align-items:center;gap:16rpx;margin-bottom:12rpx;">
@@ -52,7 +52,7 @@
               <text style="font-size:24rpx;font-weight:700;">{{ c.name }}</text>
             </view>
           </scroll-view>
-          <view v-if="physiqueLoading" style="padding:48rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">加载中…</text></view>
+          <LoadingSkeleton v-if="physiqueLoading" variant="list" :count="3" padding="8rpx 0" />
           <view v-else-if="!bodyMeasures.length" style="padding:32rpx 0;text-align:center;"><text style="font-size:26rpx;color:#8D6E63;">暂无学员</text></view>
           <view v-for="b in bodyMeasures" :key="b.student_id || b.name" class="card" style="padding:24rpx;margin-bottom:20rpx;">
             <view style="display:flex;justify-content:space-between;margin-bottom:12rpx;">
@@ -131,6 +131,7 @@
 </template>
 
 <script setup>
+import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { ref, watch, onMounted } from 'vue'
 import {
   createGrowthMilestone,
