@@ -128,7 +128,7 @@ function navigate(tab) {
   emit('navigate', tab)
 }
 
-watch(() => props.pageShowCount, () => { loadOrgEnrollments() }, { immediate: true })
+
 
 const enrollments = ref([])
 const enrollmentsLoading = ref(false)
@@ -270,6 +270,7 @@ async function doConsumeEnrollment(row) {
   })
 }
 
+watch(() => props.pageShowCount, () => { loadOrgEnrollments() }, { immediate: true })
 </script>
 
 <style lang="scss" scoped>

@@ -113,8 +113,6 @@ function navigate(tab) {
   emit('navigate', tab)
 }
 
-watch(() => props.pageShowCount, () => { loadStudents() }, { immediate: true })
-
 const classFilters = ref([{ id: null, name: '全部' }])
 const studentFilter = ref('全部')
 const studentList = ref([])
@@ -231,6 +229,7 @@ async function submitGrant() {
   }
 }
 
+watch(() => props.pageShowCount, () => { loadStudents() }, { immediate: true })
 </script>
 
 <style lang="scss" scoped>

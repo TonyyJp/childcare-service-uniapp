@@ -73,7 +73,7 @@ function navigate(tab) {
   emit('navigate', tab)
 }
 
-watch(() => props.pageShowCount, () => { loadReports() }, { immediate: true })
+
 
 const periods = [
   { id: 'month', label: '本月' },
@@ -115,6 +115,7 @@ function switchReportPeriod(id) {
   loadReports()
 }
 
+watch(() => props.pageShowCount, () => { loadReports() }, { immediate: true })
 </script>
 
 <style lang="scss" scoped>

@@ -113,7 +113,7 @@ function navigate(tab) {
   emit('navigate', tab)
 }
 
-watch(() => props.pageShowCount, () => { loadOrgEvents() }, { immediate: true })
+
 
 const eventTypeMeta = {
   activity: { label: '活动', icon: '🏅', bg: '#FFF3E0', color: '#E65100' },
@@ -203,6 +203,7 @@ async function submitEvent() {
   }
 }
 
+watch(() => props.pageShowCount, () => { loadOrgEvents() }, { immediate: true })
 </script>
 
 <style lang="scss" scoped>

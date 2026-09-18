@@ -92,7 +92,7 @@ function navigate(tab) {
   emit('navigate', tab)
 }
 
-watch(() => props.pageShowCount, () => { loadBindings() }, { immediate: true })
+
 
 const bindingFilters = [
   { value: 'pending', label: '待审核' },
@@ -172,6 +172,7 @@ async function confirmRejectBinding() {
   }
 }
 
+watch(() => props.pageShowCount, () => { loadBindings() }, { immediate: true })
 </script>
 
 <style lang="scss" scoped>
