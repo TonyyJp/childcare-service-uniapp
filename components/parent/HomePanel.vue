@@ -174,35 +174,58 @@
         </view>
 
         <view style="margin-bottom:24rpx;">
-          <view style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16rpx;">
-            <view style="display:flex;align-items:center;gap:10rpx;">
-              <MpIcon name="building-2" :size="32" color="#1F2937" />
-              <text style="font-size:26rpx;font-weight:800;color:#1F2937;">机构课程</text>
+          <view style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20rpx;">
+            <view style="display:flex;align-items:center;gap:12rpx;">
+              <view style="width:8rpx;height:30rpx;border-radius:4rpx;background:linear-gradient(180deg,#3B9EEB 0%,#6FB8F0 100%);" />
+              <text style="font-size:30rpx;font-weight:800;color:#1F2937;">机构课程</text>
             </view>
-            <text
-              style="font-size:22rpx;"
-              :style="{ color: accentColor }"
+            <view
+              class="tap-feedback"
+              hover-class="tap-feedback-active"
+              style="display:flex;align-items:center;gap:4rpx;padding:6rpx 4rpx;"
               @click="activeTab = 'courses'"
-            >{{ courses.length }}门在招 ›</text>
+            >
+              <text style="font-size:22rpx;" :style="{ color: accentColor }">{{ courses.length }}门在招</text>
+              <text style="font-size:22rpx;" :style="{ color: accentColor }">›</text>
+            </view>
           </view>
-          <scroll-view scroll-x style="margin:0 -40rpx;padding:0 40rpx;">
+          <scroll-view scroll-x style="margin:0 -40rpx;padding:4rpx 40rpx 8rpx;" show-scrollbar="false">
             <view style="display:flex;gap:24rpx;">
-              <view v-for="c in courses" :key="c.id" style="width:280rpx;flex-shrink:0;border-radius:28rpx;overflow:hidden;background:white;box-shadow:0 2rpx 16rpx rgba(0,0,0,0.08);" @click="openCourseDetail(c)">
-                <view style="height:140rpx;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(135deg,#3B9EEB22 0%,#3B9EEB10 100%);">
+              <view
+                v-for="c in courses"
+                :key="c.id"
+                class="tap-feedback"
+                hover-class="tap-feedback-active"
+                style="width:300rpx;flex-shrink:0;border-radius:28rpx;overflow:hidden;background:white;box-shadow:0 6rpx 24rpx rgba(59,158,235,0.10);"
+                @click="openCourseDetail(c)"
+              >
+                <view style="position:relative;height:180rpx;overflow:hidden;background:linear-gradient(135deg,#3B9EEB22 0%,#3B9EEB08 100%);">
                   <image v-if="c.coverUrl" :src="c.coverUrl" mode="aspectFill" style="width:100%;height:100%;" />
+                  <view v-else style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                    <MpIcon name="book-open" :size="52" color="#3B9EEB66" />
+                  </view>
+                  <view style="position:absolute;left:16rpx;top:16rpx;display:flex;align-items:center;gap:8rpx;">
+                    <view style="padding:4rpx 14rpx;border-radius:999rpx;background:rgba(255,255,255,0.92);backdrop-filter:blur(4px);">
+                      <text style="font-size:20rpx;font-weight:700;color:#3B9EEB;">{{ c.tag || '课程' }}</text>
+                    </view>
+                  </view>
                 </view>
                 <view style="padding:20rpx;">
-                  <view style="display:flex;align-items:center;gap:8rpx;margin-bottom:8rpx;flex-wrap:wrap;">
-                    <view class="pill" style="background:#3B9EEB18;color:#3B9EEB;"><text style="font-size:20rpx;">{{ c.tag || '课程' }}</text></view>
-                    <text v-if="c.sessions != null && c.sessions !== ''" style="font-size:20rpx;color:#6B7280;">{{ c.sessions }}课时</text>
+                  <text style="font-size:27rpx;font-weight:800;color:#1F2937;display:block;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ c.title }}</text>
+                  <view style="display:flex;align-items:center;gap:10rpx;margin-top:8rpx;">
+                    <text v-if="c.age" style="font-size:21rpx;color:#6B7280;">{{ c.age }}</text>
+                    <text v-if="c.age && c.sessions != null && c.sessions !== ''" style="font-size:18rpx;color:#D1D5DB;">·</text>
+                    <text v-if="c.sessions != null && c.sessions !== ''" style="font-size:21rpx;color:#6B7280;">{{ c.sessions }}课时</text>
                   </view>
-                  <text style="font-size:26rpx;font-weight:800;color:#1F2937;display:block;">{{ c.title }}</text>
-                  <text v-if="c.age" style="font-size:22rpx;color:#6B7280;display:block;margin-top:4rpx;">{{ c.age }}</text>
-                  <text style="font-size:28rpx;font-weight:800;display:block;margin-top:8rpx;color:#3B9EEB;">{{ c.price }}</text>
+                  <view style="display:flex;align-items:baseline;justify-content:space-between;margin-top:14rpx;">
+                    <text style="font-size:30rpx;font-weight:800;color:#3B9EEB;">{{ c.price }}</text>
+                    <text style="font-size:21rpx;color:#3B9EEB;">详情 ›</text>
+                  </view>
                 </view>
               </view>
-              <view v-if="!courses.length" style="padding:32rpx 16rpx;">
-                <text style="font-size:24rpx;color:#6B7280;">暂无在招课程</text>
+              <view v-if="!courses.length" style="width:100%;padding:48rpx 16rpx;display:flex;flex-direction:column;align-items:center;gap:12rpx;">
+                <MpIcon name="book-open" :size="48" color="#CBD5E1" />
+                <text style="font-size:24rpx;color:#9CA3AF;">暂无在招课程</text>
               </view>
             </view>
           </scroll-view>
