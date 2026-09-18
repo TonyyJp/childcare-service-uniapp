@@ -6,7 +6,7 @@
         <text style="color:white;font-size:28rpx;font-weight:700;">课程详情</text>
         <view style="width:64rpx;" />
       </view>
-      <view style="align-self:stretch;margin-left:-40rpx;margin-right:calc(-1 * var(--nav-pad-right, 100px));height:380rpx;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:28rpx;">
+      <view style="width:100%;margin-right:calc(40rpx - var(--nav-pad-right, 100px));height:360rpx;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:28rpx;border-radius:28rpx;box-shadow:0 12rpx 32rpx rgba(0,0,0,0.16);box-sizing:border-box;">
         <image v-if="course.coverUrl" :src="course.coverUrl" mode="aspectFill" style="width:100%;height:100%;" />
         <MpIcon v-else name="book-open" :size="88" color="rgba(255,255,255,0.9)" />
       </view>
