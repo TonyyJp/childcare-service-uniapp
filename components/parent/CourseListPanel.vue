@@ -38,9 +38,6 @@
               <view v-else style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
                 <MpIcon name="book-open" :size="72" color="#3B9EEB55" />
               </view>
-              <view style="position:absolute;left:20rpx;top:20rpx;padding:6rpx 18rpx;border-radius:999rpx;background:rgba(255,255,255,0.92);backdrop-filter:blur(4px);">
-                <text style="font-size:21rpx;font-weight:700;color:#3B9EEB;">{{ c.tag || '课程' }}</text>
-              </view>
             </view>
             <view style="padding:24rpx;">
               <text style="font-size:31rpx;font-weight:800;color:#1F2937;display:block;line-height:1.35;">{{ c.title }}</text>
