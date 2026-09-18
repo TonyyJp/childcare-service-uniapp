@@ -9,6 +9,7 @@
       <view style="display:flex;align-items:flex-end;gap:24rpx;">
         <view style="width:120rpx;height:120rpx;border-radius:36rpx;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
           <image v-if="course.coverUrl" :src="course.coverUrl" mode="aspectFill" style="width:100%;height:100%;" />
+          <MpIcon v-else name="book-open" :size="48" color="rgba(255,255,255,0.9)" />
         </view>
         <view style="flex:1;padding-bottom:8rpx;">
           <text style="font-size:36rpx;font-weight:800;color:white;display:block;line-height:1.3;">{{ course.title }}</text>
@@ -24,32 +25,56 @@
     <view style="flex:1;background:white;border-radius:40rpx 40rpx 0 0;overflow:hidden;">
       <scroll-view scroll-y style="height:100%;">
         <view style="padding:32rpx 40rpx;">
-          <view class="course-desc">
-            <rich-text v-if="descNodes" :nodes="descNodes" />
+          <view v-if="descNodes" class="detail-sec">
+            <view class="sec-head">
+              <view class="sec-bar" />
+              <text class="sec-text">课程介绍</text>
+            </view>
+            <view class="course-desc">
+              <rich-text :nodes="descNodes" />
+            </view>
           </view>
 
-          <view v-if="course.need_materials" style="margin-top:28rpx;padding:24rpx;border-radius:24rpx;background:#F5F7FA;">
-            <text style="font-size:28rpx;font-weight:800;color:#1F2937;display:block;margin-bottom:12rpx;">教学材料</text>
-            <text style="font-size:24rpx;color:#4B5563;white-space:pre-wrap;display:block;line-height:1.7;">{{ course.materials_list }}</text>
-            <text style="font-size:24rpx;color:#6B7280;display:block;margin-top:12rpx;">材料费：¥{{ course.materials_price || 0 }}</text>
-            <text style="font-size:24rpx;color:#6B7280;display:block;margin-top:8rpx;">购买方式：{{ course.materials_purchase_label || '—' }}</text>
+          <view v-if="course.need_materials" class="detail-sec">
+            <view class="sec-head">
+              <view class="sec-bar" />
+              <text class="sec-text">教学材料</text>
+            </view>
+            <view style="padding:24rpx;border-radius:24rpx;background:#F5F7FA;">
+              <text style="font-size:26rpx;color:#374151;white-space:pre-wrap;display:block;line-height:1.7;">{{ course.materials_list }}</text>
+              <view style="display:flex;gap:16rpx;margin-top:20rpx;">
+                <view style="flex:1;background:white;border-radius:16rpx;padding:16rpx 20rpx;">
+                  <text style="font-size:20rpx;color:#9CA3AF;display:block;">材料费</text>
+                  <text style="font-size:28rpx;font-weight:800;color:#3B9EEB;display:block;margin-top:4rpx;">¥{{ course.materials_price || 0 }}</text>
+                </view>
+                <view style="flex:1;background:white;border-radius:16rpx;padding:16rpx 20rpx;">
+                  <text style="font-size:20rpx;color:#9CA3AF;display:block;">购买方式</text>
+                  <text style="font-size:24rpx;font-weight:700;color:#1F2937;display:block;margin-top:4rpx;">{{ course.materials_purchase_label || '—' }}</text>
+                </view>
+              </view>
+            </view>
           </view>
 
-          <view v-if="(course.outlines || []).length" style="margin-top:28rpx;">
-            <text style="font-size:28rpx;font-weight:800;color:#1F2937;display:block;margin-bottom:16rpx;">课程大纲</text>
+          <view v-if="(course.outlines || []).length" class="detail-sec">
+            <view class="sec-head">
+              <view class="sec-bar" />
+              <text class="sec-text">课程大纲</text>
+              <text class="sec-count">{{ course.outlines.length }}节</text>
+            </view>
             <view
               v-for="(o, idx) in course.outlines"
               :key="o.id || idx"
-              style="margin-bottom:16rpx;padding:20rpx;border-radius:20rpx;background:#F5F7FA;display:flex;gap:16rpx;"
+              style="margin-bottom:16rpx;padding:20rpx 24rpx;border-radius:20rpx;background:#F5F7FA;display:flex;gap:20rpx;align-items:flex-start;"
             >
-              <text style="font-size:24rpx;font-weight:700;color:#3B9EEB;flex-shrink:0;">{{ idx + 1 }}.</text>
-              <text style="font-size:26rpx;color:#1F2937;line-height:1.7;white-space:pre-wrap;flex:1;">{{ o.content }}</text>
+              <view class="num-badge">{{ idx + 1 }}</view>
+              <text style="font-size:26rpx;color:#1F2937;line-height:1.7;white-space:pre-wrap;flex:1;padding-top:4rpx;">{{ o.content }}</text>
             </view>
           </view>
-          <view v-if="showTrialApply" class="primary-btn" style="margin-top:32rpx;background:#EAF4FD;border:2rpx solid #3B9EEB;" :style="{ opacity: busy ? 0.6 : 1 }" @click="openTrialApply">
+
+          <view v-if="showTrialApply" class="primary-btn" hover-class="btn-press" style="margin-top:32rpx;background:#EAF4FD;border:2rpx solid #3B9EEB;" :style="{ opacity: busy ? 0.6 : 1 }" @click="openTrialApply">
             <text style="color:#3B9EEB;font-size:30rpx;font-weight:800;">申请试课</text>
           </view>
-          <view class="primary-btn" :style="{ marginTop: showTrialApply ? '20rpx' : '32rpx', background: 'linear-gradient(135deg,#3B9EEB 0%,#2F8FD8 100%)', opacity: busy ? 0.6 : 1 }" @click="consult">
+          <view class="primary-btn" hover-class="btn-press" :style="{ marginTop: showTrialApply ? '20rpx' : '32rpx', background: 'linear-gradient(135deg,#3B9EEB 0%,#2F8FD8 100%)', opacity: busy ? 0.6 : 1 }" @click="consult">
             <text style="color:white;font-size:30rpx;font-weight:800;">立即咨询报名</text>
           </view>
         </view>
@@ -103,6 +128,7 @@
 import { computed, inject, ref } from 'vue'
 import { createTicket, createTrialBooking } from '../../api/parent.js'
 import { PARENT_CTX_KEY } from './parentContext.js'
+import MpIcon from '../MpIcon.vue'
 
 const props = defineProps({ course: Object })
 const emit = defineEmits(['close'])
@@ -218,10 +244,59 @@ async function submitTrialApply() {
   width: 100%;
   max-width: 100%;
   overflow: hidden;
-  margin-bottom: 24rpx;
   font-size: 26rpx;
   color: #1F2937;
   line-height: 1.7;
   box-sizing: border-box;
+}
+
+.detail-sec {
+  margin-bottom: 32rpx;
+}
+.detail-sec:last-child {
+  margin-bottom: 0;
+}
+
+.sec-head {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+.sec-bar {
+  width: 8rpx;
+  height: 30rpx;
+  border-radius: 6rpx;
+  background: linear-gradient(180deg, #3B9EEB, #2F8FD8);
+  flex-shrink: 0;
+}
+.sec-text {
+  font-size: 28rpx;
+  font-weight: 800;
+  color: #1F2937;
+}
+.sec-count {
+  font-size: 22rpx;
+  color: #9CA3AF;
+  font-weight: 700;
+}
+
+.num-badge {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 14rpx;
+  background: #3B9EEB18;
+  color: #3B9EEB;
+  font-size: 24rpx;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-press {
+  opacity: 0.85 !important;
+  transform: scale(0.98);
 }
 </style>
