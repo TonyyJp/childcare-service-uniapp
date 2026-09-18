@@ -1,12 +1,12 @@
 <template>
       <view class="tab-page">
         <view class="gradient-header" style="background:linear-gradient(135deg,#AB47BC 0%,#CE93D8 100%);">
-          <view class="safe-nav-bar" style="display:flex;align-items:center;justify-content:space-between;padding-bottom:32rpx;">
-            <view>
-              <text style="font-size:44rpx;font-weight:800;color:white;display:block;">通知管理</text>
-              <text style="font-size:24rpx;color:rgba(255,255,255,0.8);">已发 {{ sentNotices.length }} 条</text>
-            </view>
-            <view style="background:rgba(255,255,255,0.25);border-radius:20rpx;padding:16rpx 28rpx;" @click="showCompose = true">
+          <view class="safe-nav-bar" style="padding-bottom:20rpx;">
+            <text style="font-size:44rpx;font-weight:800;color:white;display:block;">通知管理</text>
+            <text style="font-size:24rpx;color:rgba(255,255,255,0.8);">已发 {{ sentNotices.length }} 条</text>
+          </view>
+          <view style="display:flex;justify-content:flex-end;padding:0 40rpx 8rpx;">
+            <view hover-class="tap-dim" style="background:rgba(255,255,255,0.25);border-radius:20rpx;padding:16rpx 28rpx;" @click="showCompose = true">
               <text style="color:white;font-size:26rpx;font-weight:700;">+ 发通知</text>
             </view>
           </view>
