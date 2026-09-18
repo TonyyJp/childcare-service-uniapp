@@ -8,8 +8,10 @@
             <text style="font-size:40rpx;font-weight:800;color:white;display:block;">学生考勤</text>
             <text style="font-size:24rpx;color:rgba(255,255,255,0.8);">{{ checkinClassName || '请选择班级' }} · {{ checkinPeriodName || '请选择时段' }}</text>
           </view>
-          <view style="padding:12rpx 20rpx;border-radius:16rpx;background:rgba(255,255,255,0.25);" @click="$emit('go-checkin')">
-            <text style="font-size:24rpx;font-weight:700;color:white;">去签到</text>
+        </view>
+        <view style="display:flex;justify-content:flex-end;margin-bottom:16rpx;">
+          <view style="padding:12rpx 28rpx;border-radius:20rpx;background:rgba(255,255,255,0.25);" hover-class="mp-tap-soft" :hover-stay-time="80" @click="$emit('go-checkin')">
+            <text style="font-size:24rpx;font-weight:700;color:white;">去签到 ›</text>
           </view>
         </view>
         <scroll-view v-if="checkinClassOptions.length" scroll-x style="margin-bottom:12rpx;white-space:nowrap;">

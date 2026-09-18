@@ -1,13 +1,13 @@
 <template>
       <view class="tab-page">
         <view class="gradient-header" style="background:linear-gradient(135deg,#AB47BC 0%,#CE93D8 100%);">
-          <view style="display:flex;align-items:center;justify-content:space-between;padding:0 40rpx 32rpx;">
-            <view>
-              <text style="font-size:44rpx;font-weight:800;color:white;display:block;">学生管理</text>
-              <text style="font-size:24rpx;color:rgba(255,255,255,0.8);">共 {{ studentList.length }} 名在园</text>
-            </view>
-            <view style="background:rgba(255,255,255,0.25);border-radius:20rpx;padding:14rpx 24rpx;" @click="navigate('bindings')">
-              <text style="color:white;font-size:24rpx;font-weight:700;">绑定审核</text>
+          <view style="padding:0 40rpx 32rpx;">
+            <text style="font-size:44rpx;font-weight:800;color:white;display:block;">学生管理</text>
+            <text style="font-size:24rpx;color:rgba(255,255,255,0.8);display:block;margin-top:4rpx;">共 {{ studentList.length }} 名在园</text>
+            <view style="display:flex;justify-content:flex-end;margin-top:16rpx;">
+              <view style="background:rgba(255,255,255,0.25);border-radius:20rpx;padding:12rpx 24rpx;" hover-class="mp-tap-soft" :hover-stay-time="80" @click="navigate('bindings')">
+                <text style="color:white;font-size:24rpx;font-weight:700;">绑定审核 ›</text>
+              </view>
             </view>
           </view>
         </view>

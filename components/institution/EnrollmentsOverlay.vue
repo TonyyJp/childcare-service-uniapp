@@ -8,7 +8,9 @@
                 <text style="font-size:40rpx;font-weight:800;color:white;display:block;">课程报名</text>
                 <text style="font-size:24rpx;color:rgba(255,255,255,0.8);">录入报名 · 消耗课时</text>
               </view>
-              <view style="background:rgba(255,255,255,0.25);border-radius:20rpx;padding:14rpx 24rpx;" @click="openEnrollmentCompose">
+            </view>
+            <view style="display:flex;justify-content:flex-end;margin-bottom:16rpx;">
+              <view style="background:rgba(255,255,255,0.25);border-radius:20rpx;padding:12rpx 28rpx;" hover-class="mp-tap-soft" :hover-stay-time="80" @click="openEnrollmentCompose">
                 <text style="color:white;font-size:24rpx;font-weight:700;">+ 录入</text>
               </view>
             </view>

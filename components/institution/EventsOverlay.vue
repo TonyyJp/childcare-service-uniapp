@@ -8,7 +8,9 @@
                 <text style="font-size:40rpx;font-weight:800;color:white;display:block;">活动日历</text>
                 <text style="font-size:24rpx;color:rgba(255,255,255,0.8);">全园 / 班级活动 · 家长可见</text>
               </view>
-              <view style="background:rgba(255,255,255,0.25);border-radius:20rpx;padding:14rpx 24rpx;" @click="openEventCompose">
+            </view>
+            <view style="display:flex;justify-content:flex-end;margin-top:16rpx;">
+              <view style="background:rgba(255,255,255,0.25);border-radius:20rpx;padding:12rpx 28rpx;" hover-class="mp-tap-soft" :hover-stay-time="80" @click="openEventCompose">
                 <text style="color:white;font-size:24rpx;font-weight:700;">+ 新建</text>
               </view>
             </view>

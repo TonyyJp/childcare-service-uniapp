@@ -2,15 +2,11 @@
   <view class="tab-page">
     <view class="gradient-header" style="background:linear-gradient(135deg,#AB47BC 0%,#CE93D8 100%);">
       <view style="padding:0 40rpx 0;">
-        <view style="display:flex;align-items:flex-start;justify-content:space-between;">
-          <view style="flex:1;min-width:0;">
-            <text style="font-size:44rpx;font-weight:800;color:white;display:block;">机构课程</text>
-            <text style="font-size:24rpx;color:rgba(255,255,255,0.8);margin-bottom:16rpx;display:block;">查看 · 上下架（请在管理后台维护课程）</text>
-          </view>
-          <view style="display:flex;flex-shrink:0;margin-top:8rpx;">
-            <view style="background:rgba(255,255,255,0.25);border-radius:20rpx;padding:14rpx 20rpx;" @click="navigate('enrollments')">
-              <text style="color:white;font-size:24rpx;font-weight:700;">报名</text>
-            </view>
+        <text style="font-size:44rpx;font-weight:800;color:white;display:block;">机构课程</text>
+        <view style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16rpx;">
+          <text style="font-size:24rpx;color:rgba(255,255,255,0.8);flex:1;min-width:0;">查看 · 上下架（请在管理后台维护课程）</text>
+          <view style="background:rgba(255,255,255,0.25);border-radius:20rpx;padding:12rpx 24rpx;flex-shrink:0;margin-left:16rpx;" hover-class="mp-tap-soft" :hover-stay-time="80" @click="navigate('enrollments')">
+            <text style="color:white;font-size:24rpx;font-weight:700;">报名 ›</text>
           </view>
         </view>
         <view style="display:flex;gap:16rpx;margin-bottom:20rpx;">
