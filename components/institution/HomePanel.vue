@@ -15,29 +15,34 @@
           <view style="padding:0 40rpx 32rpx;">
             <view style="display:flex;align-items:center;">
               <text style="font-size:48rpx;font-weight:800;color:white;flex:1;min-width:0;">{{ tenantName }}</text>
-              <view style="background:rgba(255,255,255,0.2);border-radius:16rpx;padding:10rpx 20rpx;flex-shrink:0;margin-left:12rpx;" @click="emit('open-announcements')">
+              <view class="tap-op" style="background:rgba(255,255,255,0.2);border-radius:16rpx;padding:10rpx 20rpx;flex-shrink:0;margin-left:12rpx;" hover-class="tap-op-hover" @click="emit('open-announcements')">
                 <text style="color:white;font-size:22rpx;font-weight:700;">📢 平台公告</text>
               </view>
               <view class="avatar-btn" style="flex-shrink:0;margin-left:12rpx;"><text class="avatar-text">管</text></view>
             </view>
             <text style="font-size:24rpx;color:rgba(255,255,255,0.8);display:block;margin-top:8rpx;">今日实时概览</text>
-            <view style="display:flex;margin-top:24rpx;">
-              <view v-for="(s, idx) in summary" :key="s.label" style="flex:1;background:rgba(255,255,255,0.2);border-radius:20rpx;padding:20rpx;text-align:center;box-sizing:border-box;"
-                :style="{ marginRight: idx < summary.length - 1 ? '12rpx' : '0' }">
-                <text style="font-size:44rpx;font-weight:800;display:block;" :style="{ color: s.warn ? '#FFE082' : 'white' }">{{ s.val }}</text>
-                <text style="font-size:20rpx;color:rgba(255,255,255,0.75);display:block;">{{ s.label }}</text>
+            <view style="margin-top:24rpx;background:rgba(255,255,255,0.16);border-radius:24rpx;padding:8rpx 0;">
+              <view style="display:flex;">
+                <view v-for="(s, idx) in summary" :key="s.label" style="flex:1;padding:20rpx 8rpx;text-align:center;box-sizing:border-box;position:relative;">
+                  <text style="font-size:44rpx;font-weight:800;display:block;" :style="{ color: s.warn ? '#FFE082' : 'white' }">{{ s.val }}</text>
+                  <text style="font-size:20rpx;color:rgba(255,255,255,0.8);display:block;margin-top:4rpx;">{{ s.label }}</text>
+                  <view v-if="idx < summary.length - 1" style="position:absolute;right:0;top:24rpx;bottom:24rpx;width:1rpx;background:rgba(255,255,255,0.22);" />
+                </view>
               </view>
-            </view>
-            <view v-if="lessonKpis.length" style="display:flex;margin-top:12rpx;">
-              <view
-                v-for="(s, idx) in lessonKpis"
-                :key="s.label"
-                style="flex:1;background:rgba(255,255,255,0.15);border-radius:16rpx;padding:16rpx;text-align:center;box-sizing:border-box;"
-                :style="{ marginRight: idx < lessonKpis.length - 1 ? '12rpx' : '0' }"
-                @click="onLessonKpiClick(s)"
-              >
-                <text style="font-size:36rpx;font-weight:800;display:block;" :style="{ color: s.warn ? '#FFE082' : 'white' }">{{ s.val }}</text>
-                <text style="font-size:20rpx;color:rgba(255,255,255,0.75);display:block;">{{ s.label }}</text>
+              <view v-if="lessonKpis.length" style="height:1rpx;background:rgba(255,255,255,0.18);margin:0 20rpx;" />
+              <view v-if="lessonKpis.length" style="display:flex;">
+                <view
+                  v-for="(s, idx) in lessonKpis"
+                  :key="s.label"
+                  class="tap-op"
+                  style="flex:1;padding:18rpx 8rpx;text-align:center;box-sizing:border-box;position:relative;"
+                  hover-class="tap-op-hover"
+                  @click="onLessonKpiClick(s)"
+                >
+                  <text style="font-size:34rpx;font-weight:800;display:block;" :style="{ color: s.warn ? '#FFE082' : 'white' }">{{ s.val }}</text>
+                  <text style="font-size:20rpx;color:rgba(255,255,255,0.8);display:block;margin-top:4rpx;">{{ s.label }}</text>
+                  <view v-if="idx < lessonKpis.length - 1" style="position:absolute;right:0;top:20rpx;bottom:20rpx;width:1rpx;background:rgba(255,255,255,0.18);" />
+                </view>
               </view>
             </view>
           </view>
@@ -47,11 +52,11 @@
           <view style="padding:24rpx 40rpx;">
             <!-- 今日提醒 -->
             <view class="card" style="padding:24rpx;margin-bottom:24rpx;">
-              <text style="font-size:28rpx;font-weight:800;color:#2D1F18;display:block;margin-bottom:20rpx;">🔔 今日提醒</text>
+              <view class="sec-title"><view class="sec-bar" /><text class="sec-text">今日提醒</text></view>
               <view v-if="!alerts.length" style="padding:16rpx 0;text-align:center;">
                 <text style="font-size:24rpx;color:#8D6E63;">暂无紧急待办</text>
               </view>
-              <view v-for="(a, i) in alerts" :key="i" style="display:flex;align-items:flex-start;padding:20rpx;border-radius:16rpx;margin-bottom:12rpx;" :style="{ backgroundColor: a.type === 'warn' ? '#FFF8E1' : a.type === 'info' ? '#F3E5F5' : '#F1F8E9' }" @click="onAlertClick(a)">
+              <view v-for="(a, i) in alerts" :key="i" class="tap-op" style="display:flex;align-items:flex-start;padding:20rpx;border-radius:16rpx;margin-bottom:12rpx;" :style="{ backgroundColor: a.type === 'warn' ? '#FFF8E1' : a.type === 'info' ? '#F3E5F5' : '#F1F8E9' }" hover-class="tap-op-hover" @click="onAlertClick(a)">
                 <text style="font-size:32rpx;flex-shrink:0;margin-right:16rpx;">{{ a.type === 'warn' ? '⚠️' : a.type === 'info' ? '📋' : '✅' }}</text>
                 <view style="flex:1;min-width:0;">
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">{{ a.title }}</text>
@@ -63,13 +68,15 @@
 
             <!-- 快捷入口 -->
             <view class="card" style="padding:24rpx;margin-bottom:24rpx;">
-              <text style="font-size:28rpx;font-weight:800;color:#2D1F18;display:block;margin-bottom:20rpx;">⚡ 快捷管理</text>
+              <view class="sec-title"><view class="sec-bar" /><text class="sec-text">快捷管理</text></view>
               <view style="display:flex;margin-bottom:16rpx;">
                 <view v-for="(sc, idx) in shortcuts.slice(0, 2)" :key="sc.tab"
-                  style="flex:1;padding:24rpx;border-radius:20rpx;display:flex;align-items:center;box-sizing:border-box;"
-                  :style="{ backgroundColor: sc.color + '12', marginRight: idx === 0 ? '16rpx' : '0' }"
+                  class="tap-op"
+                  style="flex:1;padding:22rpx;border-radius:20rpx;display:flex;align-items:center;box-sizing:border-box;background:#FAF7F5;border:1rpx solid #F0E9E5;"
+                  :style="{ marginRight: idx === 0 ? '16rpx' : '0' }"
+                  hover-class="tap-op-hover"
                   @click="navigate(sc.tab)">
-                  <text style="font-size:40rpx;flex-shrink:0;margin-right:16rpx;">{{ sc.icon }}</text>
+                  <view class="ico-chip" :style="{ backgroundColor: sc.color + '1a' }"><text style="font-size:36rpx;">{{ sc.icon }}</text></view>
                   <view style="flex:1;min-width:0;">
                     <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">{{ sc.label }}</text>
                     <text style="font-size:20rpx;color:#8D6E63;">{{ sc.sub }}</text>
@@ -78,10 +85,12 @@
               </view>
               <view style="display:flex;">
                 <view v-for="(sc, idx) in shortcuts.slice(2, 4)" :key="sc.tab"
-                  style="flex:1;padding:24rpx;border-radius:20rpx;display:flex;align-items:center;box-sizing:border-box;"
-                  :style="{ backgroundColor: sc.color + '12', marginRight: idx === 0 ? '16rpx' : '0' }"
+                  class="tap-op"
+                  style="flex:1;padding:22rpx;border-radius:20rpx;display:flex;align-items:center;box-sizing:border-box;background:#FAF7F5;border:1rpx solid #F0E9E5;"
+                  :style="{ marginRight: idx === 0 ? '16rpx' : '0' }"
+                  hover-class="tap-op-hover"
                   @click="navigate(sc.tab)">
-                  <text style="font-size:40rpx;flex-shrink:0;margin-right:16rpx;">{{ sc.icon }}</text>
+                  <view class="ico-chip" :style="{ backgroundColor: sc.color + '1a' }"><text style="font-size:36rpx;">{{ sc.icon }}</text></view>
                   <view style="flex:1;min-width:0;">
                     <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">{{ sc.label }}</text>
                     <text style="font-size:20rpx;color:#8D6E63;">{{ sc.sub }}</text>
@@ -92,7 +101,7 @@
 
             <!-- 班级出勤 -->
             <view class="card" style="padding:24rpx;margin-bottom:24rpx;">
-              <text style="font-size:28rpx;font-weight:800;color:#2D1F18;display:block;margin-bottom:20rpx;">📊 班级出勤</text>
+              <view class="sec-title"><view class="sec-bar" /><text class="sec-text">班级出勤</text></view>
               <view v-for="cls in classOverview" :key="cls.id || cls.name" style="margin-bottom:16rpx;">
                 <view style="display:flex;justify-content:space-between;margin-bottom:8rpx;">
                   <view style="display:flex;align-items:center;">
@@ -110,79 +119,79 @@
             <!-- 报表 / 配置 / 活动 / 报名 -->
             <view style="margin-bottom:32rpx;">
               <view style="display:flex;margin-bottom:16rpx;">
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('trial')">
+                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('trial')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">🎧</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">试课预约</text>
                   <text style="font-size:20rpx;color:#8D6E63;">{{ pendingTrialLabel }}</text>
                 </view>
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('lesson-attend')">
+                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('lesson-attend')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">🎯</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">兴趣点名</text>
                   <text style="font-size:20rpx;color:#8D6E63;">代点名消课</text>
                 </view>
               </view>
               <view style="display:flex;margin-bottom:16rpx;">
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('lesson-consume')">
+                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('lesson-consume')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">📉</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">近7日课消</text>
                   <text style="font-size:20rpx;color:#8D6E63;">只读汇总</text>
                 </view>
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('report')">
+                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('report')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">📈</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">运营报表</text>
                   <text style="font-size:20rpx;color:#8D6E63;">数据分析</text>
                 </view>
               </view>
               <view style="display:flex;margin-bottom:16rpx;">
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('bindings')">
+                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('bindings')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">🔗</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">绑定审核</text>
                   <text style="font-size:20rpx;color:#8D6E63;">家长申请</text>
                 </view>
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('events')">
+                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('events')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">🎉</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">活动日历</text>
                   <text style="font-size:20rpx;color:#8D6E63;">发布园所活动</text>
                 </view>
               </view>
               <view style="display:flex;margin-bottom:16rpx;">
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('enrollments')">
+                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('enrollments')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">🎟️</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">课程报名</text>
                   <text style="font-size:20rpx;color:#8D6E63;">录入与消课</text>
                 </view>
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('leaves')">
+                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('leaves')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">📝</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">请假审批</text>
                   <text style="font-size:20rpx;color:#8D6E63;">代教师审核</text>
                 </view>
               </view>
               <view style="display:flex;margin-bottom:16rpx;">
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('meals')">
+                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('meals')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">🍱</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">营养餐</text>
                   <text style="font-size:20rpx;color:#8D6E63;">代打卡上传</text>
                 </view>
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('homework')">
+                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('homework')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">📋</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">作业批改</text>
                   <text style="font-size:20rpx;color:#8D6E63;">待批提交</text>
                 </view>
               </view>
               <view style="display:flex;margin-bottom:16rpx;">
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('attendance')">
+                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('attendance')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">✅</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">考勤签到</text>
                   <text style="font-size:20rpx;color:#8D6E63;">全园点名</text>
                 </view>
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('daily')">
+                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('daily')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">📷</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">日常代发</text>
                   <text style="font-size:20rpx;color:#8D6E63;">草稿·发布</text>
                 </view>
               </view>
               <view style="display:flex;margin-bottom:16rpx;">
-                <view class="card" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('config')">
+                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('config')">
                   <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">⚙️</text>
                   <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">系统配置</text>
                   <text style="font-size:20rpx;color:#8D6E63;">功能设置</text>
@@ -317,4 +326,35 @@ async function loadDashboard() {
 
 <style lang="scss" scoped>
 @import '../../styles/mp-institution.scss';
+
+.sec-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.sec-bar {
+  width: 8rpx;
+  height: 30rpx;
+  border-radius: 6rpx;
+  background: linear-gradient(180deg, #AB47BC 0%, #CE93D8 100%);
+  margin-right: 14rpx;
+}
+.sec-text {
+  font-size: 28rpx;
+  font-weight: 800;
+  color: #2D1F18;
+}
+.ico-chip {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 16rpx;
+}
+.tap-op-hover {
+  opacity: 0.6;
+}
 </style>
