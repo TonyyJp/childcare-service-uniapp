@@ -67,68 +67,93 @@
 
     <scroll-view scroll-y style="flex:1;height:0;background:#F5F7FA;">
       <view style="padding:24rpx 40rpx;">
-        <LoadingSkeleton v-if="homeLoading" variant="list" :count="3" padding="8rpx 0" />
-
-        <view v-else-if="!currentItems.length" style="padding:48rpx 24rpx;text-align:center;background:white;border-radius:20rpx;margin-bottom:20rpx;">
-          <text style="font-size:28rpx;color:#6B7280;">暂无{{ dayTab === 'today' ? '今日' : '昨日' }}记录</text>
-          <text style="font-size:22rpx;color:#9CA3AF;display:block;margin-top:12rpx;">老师签到后，考勤记录会显示在这里</text>
+        <view class="tl-head">
+          <view class="tl-accent" :style="{ background: accentColor }" />
+          <text class="tl-head-text">{{ dayTab === 'today' ? '今日动态' : '昨日动态' }}</text>
+          <text v-if="!homeLoading && currentItems.length" class="tl-count">{{ currentItems.length }} 条</text>
         </view>
 
-        <view v-for="item in visibleItems" :key="item.id">
-          <view style="display:flex;gap:20rpx;margin-bottom:16rpx;">
-            <view style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:88rpx;">
-              <text style="font-size:20rpx;color:#9CA3AF;line-height:40rpx;">{{ item.time }}</text>
-              <view style="width:48rpx;height:48rpx;border-radius:24rpx;display:flex;align-items:center;justify-content:center;margin-top:4rpx;" :style="{ backgroundColor: typeConfig[item.type].bg }">
+        <LoadingSkeleton v-if="homeLoading" variant="list" :count="3" padding="8rpx 0" />
+
+        <view v-else-if="!currentItems.length" class="tl-empty">
+          <MpIcon name="calendar-clock" :size="52" color="#C4CBD6" />
+          <text class="tl-empty-title">暂无{{ dayTab === 'today' ? '今日' : '昨日' }}记录</text>
+          <text class="tl-empty-sub">老师签到后，考勤记录会显示在这里</text>
+        </view>
+
+        <template v-else>
+          <view v-for="(item, idx) in visibleItems" :key="item.id" class="tl-row">
+            <view class="tl-rail">
+              <view class="tl-node" :style="{ backgroundColor: typeConfig[item.type].bg }">
                 <MpIcon :name="typeConfig[item.type].icon" :size="28" :color="typeConfig[item.type].color" />
               </view>
+              <view v-if="idx !== visibleItems.length - 1" class="tl-line" />
             </view>
 
-            <view style="flex:1;margin-bottom:8rpx;">
-              <view v-if="item.type === 'checkin' || item.type === 'checkout'" style="border-radius:20rpx;padding:20rpx 24rpx;display:flex;align-items:center;gap:16rpx;flex-wrap:wrap;" :style="{ backgroundColor: typeConfig[item.type].bg }">
-                <text style="font-size:26rpx;font-weight:700;" :style="{ color: typeConfig[item.type].color }">{{ item.title }}</text>
-                <view v-if="item.checkinMethod" class="pill" :style="{ backgroundColor: 'rgba(255,255,255,0.7)', color: typeConfig[item.type].color }"><text style="font-size:20rpx;">{{ item.checkinMethod }}</text></view>
+            <view class="tl-body">
+              <view
+                v-if="item.type === 'checkin' || item.type === 'checkout'"
+                class="tl-card"
+                :style="{ backgroundColor: typeConfig[item.type].bg }"
+              >
+                <view class="tl-card-top">
+                  <text class="tl-title" :style="{ color: typeConfig[item.type].color }">{{ item.title }}</text>
+                  <text class="tl-time">{{ item.time }}</text>
+                </view>
+                <view v-if="item.checkinMethod" style="margin-top:12rpx;">
+                  <view class="pill" :style="{ backgroundColor: 'rgba(255,255,255,0.7)', color: typeConfig[item.type].color }"><text style="font-size:20rpx;">{{ item.checkinMethod }}</text></view>
+                </view>
               </view>
 
-              <view v-else-if="item.type === 'homework'" class="card" style="padding:20rpx 24rpx;">
-                <view style="display:flex;align-items:center;gap:16rpx;margin-bottom:12rpx;">
+              <view v-else-if="item.type === 'homework'" class="tl-card tl-card-white">
+                <view class="tl-card-top">
                   <view class="pill" :style="{ backgroundColor: item.subjectColor + '18', color: item.subjectColor }"><text style="font-size:22rpx;font-weight:700;">{{ item.subject }}</text></view>
-                  <text style="font-size:26rpx;font-weight:700;color:#1F2937;flex:1;">{{ item.hwTitle }}</text>
+                  <text class="tl-time">{{ item.time }}</text>
                 </view>
-                <text style="font-size:24rpx;color:#6B7280;line-height:1.6;">{{ item.hwComment }}</text>
+                <text class="tl-sub-title">{{ item.hwTitle }}</text>
+                <text class="tl-desc">{{ item.hwComment }}</text>
               </view>
 
-              <view v-else-if="item.type === 'meal'" class="card" style="padding:20rpx 24rpx;">
-                <view style="display:flex;align-items:center;gap:20rpx;margin-bottom:12rpx;">
-                  <view style="width:72rpx;height:72rpx;border-radius:20rpx;display:flex;align-items:center;justify-content:center;background:#F1F8E9;flex-shrink:0;">
-                    <MpIcon :name="item.mealIcon || 'soup'" :size="36" color="#2E7D32" />
+              <view v-else-if="item.type === 'meal'" class="tl-card tl-card-white">
+                <view class="tl-card-top">
+                  <view style="display:flex;align-items:center;gap:16rpx;flex:1;min-width:0;">
+                    <view class="tl-meal-ico"><MpIcon :name="item.mealIcon || 'soup'" :size="34" color="#2E7D32" /></view>
+                    <view style="flex:1;min-width:0;">
+                      <text class="tl-meal-name">{{ item.mealName }}</text>
+                      <text class="tl-meal-items">{{ item.mealItems }}</text>
+                    </view>
                   </view>
-                  <view style="flex:1;">
-                    <text style="font-size:28rpx;font-weight:700;color:#1F2937;display:block;margin-bottom:8rpx;">{{ item.mealName }}</text>
-                    <text style="font-size:22rpx;color:#6B7280;">{{ item.mealItems }}</text>
-                    <text v-if="item.mealContent" style="font-size:24rpx;color:#1F2937;line-height:1.6;display:block;margin-top:8rpx;">{{ item.mealContent }}</text>
-                  </view>
+                  <text class="tl-time">{{ item.time }}</text>
                 </view>
-                <scroll-view v-if="item.photos?.length" scroll-x style="white-space:nowrap;">
-                  <image v-for="(p, pi) in item.photos" :key="pi" :src="p" mode="aspectFill"
-                    style="width:160rpx;height:160rpx;border-radius:12rpx;margin-right:12rpx;background:#F5F0EC;display:inline-block;"
-                    @click="previewTimelinePhotos(item.photos, pi)" />
+                <text v-if="item.mealContent" class="tl-desc" style="margin-top:12rpx;">{{ item.mealContent }}</text>
+                <scroll-view v-if="item.photos?.length" scroll-x style="white-space:nowrap;margin-top:12rpx;">
+                  <image v-for="(p, pi) in item.photos" :key="pi" :src="p" mode="aspectFill" class="tl-photo" @click="previewTimelinePhotos(item.photos, pi)" />
                 </scroll-view>
               </view>
 
-              <view v-else-if="item.type === 'notice'" class="card" style="padding:20rpx 24rpx;border-left:6rpx solid #3B9EEB;" @click="item.id === 'menu' && openMenu()">
-                <view class="pill" style="background:#E3F2FD;color:#3B9EEB;margin-bottom:12rpx;"><text style="font-size:20rpx;">{{ item.noticeSender }}</text></view>
-                <text style="font-size:26rpx;font-weight:700;color:#1F2937;display:block;margin-bottom:8rpx;">{{ item.noticeTitle }}</text>
-                <text style="font-size:24rpx;color:#6B7280;line-height:1.6;">{{ item.noticeBody }}</text>
+              <view
+                v-else-if="item.type === 'notice'"
+                class="tl-card tl-card-white"
+                style="border-left:6rpx solid #3B9EEB;"
+                hover-class="tap-dim"
+                @click="item.id === 'menu' && openMenu()"
+              >
+                <view class="tl-card-top">
+                  <view class="pill" style="background:#E3F2FD;color:#3B9EEB;"><text style="font-size:20rpx;">{{ item.noticeSender }}</text></view>
+                  <text class="tl-time">{{ item.time }}</text>
+                </view>
+                <text class="tl-sub-title">{{ item.noticeTitle }}</text>
+                <text class="tl-desc">{{ item.noticeBody }}</text>
                 <text v-if="item.id === 'menu'" style="font-size:22rpx;color:#3B9EEB;display:block;margin-top:8rpx;">点击查看完整食谱 ›</text>
               </view>
             </view>
           </view>
-        </view>
 
-        <view v-if="currentItems.length > 2" style="display:flex;align-items:center;justify-content:center;gap:12rpx;padding:20rpx;background:white;border-radius:20rpx;margin-bottom:20rpx;" @click="timelineExpanded = !timelineExpanded">
-          <text style="font-size:24rpx;font-weight:700;" :style="{ color: accentColor }">{{ timelineExpanded ? '收起' : `展开全部 ${currentItems.length} 条` }}</text>
-          <text style="font-size:20rpx;" :style="{ color: accentColor }">{{ timelineExpanded ? '▲' : '▼' }}</text>
-        </view>
+          <view v-if="currentItems.length > 2" class="tl-expand" hover-class="tap-dim" @click="timelineExpanded = !timelineExpanded">
+            <text class="tl-expand-text" :style="{ color: accentColor }">{{ timelineExpanded ? '收起' : `展开全部 ${currentItems.length} 条` }}</text>
+            <text style="font-size:20rpx;" :style="{ color: accentColor }">{{ timelineExpanded ? '▲' : '▼' }}</text>
+          </view>
+        </template>
 
         <view style="margin-bottom:28rpx;">
           <text style="font-size:26rpx;font-weight:800;color:#1F2937;display:block;margin-bottom:16rpx;">快捷功能</text>
@@ -325,4 +350,37 @@ onShow(() => {
   justify-content: center;
 }
 .feature-label { font-size: 22rpx; color: #6B7280; font-weight: 600; }
+
+/* 动态时间线 */
+.tl-head { display: flex; align-items: center; margin-bottom: 20rpx; }
+.tl-accent { width: 8rpx; height: 30rpx; border-radius: 4rpx; margin-right: 14rpx; }
+.tl-head-text { font-size: 30rpx; font-weight: 800; color: #1F2937; }
+.tl-count { margin-left: 12rpx; font-size: 22rpx; color: #9CA3AF; font-weight: 600; }
+
+.tl-empty { padding: 56rpx 24rpx; display: flex; flex-direction: column; align-items: center; background: white; border-radius: 24rpx; margin-bottom: 20rpx; }
+.tl-empty-title { font-size: 28rpx; color: #4B5563; font-weight: 700; margin-top: 16rpx; }
+.tl-empty-sub { font-size: 22rpx; color: #9CA3AF; margin-top: 8rpx; }
+
+.tl-row { display: flex; }
+.tl-rail { position: relative; width: 56rpx; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
+.tl-node { width: 56rpx; height: 56rpx; border-radius: 28rpx; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 6rpx #F5F7FA; z-index: 2; margin-top: 2rpx; }
+.tl-line { position: absolute; top: 56rpx; bottom: -6rpx; width: 2rpx; background: #E5E7EB; z-index: 1; }
+.tl-body { flex: 1; min-width: 0; padding-left: 20rpx; padding-bottom: 24rpx; }
+
+.tl-card { border-radius: 20rpx; padding: 20rpx 24rpx; }
+.tl-card-white { background: white; box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05); }
+.tl-card-top { display: flex; align-items: center; gap: 12rpx; }
+.tl-title { font-size: 28rpx; font-weight: 700; flex: 1; min-width: 0; }
+.tl-time { font-size: 20rpx; color: #9CA3AF; flex-shrink: 0; margin-left: auto; }
+.tl-sub-title { font-size: 27rpx; font-weight: 700; color: #1F2937; display: block; margin-top: 12rpx; }
+.tl-desc { font-size: 24rpx; color: #6B7280; line-height: 1.6; display: block; margin-top: 6rpx; }
+.tl-meal-ico { width: 72rpx; height: 72rpx; border-radius: 20rpx; display: flex; align-items: center; justify-content: center; background: #F1F8E9; flex-shrink: 0; }
+.tl-meal-name { font-size: 27rpx; font-weight: 700; color: #1F2937; display: block; }
+.tl-meal-items { font-size: 22rpx; color: #6B7280; display: block; margin-top: 4rpx; }
+.tl-photo { width: 160rpx; height: 160rpx; border-radius: 14rpx; margin-right: 12rpx; background: #F5F0EC; display: inline-block; }
+
+.tl-expand { display: flex; align-items: center; justify-content: center; gap: 12rpx; padding: 20rpx; background: white; border-radius: 20rpx; margin-bottom: 20rpx; }
+.tl-expand-text { font-size: 24rpx; font-weight: 700; }
+
+.tap-dim { opacity: 0.6; }
 </style>
