@@ -1,10 +1,10 @@
 <template>
   <view class="overlay-page">
     <view class="gradient-header" style="background: linear-gradient(135deg, #ff7043 0%, #ff9068 100%);">
-      <view style="padding: 0 40rpx 32rpx;">
+      <view class="safe-nav-bar" style="padding-bottom: 32rpx;">
         <view style="display: flex; align-items: center;">
           <view class="back-btn" @click="$emit('back')"><text class="back-icon">‹</text></view>
-          <view style="flex: 1; margin-left: 20rpx;">
+          <view style="flex: 1; margin-left: 20rpx; min-width: 0;">
             <text style="font-size: 40rpx; font-weight: 800; color: white; display: block;">托管辅导</text>
             <text style="font-size: 24rpx; color: rgba(255, 255, 255, 0.85);">{{ todayLabel }}</text>
           </view>
@@ -12,7 +12,7 @@
       </view>
     </view>
     <scroll-view scroll-y style="flex: 1; height: 0;">
-      <view style="padding: 24rpx 40rpx;">
+      <view class="list-pad">
         <LoadingSkeleton v-if="loading" variant="list" :count="3" padding="8rpx 0" />
         <view v-else-if="!list.length" style="padding: 64rpx 0; text-align: center;">
           <text style="font-size: 26rpx; color: #8d6e63;">暂无托管班级</text>
@@ -27,11 +27,16 @@
         >
           <view class="hosting-card__top">
             <text class="hosting-card__name">{{ item.name }}</text>
-            <view class="pill" style="background: #e3f2fd; color: #1565c0;">
-              <text style="font-size: 20rpx; font-weight: 700;">{{ item.typeName }}</text>
+            <view
+              class="hosting-more tap-feedback"
+              hover-class="mp-tap"
+              :hover-stay-time="80"
+              @click.stop="onMore(item)"
+            >
+              <text class="hosting-more__dots">···</text>
             </view>
           </view>
-          <text class="hosting-card__teacher">老师：{{ item.teacherLabel }}</text>
+          <text class="hosting-card__teacher">{{ item.teacherLabel }}</text>
           <view class="hosting-card__people">
             <view
               v-for="(s, i) in item.preview"
@@ -58,6 +63,8 @@ defineEmits(['back', 'open'])
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 const AVATAR_COLORS = ['#FF7043', '#AB47BC', '#3B9EEB', '#66BB6A', '#FFA726', '#EC407A']
+const MORE_ITEMS = ['查询考勤记录', '录错题', '移出', '学情报告']
+
 const loading = ref(false)
 const list = ref([])
 const teacherSelf = ref('')
@@ -72,6 +79,18 @@ const todayLabel = computed(() => {
 
 function avatarColor(i) {
   return AVATAR_COLORS[i % AVATAR_COLORS.length]
+}
+
+function onMore(item) {
+  uni.showActionSheet({
+    itemList: MORE_ITEMS,
+    success: (res) => {
+      const label = MORE_ITEMS[res.tapIndex]
+      if (!label) return
+      // 后续对接具体能力；先提示选中项
+      uni.showToast({ title: `${label}即将开放`, icon: 'none' })
+    },
+  })
 }
 
 onMounted(async () => {
@@ -104,36 +123,63 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.list-pad {
+  padding: 24rpx 24rpx 40rpx;
+}
 .hosting-card {
-  padding: 28rpx 24rpx;
+  padding: 36rpx 28rpx 32rpx;
   margin-bottom: 20rpx;
+  min-height: 220rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .hosting-card__top {
   display: flex;
   align-items: center;
-  gap: 12rpx;
+  gap: 8rpx;
 }
 .hosting-card__name {
   flex: 1;
-  font-size: 32rpx;
+  font-size: 34rpx;
   font-weight: 800;
   color: #2d1f18;
   min-width: 0;
 }
+.hosting-more {
+  width: 64rpx;
+  height: 64rpx;
+  margin: -12rpx -8rpx -12rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16rpx;
+  flex-shrink: 0;
+}
+.hosting-more__dots {
+  font-size: 40rpx;
+  font-weight: 800;
+  color: #8d6e63;
+  letter-spacing: 2rpx;
+  line-height: 1;
+  transform: translateY(-4rpx);
+}
 .hosting-card__teacher {
   display: block;
-  margin-top: 12rpx;
-  font-size: 24rpx;
+  margin-top: 16rpx;
+  font-size: 26rpx;
   color: #8d6e63;
+  font-weight: 600;
 }
 .hosting-card__people {
   display: flex;
   align-items: center;
-  margin-top: 20rpx;
+  margin-top: 28rpx;
 }
 .hosting-avatar {
-  width: 56rpx;
-  height: 56rpx;
+  width: 60rpx;
+  height: 60rpx;
   border-radius: 50%;
   border: 3rpx solid #fff;
   display: flex;
