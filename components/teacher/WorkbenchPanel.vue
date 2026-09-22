@@ -1,7 +1,7 @@
 <template>
   <view class="tab-page wb">
     <view class="gradient-header wb-hero">
-      <view class="safe-nav-bar" style="padding-bottom: 32rpx;">
+      <view class="safe-nav-bar" style="padding-bottom: 40rpx;">
         <text class="wb-org">{{ tenantName || '工作台' }}</text>
         <view class="wb-seg">
           <view
@@ -26,34 +26,40 @@
       <view class="wb-body">
         <view class="wb-stats card">
           <LoadingSkeleton v-if="loading" variant="list" :count="1" padding="8rpx 0" />
-          <view v-else class="wb-stats-grid">
-            <view v-for="s in stats" :key="s.label" class="wb-stat">
-              <text class="wb-stat-val" :style="{ color: s.color }">{{ s.val }}</text>
-              <text class="wb-stat-label">{{ s.label }}</text>
+          <template v-else>
+            <view class="wb-stats-grid">
+              <view v-for="s in stats" :key="s.label" class="wb-stat">
+                <text class="wb-stat-val" :style="{ color: s.color }">{{ s.val }}</text>
+                <text class="wb-stat-label">{{ s.label }}</text>
+              </view>
             </view>
-          </view>
-          <text v-if="!loading" class="wb-scope-hint">
-            {{ scope === 'school' ? '学校视角（当前机构汇总）' : '仅统计我所带班级' }}
-          </text>
+            <text class="wb-scope-hint">
+              {{ scope === 'school' ? '学校视角（当前机构汇总）' : '仅统计我所带班级' }}
+            </text>
+          </template>
         </view>
 
-        <view class="section-head" style="margin-top: 8rpx;">
+        <view class="section-head wb-section">
           <view class="section-bar" />
           <text class="section-title">快捷入口</text>
         </view>
-        <view class="wb-entries card">
+        <view class="wb-entries">
           <view
             v-for="e in entries"
             :key="e.key"
-            class="wb-entry tap-feedback"
-            hover-class="mp-tap"
+            class="wb-entry card tap-feedback"
+            hover-class="mp-tap-soft"
             :hover-stay-time="80"
             @click="onEntry(e)"
           >
             <view class="wb-entry-icon" :style="{ background: e.bg }">
-              <text>{{ e.icon }}</text>
+              <MpIcon :name="e.icon" :size="52" :color="e.color" />
             </view>
-            <text class="wb-entry-label">{{ e.label }}</text>
+            <view class="wb-entry-meta">
+              <text class="wb-entry-label">{{ e.label }}</text>
+              <text class="wb-entry-desc">{{ e.desc }}</text>
+            </view>
+            <text class="wb-entry-arrow">›</text>
           </view>
         </view>
       </view>
@@ -65,6 +71,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import LoadingSkeleton from '../LoadingSkeleton.vue'
+import MpIcon from '../MpIcon.vue'
 import { fetchDashboard, fetchProfile } from '../../api/teacher.js'
 import { ensureWechatRuntime, getMpDisplayName } from '../../utils/wechatRuntime.js'
 
@@ -77,10 +84,42 @@ const mineStats = ref([])
 const schoolStats = ref([])
 
 const entries = [
-  { key: 'hosting', label: '托管辅导', icon: '🏫', bg: '#FFE0B2', nav: { tab: 'hosting-list' } },
-  { key: 'course', label: '课程', icon: '📚', bg: '#E1BEE7', nav: { tab: 'schedule' } },
-  { key: 'schedule', label: '课表', icon: '📅', bg: '#BBDEFB', nav: { tab: 'schedule' } },
-  { key: 'enroll', label: '招生意向', icon: '📝', bg: '#C8E6C9', nav: { toast: '招生意向即将开放' } },
+  {
+    key: 'hosting',
+    label: '托管辅导',
+    desc: '签到 · 消息 · 作业',
+    icon: 'school',
+    bg: 'rgba(255, 112, 67, 0.14)',
+    color: '#E64A19',
+    nav: { tab: 'hosting-list' },
+  },
+  {
+    key: 'course',
+    label: '课程',
+    desc: '兴趣课与课次',
+    icon: 'graduation-cap',
+    bg: 'rgba(171, 71, 188, 0.14)',
+    color: '#8E24AA',
+    nav: { tab: 'schedule' },
+  },
+  {
+    key: 'schedule',
+    label: '课表',
+    desc: '今日与本周安排',
+    icon: 'calendar',
+    bg: 'rgba(59, 158, 235, 0.14)',
+    color: '#1976D2',
+    nav: { tab: 'schedule' },
+  },
+  {
+    key: 'enroll',
+    label: '招生意向',
+    desc: '线索跟进',
+    icon: 'clipboard-list',
+    bg: 'rgba(102, 187, 106, 0.14)',
+    color: '#2E7D32',
+    nav: { toast: '招生意向即将开放' },
+  },
 ]
 
 const stats = computed(() => (scope.value === 'school' ? schoolStats.value : mineStats.value))
@@ -122,7 +161,6 @@ async function load() {
     const cards = dash?.classes || []
     const todos = dash?.todos || {}
     mineStats.value = buildStats(cards, todos)
-    // 暂无全校独立接口：学校数据用机构内我所带汇总占位，后续对齐
     schoolStats.value = buildStats(cards, todos)
   } catch (e) {
     uni.showToast({ title: e.message || '加载失败', icon: 'none' })
@@ -148,18 +186,18 @@ onShow(load)
   padding-right: 8rpx;
 }
 .wb-seg {
-  margin-top: 28rpx;
+  margin-top: 32rpx;
   display: flex;
   background: rgba(255, 255, 255, 0.18);
   border-radius: 20rpx;
-  padding: 6rpx;
+  padding: 8rpx;
 }
 .wb-seg-item {
   flex: 1;
   text-align: center;
-  padding: 16rpx 0;
+  padding: 20rpx 0;
   border-radius: 16rpx;
-  font-size: 26rpx;
+  font-size: 28rpx;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.75);
 }
@@ -172,61 +210,90 @@ onShow(load)
   height: 0;
 }
 .wb-body {
-  padding: 24rpx 32rpx 40rpx;
+  padding: 32rpx 32rpx 48rpx;
 }
 .wb-stats {
-  padding: 28rpx 24rpx 20rpx;
+  padding: 36rpx 20rpx 28rpx;
 }
 .wb-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8rpx;
+  gap: 12rpx;
 }
 .wb-stat {
   text-align: center;
+  padding: 8rpx 0;
 }
 .wb-stat-val {
   display: block;
-  font-size: 40rpx;
+  font-size: 44rpx;
   font-weight: 800;
+  line-height: 1.15;
 }
 .wb-stat-label {
   display: block;
-  margin-top: 4rpx;
-  font-size: 22rpx;
+  margin-top: 10rpx;
+  font-size: 24rpx;
   color: #8d6e63;
+  font-weight: 600;
 }
 .wb-scope-hint {
   display: block;
-  margin-top: 16rpx;
-  font-size: 20rpx;
+  margin-top: 24rpx;
+  font-size: 22rpx;
   color: #bcaaa4;
   text-align: center;
 }
+.wb-section {
+  margin-top: 40rpx;
+  margin-bottom: 20rpx;
+}
 .wb-entries {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12rpx;
-  padding: 28rpx 16rpx;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
 }
 .wb-entry {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 12rpx;
+  gap: 20rpx;
+  padding: 28rpx 24rpx;
+  margin: 0;
+  box-sizing: border-box;
+  min-height: 148rpx;
 }
 .wb-entry-icon {
   width: 88rpx;
   height: 88rpx;
-  border-radius: 24rpx;
+  border-radius: 28rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 40rpx;
+  flex-shrink: 0;
+}
+.wb-entry-meta {
+  flex: 1;
+  min-width: 0;
 }
 .wb-entry-label {
-  font-size: 24rpx;
-  font-weight: 700;
+  display: block;
+  font-size: 30rpx;
+  font-weight: 800;
   color: #2d1f18;
+  line-height: 1.25;
+}
+.wb-entry-desc {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #8d6e63;
+  line-height: 1.3;
+}
+.wb-entry-arrow {
+  font-size: 36rpx;
+  color: #d7ccc8;
+  font-weight: 700;
+  flex-shrink: 0;
+  line-height: 1;
 }
 </style>
