@@ -23,7 +23,7 @@
                 </view>
                 <view v-if="item.type === 'toggle'"
                   style="width:88rpx;height:44rpx;border-radius:22rpx;position:relative;"
-                  :style="{ backgroundColor: item.enabled ? '#AB47BC' : '#E0E0E0', opacity: configBusy ? 0.6 : 1 }"
+                  :style="{ backgroundColor: item.enabled ? '#AB47BC' : '#E0E0E0', opacity: (configBusy || item.locked) ? 0.6 : 1 }"
                   @click="toggleConfig(item)">
                   <view style="position:absolute;top:4rpx;width:36rpx;height:36rpx;border-radius:18rpx;background:white;box-shadow:0 2rpx 8rpx rgba(0,0,0,0.15);" :style="{ left: item.enabled ? '48rpx' : '4rpx' }" />
                 </view>
@@ -80,13 +80,19 @@ const configSections = ref([
   },
 ])
 
-function applySettings(settings) {
+function applySettings(settings, gates) {
   if (!settings) return
+  const faceGate = gates?.face_checkin
   configSections.value.forEach(section => {
     section.items.forEach(item => {
-      if (!(item.key in settings)) return
-      if (item.type === 'toggle') item.enabled = !!settings[item.key]
-      else item.value = settings[item.key] || item.value
+      if (item.key in settings) {
+        if (item.type === 'toggle') item.enabled = !!settings[item.key]
+        else item.value = settings[item.key] || item.value
+      }
+      if (item.key === 'feature.face_checkin' && faceGate) {
+        item.locked = !faceGate.platform_enabled
+        if (faceGate.hint) item.desc = faceGate.hint
+      }
     })
   })
 }
@@ -95,7 +101,7 @@ async function loadSettings() {
   configLoading.value = true
   try {
     const data = await fetchSettings()
-    applySettings(data?.settings)
+    applySettings(data?.settings, data?.gates)
   } catch (e) {
     uni.showToast({ title: e.message || '配置加载失败', icon: 'none' })
   } finally {
@@ -108,7 +114,7 @@ async function saveSettingsPatch(patch) {
   configBusy.value = true
   try {
     const data = await updateSettings(patch)
-    applySettings(data?.settings)
+    applySettings(data?.settings, data?.gates)
     uni.showToast({ title: '已保存', icon: 'success' })
   } catch (e) {
     uni.showToast({ title: e.message || '保存失败', icon: 'none' })
@@ -120,6 +126,10 @@ async function saveSettingsPatch(patch) {
 
 async function toggleConfig(item) {
   if (configBusy.value || item.type !== 'toggle') return
+  if (item.locked && !item.enabled) {
+    uni.showToast({ title: item.desc || '暂不可开启', icon: 'none' })
+    return
+  }
   const next = !item.enabled
   item.enabled = next
   await saveSettingsPatch({ [item.key]: next })

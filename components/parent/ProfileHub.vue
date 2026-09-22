@@ -55,41 +55,54 @@ import { computed, inject } from 'vue'
 import { logout } from '../../api/mp.js'
 import { PARENT_CTX_KEY } from './parentContext.js'
 import MpIcon from '../MpIcon.vue'
+import { hasApp, faceCheckinEnabled } from '../../utils/apps.js'
+import { clearSession, getToken, isGuest } from '../../utils/auth.js'
 
 const ctx = inject(PARENT_CTX_KEY)
-const { parentName, parentPhoneMasked, parentAvatarUrl, activeChild, childOptions, goProfilePage, notifyPrefsOnLabel } = ctx
+const { parentName, parentPhoneMasked, parentAvatarUrl, activeChild, childOptions, goProfilePage, notifyPrefsOnLabel, mpApps } = ctx
 
-const profileMenuGroups = computed(() => [
-  {
-    title: '账户',
-    items: [
-      { icon: 'users', label: '我的宝贝', sub: activeChild.value.name || '未绑定', page: 'child', color: '#AB47BC' },
-      { icon: 'message-circle', label: '站内消息', sub: '通知与提醒', page: 'messages', color: '#3B9EEB' },
-      { icon: 'car', label: '接送人', sub: '授权接送人员', page: 'pickup', color: '#26A69A' },
-      { icon: 'smile', label: '人脸授权', sub: '刷脸签到采集与撤回', page: 'face', color: '#5C6BC0' },
-      { icon: 'file-text', label: '请假申请', sub: '提交与查看审批进度', page: 'leave', color: '#7B1FA2' },
-      { icon: 'wallet', label: '课时余额', sub: '兴趣课剩余课时与流水', page: 'lesson-package', color: '#FF8A65' },
-      { icon: 'calendar', label: '试课预约', sub: '申请进度与上课时间', page: 'trial', color: '#FF7043' },
-      { icon: 'star', label: '服务评价', sub: '本月满意度打分', page: 'satisfaction', color: '#FF7043' },
-    ],
-  },
-  {
-    title: '偏好',
-    items: [
-      { icon: 'bell', label: '消息通知', sub: notifyPrefsOnLabel.value, page: 'notify', color: '#FF7043' },
-      { icon: 'lock', label: '隐私与安全', sub: parentPhoneMasked.value || '绑定手机与隐私说明', page: 'privacy', color: '#66BB6A' },
-    ],
-  },
-  {
-    title: '支持',
-    items: [
-      { icon: 'circle-help', label: '帮助与反馈', sub: '常见问题、意见反馈', page: 'help', color: '#FFA726' },
-      { icon: 'info', label: '关于智优', sub: '版本 1.0.0', page: 'about', color: '#6B7280' },
-    ],
-  },
-])
+const profileMenuGroups = computed(() => {
+  const accountItems = [
+    { icon: 'users', label: '我的宝贝', sub: activeChild.value.name || '未绑定', page: 'child', color: '#AB47BC' },
+    { icon: 'message-circle', label: '站内消息', sub: '通知与提醒', page: 'messages', color: '#3B9EEB' },
+    { icon: 'car', label: '接送人', sub: '授权接送人员', page: 'pickup', color: '#26A69A' },
+  ]
+  if (faceCheckinEnabled(mpApps.value)) {
+    accountItems.push({ icon: 'smile', label: '人脸授权', sub: '刷脸签到采集与撤回', page: 'face', color: '#5C6BC0' })
+  }
+  if (hasApp('ATTENDANCE', mpApps.value)) {
+    accountItems.push({ icon: 'file-text', label: '请假申请', sub: '提交与查看审批进度', page: 'leave', color: '#7B1FA2' })
+  }
+  accountItems.push(
+    { icon: 'wallet', label: '课时余额', sub: '兴趣课剩余课时与流水', page: 'lesson-package', color: '#FF8A65' },
+    { icon: 'calendar', label: '试课预约', sub: '申请进度与上课时间', page: 'trial', color: '#FF7043' },
+    { icon: 'star', label: '服务评价', sub: '本月满意度打分', page: 'satisfaction', color: '#FF7043' },
+  )
+  return [
+    { title: '账户', items: accountItems },
+    {
+      title: '偏好',
+      items: [
+        { icon: 'bell', label: '消息通知', sub: notifyPrefsOnLabel.value, page: 'notify', color: '#FF7043' },
+        { icon: 'lock', label: '隐私与安全', sub: parentPhoneMasked.value || '绑定手机与隐私说明', page: 'privacy', color: '#66BB6A' },
+      ],
+    },
+    {
+      title: '支持',
+      items: [
+        { icon: 'circle-help', label: '帮助与反馈', sub: '常见问题、意见反馈', page: 'help', color: '#FFA726' },
+        { icon: 'info', label: '关于智优', sub: '版本 1.0.0', page: 'about', color: '#6B7280' },
+      ],
+    },
+  ]
+})
 
 async function doLogout() {
+  if (isGuest() || !getToken()) {
+    clearSession()
+    uni.reLaunch({ url: '/pages/index/index' })
+    return
+  }
   try {
     await logout()
   } catch {

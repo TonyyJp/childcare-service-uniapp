@@ -12,6 +12,8 @@ import {
 } from '../../api/parent.js'
 import { mediaUrl } from '../../config.js'
 import { ensureWechatRuntime, getMpDisplayName, getSubscribeTemplates } from '../../utils/wechatRuntime.js'
+import { loadApps, hasApp, faceCheckinEnabled } from '../../utils/apps.js'
+import { getToken, isGuest } from '../../utils/auth.js'
 
 export const PARENT_CTX_KEY = 'parentCtx'
 export const ACCENT = '#3B9EEB'
@@ -78,6 +80,7 @@ export function createParentContext() {
   const profilePage = ref('main')
   const selectedCourse = ref(null)
   const menuVisible = ref(false)
+  const mpApps = ref([])
   /** 动态 Tab 内全屏子页（详情 / 与我有关），供页面级 page-container 拦截右滑 */
   const feedDetailVisible = ref(false)
   const feedBellVisible = ref(false)
@@ -132,7 +135,7 @@ export function createParentContext() {
   })
   const childOptions = ref([])
   const activeChildId = ref(null)
-    const activeChild = ref({
+  const activeChild = ref({
     name: '—',
     gender: 'unknown',
     emoji: childAvatarIcon('unknown'),
@@ -150,6 +153,21 @@ export function createParentContext() {
   const courses = ref([])
   const gradeDict = ref([])
   const schoolClassDict = ref([])
+
+  async function refreshApps(force = true) {
+    if (isGuest() || !getToken()) {
+      mpApps.value = []
+      return
+    }
+    try {
+      mpApps.value = await loadApps({
+        studentId: activeChildId.value || undefined,
+        force,
+      })
+    } catch {
+      // 保留缓存
+    }
+  }
 
   async function ensureSchoolDicts() {
     if (gradeDict.value.length && schoolClassDict.value.length) return
@@ -381,6 +399,31 @@ export function createParentContext() {
     parentAvatarUrl.value = mediaUrl(profile?.avatar || '')
   }
 
+  function applyGuestHome() {
+    parentName.value = '游客'
+    parentPhone.value = ''
+    parentAvatarUrl.value = ''
+    membershipTenants.value = []
+    childOptions.value = []
+    activeChildId.value = null
+    todayItems.value = []
+    yesterdayItems.value = []
+    courses.value = []
+    homeworkEntryHint.value = '登录后查看作业'
+    activeChild.value = {
+      name: '未绑定宝贝',
+      gender: 'unknown',
+      emoji: childAvatarIcon('unknown'),
+      avatarColor: childAvatarColor('unknown'),
+      avatarUrl: '',
+      class: '',
+      tenant: '',
+      checkinLabel: '去登录',
+      inGarden: false,
+      needsBind: true,
+    }
+  }
+
   async function loadParentHome() {
     homeLoading.value = true
     try {
@@ -389,6 +432,11 @@ export function createParentContext() {
         brandName.value = getMpDisplayName()
       } catch (_) {
         brandName.value = getMpDisplayName()
+      }
+
+      if (isGuest() || !getToken()) {
+        applyGuestHome()
+        return
       }
 
       const [profile, studentsRes] = await Promise.all([fetchProfile(), fetchStudents()])
@@ -436,6 +484,7 @@ export function createParentContext() {
         activeChildId.value = childOptions.value[0].id
       }
 
+      await refreshApps(true)
       await refreshTimeline()
     } catch (e) {
       uni.showToast({ title: e.message || '首页加载失败', icon: 'none' })
@@ -449,6 +498,7 @@ export function createParentContext() {
     activeChildId.value = id
     homeLoading.value = true
     try {
+      await refreshApps(true)
       await refreshTimeline()
     } catch (e) {
       uni.showToast({ title: e.message || '切换失败', icon: 'none' })
@@ -488,6 +538,14 @@ export function createParentContext() {
   }
 
   function goProfilePage(page) {
+    if (page === 'leave' && !hasApp('ATTENDANCE', mpApps.value)) {
+      uni.showToast({ title: '请联系平台开通', icon: 'none' })
+      return
+    }
+    if (page === 'face' && !faceCheckinEnabled(mpApps.value)) {
+      uni.showToast({ title: '请联系平台开通', icon: 'none' })
+      return
+    }
     profilePage.value = page
     if (activeTab.value !== 'me') {
       activeTab.value = 'me'
@@ -497,6 +555,10 @@ export function createParentContext() {
 
   function openFeature(nav) {
     if (!nav) return
+    if (nav.tab === 'homework' && !hasApp('HOMEWORK', mpApps.value)) {
+      uni.showToast({ title: '请联系平台开通', icon: 'none' })
+      return
+    }
     if (nav.tab) {
       activeTab.value = nav.tab
       if (nav.tab === 'me' && nav.page) profilePage.value = nav.page
@@ -509,6 +571,11 @@ export function createParentContext() {
   /** 首页「去绑定」→ 我的宝贝 + 打开添加宝贝表单 */
   const pendingOpenBindingCompose = ref(false)
   function goBindChild() {
+    if (isGuest() || !getToken()) {
+      uni.showToast({ title: '请先登录', icon: 'none' })
+      setTimeout(() => uni.reLaunch({ url: '/pages/index/index' }), 400)
+      return
+    }
     pendingOpenBindingCompose.value = true
     profilePage.value = 'child'
     activeTab.value = 'me'
@@ -670,6 +737,8 @@ export function createParentContext() {
     childOptions,
     activeChildId,
     activeChild,
+    mpApps,
+    refreshApps,
     todayItems,
     yesterdayItems,
     homeworkEntryHint,

@@ -100,7 +100,7 @@
             </view>
 
             <!-- 班级出勤 -->
-            <view class="card" style="padding:24rpx;margin-bottom:24rpx;">
+            <view v-if="showClassOverview" class="card" style="padding:24rpx;margin-bottom:24rpx;">
               <view class="sec-title"><view class="sec-bar" /><text class="sec-text">班级出勤</text></view>
               <view v-for="cls in classOverview" :key="cls.id || cls.name" style="margin-bottom:16rpx;">
                 <view style="display:flex;justify-content:space-between;margin-bottom:8rpx;">
@@ -118,85 +118,20 @@
 
             <!-- 报表 / 配置 / 活动 / 报名 -->
             <view style="margin-bottom:32rpx;">
-              <view style="display:flex;margin-bottom:16rpx;">
-                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('trial')">
-                  <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">🎧</text>
-                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">试课预约</text>
-                  <text style="font-size:20rpx;color:#8D6E63;">{{ pendingTrialLabel }}</text>
+              <view style="display:flex;flex-wrap:wrap;">
+                <view
+                  v-for="tile in mgmtTiles"
+                  :key="tile.tab"
+                  class="card tap-op"
+                  hover-class="tap-op-hover"
+                  style="width:calc(50% - 8rpx);padding:24rpx;text-align:center;margin-bottom:16rpx;box-sizing:border-box;"
+                  :style="{ marginRight: tile.odd ? '16rpx' : '0' }"
+                  @click="navigate(tile.tab)"
+                >
+                  <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">{{ tile.icon }}</text>
+                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">{{ tile.label }}</text>
+                  <text style="font-size:20rpx;color:#8D6E63;">{{ tile.sub }}</text>
                 </view>
-                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('lesson-attend')">
-                  <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">🎯</text>
-                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">兴趣点名</text>
-                  <text style="font-size:20rpx;color:#8D6E63;">代点名消课</text>
-                </view>
-              </view>
-              <view style="display:flex;margin-bottom:16rpx;">
-                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('lesson-consume')">
-                  <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">📉</text>
-                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">近7日课消</text>
-                  <text style="font-size:20rpx;color:#8D6E63;">只读汇总</text>
-                </view>
-                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('report')">
-                  <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">📈</text>
-                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">运营报表</text>
-                  <text style="font-size:20rpx;color:#8D6E63;">数据分析</text>
-                </view>
-              </view>
-              <view style="display:flex;margin-bottom:16rpx;">
-                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('bindings')">
-                  <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">🔗</text>
-                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">绑定审核</text>
-                  <text style="font-size:20rpx;color:#8D6E63;">家长申请</text>
-                </view>
-                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('events')">
-                  <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">🎉</text>
-                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">活动日历</text>
-                  <text style="font-size:20rpx;color:#8D6E63;">发布园所活动</text>
-                </view>
-              </view>
-              <view style="display:flex;margin-bottom:16rpx;">
-                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('enrollments')">
-                  <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">🎟️</text>
-                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">课程报名</text>
-                  <text style="font-size:20rpx;color:#8D6E63;">录入与消课</text>
-                </view>
-                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('leaves')">
-                  <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">📝</text>
-                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">请假审批</text>
-                  <text style="font-size:20rpx;color:#8D6E63;">代教师审核</text>
-                </view>
-              </view>
-              <view style="display:flex;margin-bottom:16rpx;">
-                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('meals')">
-                  <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">🍱</text>
-                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">营养餐</text>
-                  <text style="font-size:20rpx;color:#8D6E63;">代打卡上传</text>
-                </view>
-                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('homework')">
-                  <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">📋</text>
-                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">作业批改</text>
-                  <text style="font-size:20rpx;color:#8D6E63;">待批提交</text>
-                </view>
-              </view>
-              <view style="display:flex;margin-bottom:16rpx;">
-                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('attendance')">
-                  <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">✅</text>
-                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">考勤签到</text>
-                  <text style="font-size:20rpx;color:#8D6E63;">全园点名</text>
-                </view>
-                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;" @click="navigate('daily')">
-                  <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">📷</text>
-                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">日常代发</text>
-                  <text style="font-size:20rpx;color:#8D6E63;">草稿·发布</text>
-                </view>
-              </view>
-              <view style="display:flex;margin-bottom:16rpx;">
-                <view class="card tap-op" hover-class="tap-op-hover" style="flex:1;padding:24rpx;text-align:center;margin-right:16rpx;" @click="navigate('config')">
-                  <text style="font-size:48rpx;display:block;margin-bottom:8rpx;">⚙️</text>
-                  <text style="font-size:26rpx;font-weight:700;color:#2D1F18;display:block;">系统配置</text>
-                  <text style="font-size:20rpx;color:#8D6E63;">功能设置</text>
-                </view>
-                <view style="flex:1;" />
               </view>
             </view>
           </view>
@@ -205,16 +140,18 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import { fetchDashboard } from '../../api/institution.js'
 import { DEBUG_MODE } from '../../config.js'
 import { clearRoleSelection } from '../../utils/auth.js'
+import { hasApp, MP_APPS_KEY } from '../../utils/apps.js'
 
 const props = defineProps({
   pageShowCount: { type: Number, default: 0 },
 })
 const emit = defineEmits(["navigate","open-announcements"])
 const debugMode = DEBUG_MODE
+const mpApps = inject(MP_APPS_KEY, ref([]))
 
 function navigate(tab) {
   emit('navigate', tab)
@@ -250,6 +187,37 @@ const shortcuts = ref([
   { tab: 'notice', icon: '📢', label: '通知', sub: '发通知', color: '#66BB6A' },
 ])
 const classOverview = ref([])
+
+const ALL_MGMT_TILES = [
+  { tab: 'trial', icon: '🎧', label: '试课预约', subKey: 'trial', always: true },
+  { tab: 'lesson-attend', icon: '🎯', label: '兴趣点名', sub: '代点名消课', apps: ['HOSTING'] },
+  { tab: 'lesson-consume', icon: '📉', label: '近7日课消', sub: '只读汇总', apps: ['HOSTING'] },
+  { tab: 'report', icon: '📈', label: '运营报表', sub: '数据分析', apps: ['HOSTING'] },
+  { tab: 'bindings', icon: '🔗', label: '绑定审核', sub: '家长申请', always: true },
+  { tab: 'events', icon: '🎉', label: '活动日历', sub: '发布园所活动', always: true },
+  { tab: 'enrollments', icon: '🎟️', label: '课程报名', sub: '录入与消课', always: true },
+  { tab: 'leaves', icon: '📝', label: '请假审批', sub: '代教师审核', apps: ['ATTENDANCE'] },
+  { tab: 'meals', icon: '🍱', label: '营养餐', sub: '代打卡上传', apps: ['NUTRITION'] },
+  { tab: 'homework', icon: '📋', label: '作业批改', sub: '待批提交', apps: ['HOMEWORK'] },
+  { tab: 'attendance', icon: '✅', label: '考勤签到', sub: '全园点名', apps: ['HOSTING', 'ATTENDANCE'] },
+  { tab: 'daily', icon: '📷', label: '日常代发', sub: '草稿·发布', apps: ['HOSTING'] },
+  { tab: 'config', icon: '⚙️', label: '系统配置', sub: '功能设置', always: true },
+]
+
+const mgmtTiles = computed(() => {
+  const list = ALL_MGMT_TILES.filter((t) => {
+    if (t.always) return true
+    return (t.apps || []).some((code) => hasApp(code, mpApps.value))
+  }).map((t) => ({
+    ...t,
+    sub: t.subKey === 'trial' ? pendingTrialLabel.value : t.sub,
+  }))
+  return list.map((t, i) => ({ ...t, odd: i % 2 === 0 }))
+})
+
+const showClassOverview = computed(
+  () => hasApp('HOSTING', mpApps.value) || hasApp('ATTENDANCE', mpApps.value),
+)
 
 function onAlertClick(a) {
   if (a?.tab) navigate(a.tab)

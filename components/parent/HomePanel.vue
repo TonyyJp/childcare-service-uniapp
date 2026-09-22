@@ -239,6 +239,7 @@ import { DEBUG_MODE } from '../../config.js'
 import { clearRoleSelection } from '../../utils/auth.js'
 import { PARENT_CTX_KEY } from './parentContext.js'
 import MpIcon from '../MpIcon.vue'
+import { hasApp } from '../../utils/apps.js'
 
 const props = defineProps({ active: { type: Boolean, default: false } })
 const ctx = inject(PARENT_CTX_KEY)
@@ -264,13 +265,21 @@ const openProfile = ctx.openProfile
 const goBindChild = ctx.goBindChild
 const openFeature = ctx.openFeature
 const refreshUnreadCount = ctx.refreshUnreadCount
+const mpApps = ctx.mpApps
 
-const features = [
-  { icon: 'clipboard-list', label: '作业', color: '#3B9EEB', nav: { tab: 'homework' } },
-  { icon: 'sprout', label: '成长', color: '#66BB6A', nav: { tab: 'growth' } },
-  { icon: 'images', label: '成长影集', color: '#AB47BC', nav: { tab: 'growth-album' } },
-  { icon: 'utensils', label: '周食谱', color: '#00897B', nav: { menu: true } },
+const ALL_FEATURES = [
+  { icon: 'clipboard-list', label: '作业', color: '#3B9EEB', nav: { tab: 'homework' }, apps: ['HOMEWORK'] },
+  { icon: 'sprout', label: '成长', color: '#66BB6A', nav: { tab: 'growth' }, always: true },
+  { icon: 'images', label: '成长影集', color: '#AB47BC', nav: { tab: 'growth-album' }, always: true },
+  { icon: 'utensils', label: '周食谱', color: '#00897B', nav: { menu: true }, apps: ['NUTRITION'] },
 ]
+
+const features = computed(() =>
+  ALL_FEATURES.filter((f) => {
+    if (f.always) return true
+    return (f.apps || []).some((code) => hasApp(code, mpApps.value))
+  }),
+)
 
 function onCheckinPillClick() {
   if (activeChild.value?.needsBind) {

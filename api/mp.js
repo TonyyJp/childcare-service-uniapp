@@ -1,5 +1,5 @@
 import { http } from '../utils/request.js'
-import { clearSession, getRole, setProfile, setRole, setToken } from '../utils/auth.js'
+import { clearGuest, clearSession, getRole, setProfile, setRole, setToken } from '../utils/auth.js'
 import { MP_APPID } from '../config.js'
 
 /** POST /mp/login（仅微信 code，可能返回 need_phone） */
@@ -43,6 +43,11 @@ export function fetchMe() {
   return http.get('/mp/me')
 }
 
+/** GET /mp/apps — 当前角色有效已购应用（家长可传 student_id） */
+export function fetchApps(params) {
+  return http.get('/mp/apps', params || {})
+}
+
 /** POST /mp/role/switch */
 export function switchRole(role, staffId) {
   const data = { role }
@@ -73,6 +78,7 @@ function wxLoginCode() {
  * 登录凭证一律先落盘；若目标角色无权限则保留会话并抛出，便于重选身份无需再登录。
  */
 export async function applySession(data, targetRole) {
+  clearGuest()
   setToken(data.token)
   const baseRole = data.current_role || 'parent'
   setProfile({ identities: data.identities, current_role: baseRole })

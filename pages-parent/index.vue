@@ -323,6 +323,7 @@ watch(activeTab, (tab) => {
 
 onShow(() => {
   refreshUnreadCount()
+  ctx.refreshApps?.(true)
 })
 </script>
 

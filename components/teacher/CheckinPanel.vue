@@ -37,7 +37,10 @@
             <text style="font-size:20rpx;font-weight:700;" :style="{ color: s.color }">{{ s.label }}</text>
           </view>
         </view>
-        <view style="display:flex;gap:16rpx;margin-top:24rpx;background:rgba(255,255,255,0.15);border-radius:20rpx;padding:8rpx;">
+        <view
+          v-if="faceAvailable"
+          style="display:flex;gap:16rpx;margin-top:24rpx;background:rgba(255,255,255,0.15);border-radius:20rpx;padding:8rpx;"
+        >
           <view style="flex:1;text-align:center;padding:16rpx;border-radius:16rpx;font-size:26rpx;font-weight:700;"
             :style="{ backgroundColor: checkinMode === 'list' ? 'white' : 'transparent', color: checkinMode === 'list' ? '#FF7043' : 'rgba(255,255,255,0.75)' }"
             @click="checkinMode = 'list'"><text>📋 名单签到</text></view>
@@ -134,7 +137,7 @@
 </template>
 
 <script setup>
-import { ref, computed, inject, nextTick, onMounted, onUnmounted } from 'vue'
+import { ref, computed, inject, nextTick, onMounted, onUnmounted, watch } from 'vue'
 import {
   checkinStudents,
   checkoutStudent,
@@ -145,6 +148,7 @@ import {
   markAbsent,
 } from '../../api/teacher.js'
 import { uploadFile } from '../../utils/request.js'
+import { faceCheckinEnabled, MP_APPS_KEY } from '../../utils/apps.js'
 
 const AVATAR_COLORS = ['#FF7043', '#AB47BC', '#3B9EEB', '#66BB6A', '#FFA726', '#EC407A']
 const STATUS_LABEL = {
@@ -154,6 +158,9 @@ const STATUS_LABEL = {
   leave: '请假',
   absent: '缺勤'
 }
+
+const mpApps = inject(MP_APPS_KEY, ref([]))
+const faceAvailable = computed(() => faceCheckinEnabled(mpApps.value))
 
 const injectedClassId = inject('teacherCheckinClassId', null)
 const injectedPeriodId = inject('teacherCheckinPeriodId', null)
@@ -394,6 +401,13 @@ const faceLastMsg = ref('')
 const faceHits = ref([]) // 本轮已识别学生 {id, name}
 const faceCameraPosition = ref('front') // front | back
 let cameraCtx = null
+
+watch(faceAvailable, (ok) => {
+  if (!ok && checkinMode.value === 'face') {
+    checkinMode.value = 'list'
+    faceCameraOn.value = false
+  }
+})
 
 const faceHitNames = computed(() => faceHits.value.map(h => h.name).join('、'))
 

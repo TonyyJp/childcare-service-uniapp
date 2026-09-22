@@ -11,7 +11,7 @@
       <DailyPanel v-else-if="shellTab === 'daily'" />
       <StatsPanel v-else-if="shellTab === 'stats'" />
 
-      <!-- 内页：page-container 承接右滑/系统返回，避免退出小程序 -->
+      <!-- #ifndef H5 -->
       <page-container
         :show="innerShow"
         :position="pcProps.position"
@@ -23,30 +23,34 @@
         @afterleave="onInnerAfterLeave"
       >
         <view class="mp-inner-wrap">
-          <MealOverlay v-if="innerKey === 'meal'" @back="activeTab = 'home'" />
-          <AttendanceOverlay
-            v-else-if="innerKey === 'attendance'"
-            @back="activeTab = 'home'"
-            @go-checkin="activeTab = 'checkin'"
-          />
-          <LeaveOverlay v-else-if="innerKey === 'leave'" @back="activeTab = 'home'" />
-          <NoticesOverlay v-else-if="innerKey === 'notices'" @back="activeTab = 'home'" />
-          <MessagesOverlay v-else-if="innerKey === 'messages'" @back="activeTab = 'home'" />
-          <ScheduleOverlay
-            v-else-if="innerKey === 'schedule'"
-            @back="activeTab = 'home'"
+          <TeacherInnerPages
+            :inner-key="innerKey"
+            @back="onOverlayBack"
+            @go-checkin="onInnerGoCheckin"
             @detail="onCourseDetail"
             @lesson-attend="onLessonAttend"
+            @lesson-attend-from-detail="onLessonAttendFromDetail"
+            @lesson-attend-back="onLessonAttendBack"
           />
-          <CourseDetailOverlay
-            v-else-if="innerKey === 'course-detail'"
-            @back="activeTab = 'schedule'"
-            @lesson-attend="onLessonAttendFromDetail"
-          />
-          <LessonAttendOverlay v-else-if="innerKey === 'lesson-attend'" @back="onLessonAttendBack" />
-          <GrowthOverlay v-else-if="innerKey === 'life'" @back="activeTab = 'home'" />
         </view>
       </page-container>
+      <!-- #endif -->
+
+      <!-- #ifdef H5 -->
+      <view v-if="innerShow" class="h5-inner-overlay">
+        <view class="mp-inner-wrap">
+          <TeacherInnerPages
+            :inner-key="innerKey"
+            @back="onOverlayBack"
+            @go-checkin="onInnerGoCheckin"
+            @detail="onCourseDetail"
+            @lesson-attend="onLessonAttend"
+            @lesson-attend-from-detail="onLessonAttendFromDetail"
+            @lesson-attend-back="onLessonAttendBack"
+          />
+        </view>
+      </view>
+      <!-- #endif -->
     </view>
 
     <view v-if="isMainTab">
@@ -57,24 +61,18 @@
 
 <script setup>
 import { ref, computed, provide, watch } from 'vue'
+import { onBackPress, onShow } from '@dcloudio/uni-app'
 import BottomNav from '../components/bottom-nav.vue'
 import HomePanel from '../components/teacher/HomePanel.vue'
 import CheckinPanel from '../components/teacher/CheckinPanel.vue'
 import HomeworkPanel from '../components/teacher/HomeworkPanel.vue'
 import DailyPanel from '../components/teacher/DailyPanel.vue'
 import StatsPanel from '../components/teacher/StatsPanel.vue'
-import MealOverlay from '../components/teacher/MealOverlay.vue'
-import AttendanceOverlay from '../components/teacher/AttendanceOverlay.vue'
-import LeaveOverlay from '../components/teacher/LeaveOverlay.vue'
-import NoticesOverlay from '../components/teacher/NoticesOverlay.vue'
-import MessagesOverlay from '../components/teacher/MessagesOverlay.vue'
-import ScheduleOverlay from '../components/teacher/ScheduleOverlay.vue'
-import CourseDetailOverlay from '../components/teacher/CourseDetailOverlay.vue'
-import LessonAttendOverlay from '../components/teacher/LessonAttendOverlay.vue'
-import GrowthOverlay from '../components/teacher/GrowthOverlay.vue'
+import TeacherInnerPages from '../components/teacher/TeacherInnerPages.vue'
 import { navSafeCssVars } from './utils/safeArea.js'
 import { todayYmd } from '../utils/lessonAttend.js'
 import { MP_PAGE_CONTAINER_PROPS, createPageContainerBridge } from './utils/mpPageContainer.js'
+import { loadApps, MP_APPS_KEY } from '../utils/apps.js'
 
 const navSafeStyle = navSafeCssVars()
 const activeTab = ref('home')
@@ -84,25 +82,57 @@ const courseDetail = ref(null)
 const lessonAttendCtx = ref(null)
 const lastMainTab = ref('home')
 const innerKey = ref('')
+const mpApps = ref([])
 
 provide('teacherActiveTab', activeTab)
 provide('teacherCheckinClassId', checkinClassId)
 provide('teacherCheckinPeriodId', checkinPeriodId)
 provide('teacherCourseDetail', courseDetail)
 provide('teacherLessonAttend', lessonAttendCtx)
+provide(MP_APPS_KEY, mpApps)
 
 const MAIN_TABS = ['home', 'checkin', 'homework', 'daily', 'stats']
 const isMainTab = computed(() => MAIN_TABS.includes(activeTab.value))
 const shellTab = computed(() => (isMainTab.value ? activeTab.value : lastMainTab.value))
 const pcProps = MP_PAGE_CONTAINER_PROPS
 
-watch(activeTab, (tab) => {
-  if (MAIN_TABS.includes(tab)) {
-    lastMainTab.value = tab
-  } else {
-    innerKey.value = tab
+const navTabs = [
+  { id: 'home', label: '首页', emoji: '🏠' },
+  { id: 'checkin', label: '签到', emoji: '✅' },
+  { id: 'homework', label: '作业', emoji: '📋' },
+  { id: 'daily', label: '日常', emoji: '📷' },
+  { id: 'stats', label: '学情', emoji: '📊' },
+]
+
+async function refreshApps() {
+  try {
+    mpApps.value = await loadApps({ force: true })
+  } catch {
+    mpApps.value = mpApps.value.length ? mpApps.value : []
   }
+}
+
+onShow(() => {
+  refreshApps()
 })
+
+function resolveInnerKey() {
+  if (MAIN_TABS.includes(activeTab.value)) return ''
+  return activeTab.value
+}
+
+function isInnerOpen() {
+  return !!resolveInnerKey()
+}
+
+watch(activeTab, (tab) => {
+  if (MAIN_TABS.includes(tab)) lastMainTab.value = tab
+})
+
+watch(activeTab, () => {
+  const key = resolveInnerKey()
+  if (key) innerKey.value = key
+}, { immediate: true })
 
 function popInnerOnce() {
   if (MAIN_TABS.includes(activeTab.value)) return false
@@ -111,13 +141,15 @@ function popInnerOnce() {
   } else if (activeTab.value === 'course-detail') {
     activeTab.value = 'schedule'
   } else {
-    activeTab.value = 'home'
+    activeTab.value = lastMainTab.value || 'home'
   }
+  const key = resolveInnerKey()
+  if (key) innerKey.value = key
   return !MAIN_TABS.includes(activeTab.value)
 }
 
 const pc = createPageContainerBridge({
-  isOpen: () => !MAIN_TABS.includes(activeTab.value),
+  isOpen: isInnerOpen,
   onBack: popInnerOnce,
 })
 const {
@@ -131,13 +163,11 @@ watch(contentAlive, (alive) => {
   if (!alive) innerKey.value = ''
 })
 
-const navTabs = [
-  { id: 'home', label: '首页', emoji: '🏠' },
-  { id: 'checkin', label: '签到', emoji: '✅' },
-  { id: 'homework', label: '作业', emoji: '📋' },
-  { id: 'daily', label: '日常', emoji: '📷' },
-  { id: 'stats', label: '学情', emoji: '📊' },
-]
+onBackPress(() => {
+  if (!isInnerOpen()) return false
+  popInnerOnce()
+  return true
+})
 
 function navigate(nav) {
   if (!nav) return
@@ -158,13 +188,26 @@ function navigate(nav) {
 }
 
 function onGoCheckin(payload) {
+  applyCheckinPayload(payload)
+  activeTab.value = 'checkin'
+}
+
+function onInnerGoCheckin(payload) {
+  applyCheckinPayload(payload)
+  activeTab.value = 'checkin'
+}
+
+function applyCheckinPayload(payload) {
   if (payload != null && typeof payload === 'object') {
     if (payload.classId != null) checkinClassId.value = payload.classId
     if (payload.periodId != null) checkinPeriodId.value = payload.periodId
   } else if (payload != null) {
     checkinClassId.value = payload
   }
-  activeTab.value = 'checkin'
+}
+
+function onOverlayBack() {
+  popInnerOnce()
 }
 
 function onCourseDetail(cls) {
@@ -207,12 +250,15 @@ function onLessonAttendBack() {
 <style lang="scss">
 @import '../styles/mp-common.scss';
 
-.mp-inner-wrap {
-  width: 100%;
-  height: 100%;
-  min-height: 100vh;
-  box-sizing: border-box;
-  position: relative;
+/* #ifdef H5 */
+.h5-inner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
   overflow: hidden;
 }
+/* #endif */
 </style>
