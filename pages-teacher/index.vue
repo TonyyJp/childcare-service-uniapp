@@ -6,10 +6,12 @@
         @navigate="navigate"
         @go-checkin="onGoCheckin"
       />
-      <CheckinPanel v-else-if="shellTab === 'checkin'" />
-      <HomeworkPanel v-else-if="shellTab === 'homework'" />
-      <DailyPanel v-else-if="shellTab === 'daily'" />
-      <StatsPanel v-else-if="shellTab === 'stats'" />
+      <WorkbenchPanel
+        v-else-if="shellTab === 'workbench'"
+        @navigate="navigate"
+      />
+      <DailyPanel v-else-if="shellTab === 'circle'" />
+      <MePanel v-else-if="shellTab === 'me'" @navigate="navigate" />
 
       <!-- #ifndef H5 -->
       <page-container
@@ -31,6 +33,8 @@
             @lesson-attend="onLessonAttend"
             @lesson-attend-from-detail="onLessonAttendFromDetail"
             @lesson-attend-back="onLessonAttendBack"
+            @open-hosting="onOpenHosting"
+            @homework="onHomeworkTutoring"
           />
         </view>
       </page-container>
@@ -47,6 +51,8 @@
             @lesson-attend="onLessonAttend"
             @lesson-attend-from-detail="onLessonAttendFromDetail"
             @lesson-attend-back="onLessonAttendBack"
+            @open-hosting="onOpenHosting"
+            @homework="onHomeworkTutoring"
           />
         </view>
       </view>
@@ -64,10 +70,9 @@ import { ref, computed, provide, watch } from 'vue'
 import { onBackPress, onShow } from '@dcloudio/uni-app'
 import BottomNav from '../components/bottom-nav.vue'
 import HomePanel from '../components/teacher/HomePanel.vue'
-import CheckinPanel from '../components/teacher/CheckinPanel.vue'
-import HomeworkPanel from '../components/teacher/HomeworkPanel.vue'
+import WorkbenchPanel from '../components/teacher/WorkbenchPanel.vue'
 import DailyPanel from '../components/teacher/DailyPanel.vue'
-import StatsPanel from '../components/teacher/StatsPanel.vue'
+import MePanel from '../components/teacher/MePanel.vue'
 import TeacherInnerPages from '../components/teacher/TeacherInnerPages.vue'
 import { navSafeCssVars } from './utils/safeArea.js'
 import { todayYmd } from '../utils/lessonAttend.js'
@@ -80,6 +85,7 @@ const checkinClassId = ref(null)
 const checkinPeriodId = ref(null)
 const courseDetail = ref(null)
 const lessonAttendCtx = ref(null)
+const hostingCtx = ref(null)
 const lastMainTab = ref('home')
 const innerKey = ref('')
 const mpApps = ref([])
@@ -89,19 +95,19 @@ provide('teacherCheckinClassId', checkinClassId)
 provide('teacherCheckinPeriodId', checkinPeriodId)
 provide('teacherCourseDetail', courseDetail)
 provide('teacherLessonAttend', lessonAttendCtx)
+provide('teacherHosting', hostingCtx)
 provide(MP_APPS_KEY, mpApps)
 
-const MAIN_TABS = ['home', 'checkin', 'homework', 'daily', 'stats']
+const MAIN_TABS = ['home', 'workbench', 'circle', 'me']
 const isMainTab = computed(() => MAIN_TABS.includes(activeTab.value))
 const shellTab = computed(() => (isMainTab.value ? activeTab.value : lastMainTab.value))
 const pcProps = MP_PAGE_CONTAINER_PROPS
 
 const navTabs = [
   { id: 'home', label: '首页', emoji: '🏠' },
-  { id: 'checkin', label: '签到', emoji: '✅' },
-  { id: 'homework', label: '作业', emoji: '📋' },
-  { id: 'daily', label: '日常', emoji: '📷' },
-  { id: 'stats', label: '学情', emoji: '📊' },
+  { id: 'workbench', label: '工作台', emoji: '🧰' },
+  { id: 'circle', label: '家校圈', emoji: '📷' },
+  { id: 'me', label: '我的', emoji: '👤' },
 ]
 
 async function refreshApps() {
@@ -140,6 +146,14 @@ function popInnerOnce() {
     activeTab.value = lessonAttendCtx.value?.backTab || 'schedule'
   } else if (activeTab.value === 'course-detail') {
     activeTab.value = 'schedule'
+  } else if (activeTab.value === 'homework-tutoring') {
+    activeTab.value = 'hosting-detail'
+  } else if (activeTab.value === 'hosting-detail') {
+    activeTab.value = 'hosting-list'
+  } else if (activeTab.value === 'hosting-list') {
+    activeTab.value = 'workbench'
+  } else if (['schedule', 'messages', 'notices', 'leave', 'life', 'meal', 'attendance', 'checkin'].includes(activeTab.value)) {
+    activeTab.value = lastMainTab.value || 'workbench'
   } else {
     activeTab.value = lastMainTab.value || 'home'
   }
@@ -189,12 +203,13 @@ function navigate(nav) {
 
 function onGoCheckin(payload) {
   applyCheckinPayload(payload)
-  activeTab.value = 'checkin'
+  // 旧签到入口：进托管列表更符合新 IA
+  activeTab.value = 'hosting-list'
 }
 
 function onInnerGoCheckin(payload) {
   applyCheckinPayload(payload)
-  activeTab.value = 'checkin'
+  activeTab.value = 'hosting-list'
 }
 
 function applyCheckinPayload(payload) {
@@ -213,6 +228,16 @@ function onOverlayBack() {
 function onCourseDetail(cls) {
   courseDetail.value = cls || null
   activeTab.value = 'course-detail'
+}
+
+function onOpenHosting(item) {
+  hostingCtx.value = item || null
+  activeTab.value = 'hosting-detail'
+}
+
+function onHomeworkTutoring(item) {
+  if (item) hostingCtx.value = item
+  activeTab.value = 'homework-tutoring'
 }
 
 function openLessonAttend(payload) {
