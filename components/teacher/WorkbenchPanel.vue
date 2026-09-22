@@ -26,17 +26,12 @@
       <view class="wb-body">
         <view class="wb-stats card">
           <LoadingSkeleton v-if="loading" variant="list" :count="1" padding="8rpx 0" />
-          <template v-else>
-            <view class="wb-stats-grid">
-              <view v-for="s in stats" :key="s.label" class="wb-stat">
-                <text class="wb-stat-val" :style="{ color: s.color }">{{ s.val }}</text>
-                <text class="wb-stat-label">{{ s.label }}</text>
-              </view>
+          <view v-else class="wb-stats-grid">
+            <view v-for="s in stats" :key="s.label" class="wb-stat">
+              <text class="wb-stat-val" :style="{ color: s.color }">{{ s.val }}</text>
+              <text class="wb-stat-label">{{ s.label }}</text>
             </view>
-            <text class="wb-scope-hint">
-              {{ scope === 'school' ? '学校视角（当前机构汇总）' : '仅统计我所带班级' }}
-            </text>
-          </template>
+          </view>
         </view>
 
         <view class="section-head wb-section">
@@ -78,7 +73,7 @@ import { ensureWechatRuntime, getMpDisplayName } from '../../utils/wechatRuntime
 const emit = defineEmits(['navigate'])
 
 const loading = ref(false)
-const scope = ref('mine')
+const scope = ref('school')
 const tenantName = ref('')
 const mineStats = ref([])
 const schoolStats = ref([])
@@ -236,13 +231,6 @@ onShow(load)
   font-size: 24rpx;
   color: #8d6e63;
   font-weight: 600;
-}
-.wb-scope-hint {
-  display: block;
-  margin-top: 24rpx;
-  font-size: 22rpx;
-  color: #bcaaa4;
-  text-align: center;
 }
 .wb-section {
   margin-top: 40rpx;
