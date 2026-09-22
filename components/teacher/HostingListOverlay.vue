@@ -28,10 +28,11 @@
           <view class="hosting-card__top">
             <text class="hosting-card__name">{{ item.name }}</text>
             <view
+              :id="'hosting-more-' + item.id"
               class="hosting-more tap-feedback"
               hover-class="mp-tap"
               :hover-stay-time="80"
-              @click.stop="onMore(item)"
+              @click.stop="openMore(item)"
             >
               <text class="hosting-more__dots">···</text>
             </view>
@@ -51,24 +52,43 @@
         </view>
       </view>
     </scroll-view>
+
+    <PopoverMenu
+      :visible="menuVisible"
+      :items="moreItems"
+      :anchor="menuAnchor"
+      @close="closeMore"
+      @select="onMoreSelect"
+    />
   </view>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, getCurrentInstance, nextTick, onMounted, ref } from 'vue'
 import LoadingSkeleton from '../LoadingSkeleton.vue'
+import PopoverMenu from '../PopoverMenu.vue'
 import { fetchDashboard, fetchProfile } from '../../api/teacher.js'
 
 defineEmits(['back', 'open'])
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 const AVATAR_COLORS = ['#FF7043', '#AB47BC', '#3B9EEB', '#66BB6A', '#FFA726', '#EC407A']
-const MORE_ITEMS = ['查询考勤记录', '录错题', '移出', '学情报告']
+
+const moreItems = [
+  { key: 'attendance', label: '查询考勤记录' },
+  { key: 'wrongbook', label: '录错题' },
+  { key: 'remove', label: '移出', danger: true },
+  { key: 'report', label: '学情报告' },
+]
 
 const loading = ref(false)
 const list = ref([])
 const teacherSelf = ref('')
 const dashDate = ref('')
+const menuVisible = ref(false)
+const menuAnchor = ref(null)
+const menuItem = ref(null)
+const instance = getCurrentInstance()
 
 const todayLabel = computed(() => {
   const raw = dashDate.value || ''
@@ -81,16 +101,30 @@ function avatarColor(i) {
   return AVATAR_COLORS[i % AVATAR_COLORS.length]
 }
 
-function onMore(item) {
-  uni.showActionSheet({
-    itemList: MORE_ITEMS,
-    success: (res) => {
-      const label = MORE_ITEMS[res.tapIndex]
-      if (!label) return
-      // 后续对接具体能力；先提示选中项
-      uni.showToast({ title: `${label}即将开放`, icon: 'none' })
-    },
+function closeMore() {
+  menuVisible.value = false
+  menuItem.value = null
+}
+
+function openMore(item) {
+  menuItem.value = item
+  nextTick(() => {
+    const q = uni.createSelectorQuery()
+    // #ifndef H5
+    if (instance?.proxy) q.in(instance.proxy)
+    // #endif
+    q.select(`#hosting-more-${item.id}`)
+      .boundingClientRect((rect) => {
+        menuAnchor.value = rect || null
+        menuVisible.value = true
+      })
+      .exec()
   })
+}
+
+function onMoreSelect(opt) {
+  const label = opt?.label || '该功能'
+  uni.showToast({ title: `${label}即将开放`, icon: 'none' })
 }
 
 onMounted(async () => {
