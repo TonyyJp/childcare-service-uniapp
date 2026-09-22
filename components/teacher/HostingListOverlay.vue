@@ -6,7 +6,7 @@
           <view class="back-btn" @click="$emit('back')"><text class="back-icon">‹</text></view>
           <view style="flex: 1; margin-left: 20rpx;">
             <text style="font-size: 40rpx; font-weight: 800; color: white; display: block;">托管辅导</text>
-            <text style="font-size: 24rpx; color: rgba(255, 255, 255, 0.85);">选择托管班进入详情</text>
+            <text style="font-size: 24rpx; color: rgba(255, 255, 255, 0.85);">{{ todayLabel }}</text>
           </view>
         </view>
       </view>
@@ -50,16 +50,25 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import LoadingSkeleton from '../LoadingSkeleton.vue'
 import { fetchDashboard, fetchProfile } from '../../api/teacher.js'
 
 defineEmits(['back', 'open'])
 
+const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 const AVATAR_COLORS = ['#FF7043', '#AB47BC', '#3B9EEB', '#66BB6A', '#FFA726', '#EC407A']
 const loading = ref(false)
 const list = ref([])
 const teacherSelf = ref('')
+const dashDate = ref('')
+
+const todayLabel = computed(() => {
+  const raw = dashDate.value || ''
+  const d = raw ? new Date(raw.replace(/-/g, '/')) : new Date()
+  if (Number.isNaN(d.getTime())) return raw || ''
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 星期${WEEK[d.getDay()]}`
+})
 
 function avatarColor(i) {
   return AVATAR_COLORS[i % AVATAR_COLORS.length]
@@ -70,6 +79,7 @@ onMounted(async () => {
   try {
     const [profile, dash] = await Promise.all([fetchProfile(), fetchDashboard()])
     teacherSelf.value = profile?.name || ''
+    dashDate.value = dash?.date || ''
     list.value = (dash?.classes || [])
       .filter((c) => c.biz_type === 'care' || c.attendance_type_id)
       .map((c) => {
