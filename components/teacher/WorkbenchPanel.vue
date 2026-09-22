@@ -1,10 +1,8 @@
 <template>
   <view class="tab-page wb">
-    <view class="wb-hero">
-      <view class="safe-nav-bar wb-hero-pad">
-        <text class="wb-date">{{ dateMain }}</text>
-        <text class="wb-week">{{ weekLabel }}</text>
-        <text class="wb-org">{{ tenantName || '—' }}</text>
+    <view class="gradient-header wb-hero">
+      <view class="safe-nav-bar" style="padding-bottom: 32rpx;">
+        <text class="wb-org">{{ tenantName || '工作台' }}</text>
         <view class="wb-seg">
           <view
             class="wb-seg-item"
@@ -75,7 +73,6 @@ const emit = defineEmits(['navigate'])
 const loading = ref(false)
 const scope = ref('mine')
 const tenantName = ref('')
-const dashDate = ref('')
 const mineStats = ref([])
 const schoolStats = ref([])
 
@@ -85,22 +82,6 @@ const entries = [
   { key: 'schedule', label: '课表', icon: '📅', bg: '#BBDEFB', nav: { tab: 'schedule' } },
   { key: 'enroll', label: '招生意向', icon: '📝', bg: '#C8E6C9', nav: { toast: '招生意向即将开放' } },
 ]
-
-const WEEK = ['日', '一', '二', '三', '四', '五', '六']
-
-const dateMain = computed(() => {
-  if (!dashDate.value) return '—'
-  const d = new Date(dashDate.value.replace(/-/g, '/'))
-  if (Number.isNaN(d.getTime())) return dashDate.value
-  return `${d.getMonth() + 1}月${d.getDate()}日`
-})
-
-const weekLabel = computed(() => {
-  if (!dashDate.value) return ''
-  const d = new Date(dashDate.value.replace(/-/g, '/'))
-  if (Number.isNaN(d.getTime())) return ''
-  return `星期${WEEK[d.getDay()]}`
-})
 
 const stats = computed(() => (scope.value === 'school' ? schoolStats.value : mineStats.value))
 
@@ -138,7 +119,6 @@ async function load() {
     const [profile, dash] = await Promise.all([fetchProfile(), fetchDashboard()])
     await ensureWechatRuntime(false).catch(() => {})
     tenantName.value = profile?.tenant_name || getMpDisplayName()
-    dashDate.value = dash?.date || ''
     const cards = dash?.classes || []
     const todos = dash?.todos || {}
     mineStats.value = buildStats(cards, todos)
@@ -159,28 +139,13 @@ onShow(load)
 .wb-hero {
   background: linear-gradient(135deg, #ff7043 0%, #ff9068 100%);
 }
-.wb-hero-pad {
-  padding: 8rpx 40rpx 36rpx;
-}
-.wb-date {
-  display: block;
-  font-size: 56rpx;
-  font-weight: 800;
-  color: #fff;
-  line-height: 1.2;
-}
-.wb-week {
-  display: block;
-  margin-top: 8rpx;
-  font-size: 28rpx;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.92);
-}
 .wb-org {
   display: block;
-  margin-top: 6rpx;
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.78);
+  font-size: 40rpx;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.3;
+  padding-right: 8rpx;
 }
 .wb-seg {
   margin-top: 28rpx;
