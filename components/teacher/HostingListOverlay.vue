@@ -26,6 +26,9 @@
           @click="$emit('open', item)"
         >
           <view class="hosting-card__top">
+            <view class="hosting-card__badge">
+              <MpIcon name="school" :size="36" color="#E64A19" />
+            </view>
             <text class="hosting-card__name">{{ item.name }}</text>
             <view
               :id="'hosting-more-' + item.id"
@@ -66,6 +69,7 @@
 <script setup>
 import { computed, getCurrentInstance, nextTick, onMounted, ref } from 'vue'
 import LoadingSkeleton from '../LoadingSkeleton.vue'
+import MpIcon from '../MpIcon.vue'
 import PopoverMenu from '../PopoverMenu.vue'
 import { fetchDashboard, fetchProfile } from '../../api/teacher.js'
 
@@ -172,7 +176,17 @@ onMounted(async () => {
 .hosting-card__top {
   display: flex;
   align-items: center;
-  gap: 8rpx;
+  gap: 12rpx;
+}
+.hosting-card__badge {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 16rpx;
+  background: rgba(255, 112, 67, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 .hosting-card__name {
   flex: 1;
