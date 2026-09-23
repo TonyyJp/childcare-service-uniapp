@@ -79,21 +79,25 @@ function onPick(item) {
 }
 .popover-panel {
   position: absolute;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.72);
   border-radius: 16rpx;
-  box-shadow: 0 12rpx 40rpx rgba(45, 31, 24, 0.16), 0 2rpx 8rpx rgba(45, 31, 24, 0.06);
+  border: 1rpx solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 12rpx 40rpx rgba(45, 31, 24, 0.14), 0 2rpx 8rpx rgba(45, 31, 24, 0.05);
   overflow: hidden;
   padding: 8rpx 0;
+  /* 微信基础库较新时毛玻璃更自然；不支持则仍保留半透明底 */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 .popover-item {
   padding: 24rpx 28rpx;
-  border-bottom: 1rpx solid #f3eee9;
+  border-bottom: 1rpx solid rgba(45, 31, 24, 0.08);
 }
 .popover-item.is-last {
   border-bottom: none;
 }
 .popover-item--hover {
-  background: #faf7f4;
+  background: rgba(45, 31, 24, 0.06);
 }
 .popover-item__text {
   font-size: 28rpx;
