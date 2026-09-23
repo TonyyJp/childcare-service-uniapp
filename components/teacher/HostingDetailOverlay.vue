@@ -1,23 +1,32 @@
 <template>
   <view class="overlay-page">
     <view class="gradient-header" style="background: linear-gradient(135deg, #ff7043 0%, #ff9068 100%);">
-      <view class="safe-nav-bar" style="padding-bottom: 32rpx;">
-        <view style="display: flex; align-items: center;">
-          <view class="back-btn" style="margin-right: 20rpx;" @click="$emit('back')">
+      <view class="safe-nav-bar" style="padding-bottom: 28rpx;">
+        <view class="nav-row">
+          <view class="back-btn" @click="$emit('back')">
             <text class="back-icon">‹</text>
           </view>
-          <view style="flex: 1; min-width: 0;">
-            <text style="font-size: 40rpx; font-weight: 800; color: white; display: block;">{{ className }}</text>
-            <text style="font-size: 24rpx; color: rgba(255, 255, 255, 0.85);">
-              {{ teacherLabel }} · {{ dateLabel }}
-            </text>
-          </view>
+          <text class="nav-title">托管辅导</text>
+          <view class="nav-side" />
         </view>
       </view>
     </view>
 
     <scroll-view scroll-y style="flex: 1; height: 0;">
       <view style="padding: 24rpx 28rpx 200rpx;">
+        <view class="class-head">
+          <view class="class-head__badge">
+            <MpIcon name="school" :size="40" color="#E64A19" />
+          </view>
+          <view class="class-head__meta">
+            <view class="class-head__title-row">
+              <text class="class-head__name">{{ className }}</text>
+              <text class="class-head__count">（共{{ studentCount }}人）</text>
+            </view>
+            <text class="class-head__sub">{{ teacherLabel }} · {{ dateLabel }}</text>
+          </view>
+        </view>
+
         <view class="period-tip">
           <MpIcon name="clock" :size="28" color="#E64A19" />
           <view class="period-tip__main" @click="onPeriodTipClick">
@@ -37,7 +46,7 @@
 
         <LoadingSkeleton v-if="loading" variant="list" :count="2" padding="8rpx 0" />
         <template v-else>
-          <view v-for="sec in sections" :key="sec.key" class="section">
+          <view v-for="sec in visibleSections" :key="sec.key" class="section">
             <view class="section-head">
               <view class="section-dot" :style="{ background: sec.dot }" />
               <text class="section-title">{{ sec.title }}</text>
@@ -50,8 +59,10 @@
                 </view>
                 <text class="stu-name">{{ s.name }}</text>
               </view>
-              <view v-if="!sec.list.length" class="folder-empty"><text>暂无</text></view>
             </view>
+          </view>
+          <view v-if="!visibleSections.length && !loading" class="all-empty">
+            <text>暂无学员</text>
           </view>
         </template>
       </view>
@@ -338,6 +349,10 @@ const sections = computed(() => [
   { key: 'arrived', title: '已到校', list: arrived.value, dot: '#66BB6A' },
   { key: 'left', title: '已离校', list: left.value, dot: '#90A4AE' },
 ])
+const visibleSections = computed(() => sections.value.filter((s) => s.list.length > 0))
+const studentCount = computed(
+  () => hosting.value?.studentsCount ?? students.value.length,
+)
 
 const checkinCandidates = computed(() =>
   checkinMode.value === 'in' ? waiting.value : arrived.value,
@@ -566,15 +581,72 @@ watch(classId, () => load())
 </script>
 
 <style scoped lang="scss">
+.nav-row {
+  display: flex;
+  align-items: center;
+}
+.nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: 34rpx;
+  font-weight: 800;
+  color: #fff;
+  line-height: 64rpx;
+}
+.nav-side {
+  width: 64rpx;
+  height: 64rpx;
+  flex-shrink: 0;
+}
+.class-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+.class-head__badge {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 112, 67, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.class-head__meta {
+  flex: 1;
+  min-width: 0;
+}
+.class-head__title-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4rpx 8rpx;
+}
+.class-head__name {
+  font-size: 36rpx;
+  font-weight: 800;
+  color: #2d1f18;
+  line-height: 1.25;
+}
+.class-head__count {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #8d6e63;
+}
+.class-head__sub {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #8d6e63;
+}
 .period-tip {
   display: flex;
   align-items: center;
   gap: 12rpx;
-  padding: 22rpx 20rpx;
-  margin-bottom: 28rpx;
-  border-radius: 20rpx;
-  background: #fff;
-  box-shadow: 0 4rpx 16rpx rgba(45, 31, 24, 0.04);
+  padding: 8rpx 0 24rpx;
+  margin-bottom: 8rpx;
 }
 .period-tip__main {
   flex: 1;
@@ -616,6 +688,12 @@ watch(classId, () => load())
   letter-spacing: 2rpx;
   line-height: 1;
   transform: translateY(-2rpx);
+}
+.all-empty {
+  padding: 48rpx 0;
+  text-align: center;
+  font-size: 26rpx;
+  color: #bcaaa4;
 }
 .section {
   margin-bottom: 36rpx;
