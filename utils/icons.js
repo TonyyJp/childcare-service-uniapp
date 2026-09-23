@@ -693,6 +693,13 @@ export const ICONS = {
       { "tag": "circle", "cx": "12", "cy": "10", "r": "4" },
       { "tag": "circle", "cx": "12", "cy": "12", "r": "10" }
     ]
+  },
+  "clock": {
+    "viewBox": "0 0 24 24",
+    "els": [
+      { "tag": "circle", "cx": "12", "cy": "12", "r": "10" },
+      { "tag": "path", "d": "M12 6v6l4 2" }
+    ]
   }
 }
 

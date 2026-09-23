@@ -1,8 +1,8 @@
 <template>
   <view class="overlay-page">
     <view class="gradient-header" style="background: linear-gradient(135deg, #ff7043 0%, #ff9068 100%);">
-      <view style="padding: 0 40rpx 32rpx;">
-        <view style="display: flex; align-items: center; margin-bottom: 12rpx;">
+      <view class="safe-nav-bar" style="padding-bottom: 28rpx;">
+        <view style="display: flex; align-items: center; margin-bottom: 20rpx;">
           <view class="back-btn" style="margin-right: 20rpx;" @click="$emit('back')">
             <text class="back-icon">‹</text>
           </view>
@@ -12,43 +12,42 @@
               {{ teacherLabel }} · {{ dateLabel }}
             </text>
           </view>
+          <view
+            id="hosting-detail-more"
+            class="header-more tap-feedback"
+            hover-class="mp-tap"
+            :hover-stay-time="80"
+            @click.stop="openMore"
+          >
+            <text class="header-more__dots">···</text>
+          </view>
+        </view>
+        <view class="period-tip" @click="goPeriodSettings">
+          <MpIcon name="clock" :size="28" color="rgba(255,255,255,0.92)" />
+          <text class="period-tip__text">{{ periodTipText }}</text>
+          <text class="period-tip__action">设置</text>
         </view>
       </view>
     </view>
 
     <scroll-view scroll-y style="flex: 1; height: 0;">
-      <view style="padding: 24rpx 32rpx 180rpx;">
+      <view style="padding: 28rpx 28rpx 200rpx;">
         <LoadingSkeleton v-if="loading" variant="list" :count="2" padding="8rpx 0" />
         <template v-else>
-          <view class="folder">
-            <view class="folder-head">
-              <text class="folder-title">未到校</text>
-              <text class="folder-count">{{ waiting.length }}</text>
+          <view v-for="sec in sections" :key="sec.key" class="section">
+            <view class="section-head">
+              <view class="section-dot" :style="{ background: sec.dot }" />
+              <text class="section-title">{{ sec.title }}</text>
+              <text class="section-count">{{ sec.list.length }}</text>
             </view>
             <view class="folder-grid">
-              <view v-for="s in waiting" :key="s.id" class="stu-cell">
+              <view v-for="s in sec.list" :key="s.id" class="stu-cell">
                 <view class="stu-avatar" :style="{ background: s.color }">
                   <text>{{ s.initial }}</text>
                 </view>
                 <text class="stu-name">{{ s.name }}</text>
               </view>
-              <view v-if="!waiting.length" class="folder-empty"><text>暂无</text></view>
-            </view>
-          </view>
-
-          <view class="folder" style="margin-top: 24rpx;">
-            <view class="folder-head">
-              <text class="folder-title">已到校</text>
-              <text class="folder-count">{{ arrived.length }}</text>
-            </view>
-            <view class="folder-grid">
-              <view v-for="s in arrived" :key="s.id" class="stu-cell">
-                <view class="stu-avatar" :style="{ background: s.color }">
-                  <text>{{ s.initial }}</text>
-                </view>
-                <text class="stu-name">{{ s.name }}</text>
-              </view>
-              <view v-if="!arrived.length" class="folder-empty"><text>暂无</text></view>
+              <view v-if="!sec.list.length" class="folder-empty"><text>暂无</text></view>
             </view>
           </view>
         </template>
@@ -57,15 +56,26 @@
 
     <view class="detail-bar">
       <view class="detail-btn primary" @click="showCheckin = true">
-        <text>签到/签退</text>
+        <MpIcon name="circle-check" :size="40" color="#fff" />
+        <text class="detail-btn__label on">签到/签退</text>
       </view>
       <view class="detail-btn" @click="showMessage = true">
-        <text>发消息</text>
+        <MpIcon name="message-circle" :size="40" color="#E64A19" />
+        <text class="detail-btn__label">发消息</text>
       </view>
       <view class="detail-btn" @click="$emit('homework', hosting)">
-        <text>作业辅导</text>
+        <MpIcon name="notebook-pen" :size="40" color="#E64A19" />
+        <text class="detail-btn__label">作业辅导</text>
       </view>
     </view>
+
+    <PopoverMenu
+      :visible="menuVisible"
+      :items="moreItems"
+      :anchor="menuAnchor"
+      @close="menuVisible = false"
+      @select="onMoreSelect"
+    />
 
     <!-- 签到/签退抽屉 -->
     <template v-if="showCheckin">
@@ -189,8 +199,10 @@
 </template>
 
 <script setup>
-import { computed, inject, onMounted, ref, watch } from 'vue'
+import { computed, getCurrentInstance, inject, nextTick, onMounted, ref, watch } from 'vue'
 import LoadingSkeleton from '../LoadingSkeleton.vue'
+import MpIcon from '../MpIcon.vue'
+import PopoverMenu from '../PopoverMenu.vue'
 import {
   checkinStudents,
   checkoutStudent,
@@ -202,15 +214,22 @@ import {
 } from '../../api/teacher.js'
 import { uploadFile } from '../../utils/request.js'
 
-const emit = defineEmits(['back', 'homework'])
+const emit = defineEmits(['back', 'homework', 'period-settings'])
 const hosting = inject('teacherHosting', ref(null))
+const instance = getCurrentInstance()
 
 const AVATAR_COLORS = ['#FF7043', '#AB47BC', '#3B9EEB', '#66BB6A', '#FFA726', '#EC407A']
+const moreItems = [
+  { key: 'period', label: '设置考勤时段' },
+  { key: 'group', label: '新增学员分组' },
+]
+
 const loading = ref(false)
 const busy = ref(false)
 const students = ref([])
 const records = ref([])
 const periodId = ref(null)
+const periodLabel = ref('')
 const showCheckin = ref(false)
 const showMessage = ref(false)
 const checkinMode = ref('in')
@@ -220,6 +239,8 @@ const msgText = ref('')
 const msgPhotos = ref([])
 const msgStudentIds = ref([])
 const msgBusy = ref(false)
+const menuVisible = ref(false)
+const menuAnchor = ref(null)
 
 const classId = computed(() => hosting.value?.id || null)
 const className = computed(() => hosting.value?.name || '托管详情')
@@ -228,6 +249,10 @@ const dateLabel = computed(() => {
   const d = new Date()
   return `${d.getMonth() + 1}月${d.getDate()}日`
 })
+const hasPeriod = computed(() => !!periodId.value)
+const periodTipText = computed(() =>
+  hasPeriod.value ? (periodLabel.value || '已设置考勤时段') : '未设置考勤时段',
+)
 
 function decorate(list) {
   return (list || []).map((s, i) => ({
@@ -241,10 +266,17 @@ function decorate(list) {
 }
 
 const waiting = computed(() => students.value.filter((s) => !['arrived', 'left'].includes(s.status)))
-const arrived = computed(() => students.value.filter((s) => ['arrived', 'left'].includes(s.status)))
+const arrived = computed(() => students.value.filter((s) => s.status === 'arrived'))
+const left = computed(() => students.value.filter((s) => s.status === 'left'))
+
+const sections = computed(() => [
+  { key: 'waiting', title: '未到校', list: waiting.value, dot: '#FFA726' },
+  { key: 'arrived', title: '已到校', list: arrived.value, dot: '#66BB6A' },
+  { key: 'left', title: '已离校', list: left.value, dot: '#90A4AE' },
+])
 
 const checkinCandidates = computed(() =>
-  checkinMode.value === 'in' ? waiting.value : arrived.value.filter((s) => s.status === 'arrived'),
+  checkinMode.value === 'in' ? waiting.value : arrived.value,
 )
 
 const allSelected = computed(() => {
@@ -258,6 +290,33 @@ watch(checkinMode, () => {
 watch(showCheckin, (v) => {
   if (v) selectedIds.value = []
 })
+
+function goPeriodSettings() {
+  emit('period-settings')
+}
+
+function openMore() {
+  nextTick(() => {
+    const q = uni.createSelectorQuery()
+    // #ifndef H5
+    if (instance?.proxy) q.in(instance.proxy)
+    // #endif
+    q.select('#hosting-detail-more')
+      .boundingClientRect((rect) => {
+        menuAnchor.value = rect || null
+        menuVisible.value = true
+      })
+      .exec()
+  })
+}
+
+function onMoreSelect(opt) {
+  if (opt?.key === 'period') {
+    goPeriodSettings()
+    return
+  }
+  uni.showToast({ title: `${opt?.label || '该功能'}即将开放`, icon: 'none' })
+}
 
 function toggleStudent(id) {
   const i = selectedIds.value.indexOf(id)
@@ -310,10 +369,21 @@ async function load() {
       fetchPeriods().catch(() => ({ list: [] })),
     ])
     const periodList = periods?.list || periods || []
-    const prefer = (hosting.value?.periods || [])[0]?.period_id
-      || periodList[0]?.id
-      || null
+    const hostPeriod = (hosting.value?.periods || [])[0]
+    const prefer = hostPeriod?.period_id || periodList[0]?.id || null
     periodId.value = prefer
+    if (hostPeriod) {
+      periodLabel.value = hostPeriod.start_time
+        ? `${hostPeriod.period_name || '时段'} ${hostPeriod.start_time}`
+        : (hostPeriod.period_name || '已设置考勤时段')
+    } else if (prefer) {
+      const hit = periodList.find((p) => p.id === prefer)
+      periodLabel.value = hit
+        ? `${hit.name}${hit.start_time ? ` ${hit.start_time}` : ''}`
+        : '已设置考勤时段'
+    } else {
+      periodLabel.value = ''
+    }
 
     let todayRows = []
     if (prefer) {
@@ -340,11 +410,9 @@ async function load() {
       let status = hit?.status
       if (!status && s.today) {
         const vals = Object.values(s.today)
-        if (vals.includes('arrived') || vals.includes('left')) {
-          status = vals.includes('left') ? 'left' : 'arrived'
-        } else {
-          status = 'waiting'
-        }
+        if (vals.includes('left')) status = 'left'
+        else if (vals.includes('arrived')) status = 'arrived'
+        else status = 'waiting'
       }
       return {
         id: s.id,
@@ -365,7 +433,7 @@ async function load() {
 async function submitCheckin() {
   if (busy.value || !selectedIds.value.length) return
   if (!periodId.value && checkinMode.value === 'in') {
-    uni.showToast({ title: '今日无可用考勤时段', icon: 'none' })
+    uni.showToast({ title: '请先设置考勤时段', icon: 'none' })
     return
   }
   busy.value = true
@@ -439,27 +507,71 @@ watch(classId, () => load())
 </script>
 
 <style scoped lang="scss">
-.folder {
-  background: #fff;
-  border-radius: 24rpx;
-  padding: 24rpx;
-  box-shadow: 0 4rpx 16rpx rgba(45, 31, 24, 0.04);
-}
-.folder-head {
+.header-more {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 32rpx;
+  background: rgba(255, 255, 255, 0.22);
   display: flex;
   align-items: center;
-  margin-bottom: 16rpx;
+  justify-content: center;
+  flex-shrink: 0;
 }
-.folder-title {
+.header-more__dots {
+  font-size: 36rpx;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 2rpx;
+  line-height: 1;
+  transform: translateY(-2rpx);
+}
+.period-tip {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 16rpx 20rpx;
+  border-radius: 16rpx;
+  background: rgba(255, 255, 255, 0.16);
+}
+.period-tip__text {
   flex: 1;
-  font-size: 28rpx;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 600;
+  min-width: 0;
+}
+.period-tip__action {
+  font-size: 24rpx;
+  font-weight: 800;
+  color: #fff;
+  text-decoration: underline;
+  flex-shrink: 0;
+}
+.section {
+  margin-bottom: 36rpx;
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+}
+.section-dot {
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.section-title {
+  font-size: 30rpx;
   font-weight: 800;
   color: #2d1f18;
 }
-.folder-count {
-  font-size: 24rpx;
-  color: #8d6e63;
+.section-count {
+  font-size: 28rpx;
   font-weight: 700;
+  color: #8d6e63;
+  margin-left: 4rpx;
 }
 .folder-grid {
   display: flex;
@@ -468,8 +580,7 @@ watch(classId, () => load())
 }
 .folder-empty {
   width: 100%;
-  padding: 24rpx 0;
-  text-align: center;
+  padding: 16rpx 0 8rpx;
   color: #bcaaa4;
   font-size: 24rpx;
 }
@@ -525,26 +636,31 @@ watch(classId, () => load())
   bottom: 0;
   display: flex;
   gap: 16rpx;
-  padding: 20rpx 32rpx calc(20rpx + env(safe-area-inset-bottom));
+  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
   background: #fff;
   border-top: 1rpx solid #f0e6dc;
   z-index: 20;
 }
 .detail-btn {
   flex: 1;
-  text-align: center;
-  padding: 22rpx 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 18rpx 0;
   border-radius: 20rpx;
-  background: #f5f0ec;
-  font-size: 26rpx;
-  font-weight: 800;
-  color: #2d1f18;
+  background: #fff3e0;
 }
 .detail-btn.primary {
   background: #ff7043;
-  color: #fff;
 }
-.detail-btn.primary text {
+.detail-btn__label {
+  font-size: 22rpx;
+  font-weight: 800;
+  color: #e64a19;
+}
+.detail-btn__label.on {
   color: #fff;
 }
 .drawer-mask {

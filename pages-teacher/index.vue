@@ -35,6 +35,7 @@
             @lesson-attend-back="onLessonAttendBack"
             @open-hosting="onOpenHosting"
             @homework="onHomeworkTutoring"
+            @period-settings="onPeriodSettings"
           />
         </view>
       </page-container>
@@ -53,6 +54,7 @@
             @lesson-attend-back="onLessonAttendBack"
             @open-hosting="onOpenHosting"
             @homework="onHomeworkTutoring"
+            @period-settings="onPeriodSettings"
           />
         </view>
       </view>
@@ -148,6 +150,8 @@ function popInnerOnce() {
     activeTab.value = 'schedule'
   } else if (activeTab.value === 'homework-tutoring') {
     activeTab.value = 'hosting-detail'
+  } else if (activeTab.value === 'attendance-period') {
+    activeTab.value = 'hosting-detail'
   } else if (activeTab.value === 'hosting-detail') {
     activeTab.value = 'hosting-list'
   } else if (activeTab.value === 'hosting-list') {
@@ -238,6 +242,10 @@ function onOpenHosting(item) {
 function onHomeworkTutoring(item) {
   if (item) hostingCtx.value = item
   activeTab.value = 'homework-tutoring'
+}
+
+function onPeriodSettings() {
+  activeTab.value = 'attendance-period'
 }
 
 function openLessonAttend(payload) {

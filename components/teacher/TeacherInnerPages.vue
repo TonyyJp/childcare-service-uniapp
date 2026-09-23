@@ -30,6 +30,11 @@
     v-else-if="innerKey === 'hosting-detail'"
     @back="$emit('back')"
     @homework="$emit('homework', $event)"
+    @period-settings="$emit('period-settings')"
+  />
+  <AttendancePeriodSettingsOverlay
+    v-else-if="innerKey === 'attendance-period'"
+    @back="$emit('back')"
   />
   <HomeworkTutoringOverlay
     v-else-if="innerKey === 'homework-tutoring'"
@@ -49,6 +54,7 @@ import LessonAttendOverlay from './LessonAttendOverlay.vue'
 import GrowthOverlay from './GrowthOverlay.vue'
 import HostingListOverlay from './HostingListOverlay.vue'
 import HostingDetailOverlay from './HostingDetailOverlay.vue'
+import AttendancePeriodSettingsOverlay from './AttendancePeriodSettingsOverlay.vue'
 import HomeworkTutoringOverlay from './HomeworkTutoringOverlay.vue'
 
 defineProps({
@@ -63,5 +69,6 @@ defineEmits([
   'lesson-attend-back',
   'open-hosting',
   'homework',
+  'period-settings',
 ])
 </script>
