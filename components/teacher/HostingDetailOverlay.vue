@@ -1,8 +1,8 @@
 <template>
   <view class="overlay-page">
     <view class="gradient-header" style="background: linear-gradient(135deg, #ff7043 0%, #ff9068 100%);">
-      <view class="safe-nav-bar" style="padding-bottom: 28rpx;">
-        <view style="display: flex; align-items: center; margin-bottom: 20rpx;">
+      <view class="safe-nav-bar" style="padding-bottom: 32rpx;">
+        <view style="display: flex; align-items: center;">
           <view class="back-btn" style="margin-right: 20rpx;" @click="$emit('back')">
             <text class="back-icon">‹</text>
           </view>
@@ -12,26 +12,29 @@
               {{ teacherLabel }} · {{ dateLabel }}
             </text>
           </view>
-          <view
-            id="hosting-detail-more"
-            class="header-more tap-feedback"
-            hover-class="mp-tap"
-            :hover-stay-time="80"
-            @click.stop="openMore"
-          >
-            <text class="header-more__dots">···</text>
-          </view>
-        </view>
-        <view class="period-tip" @click="goPeriodSettings">
-          <MpIcon name="clock" :size="28" color="rgba(255,255,255,0.92)" />
-          <text class="period-tip__text">{{ periodTipText }}</text>
-          <text class="period-tip__action">设置</text>
         </view>
       </view>
     </view>
 
     <scroll-view scroll-y style="flex: 1; height: 0;">
-      <view style="padding: 28rpx 28rpx 200rpx;">
+      <view style="padding: 24rpx 28rpx 200rpx;">
+        <view class="period-tip">
+          <MpIcon name="clock" :size="28" color="#E64A19" />
+          <view class="period-tip__main" @click="onPeriodTipClick">
+            <text class="period-tip__text">{{ periodTipText }}</text>
+            <text v-if="!hasPeriod" class="period-tip__action">设置</text>
+          </view>
+          <view
+            id="hosting-detail-more"
+            class="period-more tap-feedback"
+            hover-class="mp-tap"
+            :hover-stay-time="80"
+            @click.stop="openMore"
+          >
+            <text class="period-more__dots">···</text>
+          </view>
+        </view>
+
         <LoadingSkeleton v-if="loading" variant="list" :count="2" padding="8rpx 0" />
         <template v-else>
           <view v-for="sec in sections" :key="sec.key" class="section">
@@ -229,7 +232,8 @@ const busy = ref(false)
 const students = ref([])
 const records = ref([])
 const periodId = ref(null)
-const periodLabel = ref('')
+const periodTipText = ref('未设置考勤时段')
+const hasPeriod = ref(false)
 const showCheckin = ref(false)
 const showMessage = ref(false)
 const checkinMode = ref('in')
@@ -249,10 +253,70 @@ const dateLabel = computed(() => {
   const d = new Date()
   return `${d.getMonth() + 1}月${d.getDate()}日`
 })
-const hasPeriod = computed(() => !!periodId.value)
-const periodTipText = computed(() =>
-  hasPeriod.value ? (periodLabel.value || '已设置考勤时段') : '未设置考勤时段',
-)
+
+function parseHm(hm) {
+  if (!hm || typeof hm !== 'string') return null
+  const parts = hm.slice(0, 5).split(':')
+  if (parts.length < 2) return null
+  const h = Number(parts[0])
+  const m = Number(parts[1])
+  if (!Number.isFinite(h) || !Number.isFinite(m)) return null
+  return h * 60 + m
+}
+
+function formatHm(hm) {
+  if (!hm) return ''
+  return String(hm).slice(0, 5)
+}
+
+/** 离当前时间最近：优先进行中 → 即将开始 → 否则最近一场 */
+function pickNearestPeriod(list) {
+  const rows = (list || [])
+    .map((p) => ({
+      id: p.period_id || p.id,
+      name: p.period_name || p.name || '时段',
+      start_time: p.start_time,
+      end_time: p.end_time,
+      startM: parseHm(p.start_time),
+      endM: parseHm(p.end_time),
+    }))
+    .filter((p) => p.id)
+  if (!rows.length) return null
+
+  const now = new Date()
+  const mins = now.getHours() * 60 + now.getMinutes()
+  const timed = rows.filter((p) => p.startM != null)
+  if (!timed.length) return rows[0]
+
+  const ongoing = timed.find(
+    (p) => p.startM <= mins && (p.endM == null || mins < p.endM),
+  )
+  if (ongoing) return ongoing
+
+  const upcoming = timed
+    .filter((p) => p.startM >= mins)
+    .sort((a, b) => a.startM - b.startM)[0]
+  if (upcoming) return upcoming
+
+  return timed.sort((a, b) => Math.abs(a.startM - mins) - Math.abs(b.startM - mins))[0]
+}
+
+function applyPeriodTip(period) {
+  if (!period) {
+    hasPeriod.value = false
+    periodId.value = null
+    periodTipText.value = '未设置考勤时段'
+    return
+  }
+  hasPeriod.value = true
+  periodId.value = period.id
+  const range = [formatHm(period.start_time), formatHm(period.end_time)]
+    .filter(Boolean)
+    .join(' - ')
+  periodTipText.value = range
+    ? `即将：${range} ${period.name}`
+    : `即将：${period.name}`
+}
 
 function decorate(list) {
   return (list || []).map((s, i) => ({
@@ -293,6 +357,10 @@ watch(showCheckin, (v) => {
 
 function goPeriodSettings() {
   emit('period-settings')
+}
+
+function onPeriodTipClick() {
+  if (!hasPeriod.value) goPeriodSettings()
 }
 
 function openMore() {
@@ -369,26 +437,17 @@ async function load() {
       fetchPeriods().catch(() => ({ list: [] })),
     ])
     const periodList = periods?.list || periods || []
-    const hostPeriod = (hosting.value?.periods || [])[0]
-    const prefer = hostPeriod?.period_id || periodList[0]?.id || null
-    periodId.value = prefer
-    if (hostPeriod) {
-      periodLabel.value = hostPeriod.start_time
-        ? `${hostPeriod.period_name || '时段'} ${hostPeriod.start_time}`
-        : (hostPeriod.period_name || '已设置考勤时段')
-    } else if (prefer) {
-      const hit = periodList.find((p) => p.id === prefer)
-      periodLabel.value = hit
-        ? `${hit.name}${hit.start_time ? ` ${hit.start_time}` : ''}`
-        : '已设置考勤时段'
-    } else {
-      periodLabel.value = ''
-    }
+    const hostPeriods = hosting.value?.periods || []
+    const candidates = hostPeriods.length
+      ? hostPeriods
+      : periodList
+    const nearest = pickNearestPeriod(candidates)
+    applyPeriodTip(nearest)
 
     let todayRows = []
-    if (prefer) {
+    if (nearest?.id) {
       try {
-        const today = await fetchAttendanceToday({ classId: classId.value, periodId: prefer })
+        const today = await fetchAttendanceToday({ classId: classId.value, periodId: nearest.id })
         todayRows = today?.list || today?.students || []
       } catch (_) {
         todayRows = []
@@ -507,45 +566,56 @@ watch(classId, () => load())
 </script>
 
 <style scoped lang="scss">
-.header-more {
-  width: 64rpx;
-  height: 64rpx;
-  border-radius: 32rpx;
-  background: rgba(255, 255, 255, 0.22);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.header-more__dots {
-  font-size: 36rpx;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: 2rpx;
-  line-height: 1;
-  transform: translateY(-2rpx);
-}
 .period-tip {
   display: flex;
   align-items: center;
+  gap: 12rpx;
+  padding: 22rpx 20rpx;
+  margin-bottom: 28rpx;
+  border-radius: 20rpx;
+  background: #fff;
+  box-shadow: 0 4rpx 16rpx rgba(45, 31, 24, 0.04);
+}
+.period-tip__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
   gap: 10rpx;
-  padding: 16rpx 20rpx;
-  border-radius: 16rpx;
-  background: rgba(255, 255, 255, 0.16);
 }
 .period-tip__text {
   flex: 1;
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.92);
+  font-size: 26rpx;
+  color: #2d1f18;
   font-weight: 600;
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .period-tip__action {
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: 800;
-  color: #fff;
-  text-decoration: underline;
+  color: #ff7043;
   flex-shrink: 0;
+}
+.period-more {
+  width: 56rpx;
+  height: 56rpx;
+  margin: -8rpx -4rpx -8rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14rpx;
+  flex-shrink: 0;
+}
+.period-more__dots {
+  font-size: 36rpx;
+  font-weight: 800;
+  color: #8d6e63;
+  letter-spacing: 2rpx;
+  line-height: 1;
+  transform: translateY(-2rpx);
 }
 .section {
   margin-bottom: 36rpx;
